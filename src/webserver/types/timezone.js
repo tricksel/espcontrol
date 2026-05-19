@@ -17,16 +17,14 @@ function timezoneCardTimeParts(tzOption) {
     var parts = new Intl.DateTimeFormat("en-US", opts).formatToParts(new Date());
     var hour = "";
     var minute = "";
-    var dayPeriod = "";
     for (var i = 0; i < parts.length; i++) {
       if (parts[i].type === "hour") hour = parts[i].value;
       else if (parts[i].type === "minute") minute = parts[i].value;
-      else if (parts[i].type === "dayPeriod") dayPeriod = parts[i].value;
     }
     if (!hour || !minute) return { value: "--:--", unit: "" };
     return {
       value: (use12h ? hour : hour.padStart(2, "0")) + ":" + minute,
-      unit: use12h ? dayPeriod.toLowerCase().replace(/\./g, "") : "",
+      unit: "",
     };
   } catch (e) {
     return { value: "--:--", unit: "" };

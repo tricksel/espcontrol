@@ -73,13 +73,11 @@ registerButtonType("calendar", {
       var hour = now.getHours();
       var minute = String(now.getMinutes()).padStart(2, "0");
       var timeValue = "";
-      var timeUnit = "";
 
       if (use12h) {
         var hour12 = hour % 12;
         if (hour12 === 0) hour12 = 12;
         timeValue = String(hour12) + ":" + minute;
-        timeUnit = hour < 12 ? "am" : "pm";
       } else {
         timeValue = String(hour).padStart(2, "0") + ":" + minute;
       }
@@ -89,7 +87,6 @@ registerButtonType("calendar", {
           '<span class="sp-sensor-preview' +
             (helpers.cardSize === 4 && cardLargeNumbersEnabled(b) ? " sp-sensor-preview-large" : "") + '">' +
             '<span class="sp-sensor-value">' + helpers.escHtml(timeValue) + '</span>' +
-            '<span class="sp-sensor-unit">' + helpers.escHtml(timeUnit) + '</span>' +
           '</span>',
         labelHtml:
           '<span class="sp-btn-label-row"><span class="sp-btn-label">' +
