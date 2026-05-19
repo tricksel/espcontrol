@@ -20,7 +20,7 @@ lvgl:
           text_font: clockbar_font_md_square
           align: top_left
           x: 12
-          y: 9
+          y: 13
           text_color: 0xFFFFFF
           hidden: true
       # Clock (top-center, updated every minute by time.yaml)
@@ -30,7 +30,7 @@ lvgl:
           text_font: clockbar_font_md_square
           align: top_mid
           x: 0
-          y: 9
+          y: 13
           text_align: center
           text_color: 0xFFFFFF
           hidden: true
@@ -40,7 +40,7 @@ lvgl:
           id: network_status_button
           align: top_right
           x: -20
-          y: 2
+          y: 6
           width: 44
           height: 42
           bg_opa: 0%
