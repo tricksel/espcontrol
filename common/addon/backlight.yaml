@@ -157,6 +157,13 @@ script:
   - id: screensaver_sleep_timer
     mode: restart
     then:
+      - lambda: |-
+          media_volume_hide_modal();
+          climate_control_hide_modal();
+          option_select_hide_modal();
+          switch_confirmation_hide_modal();
+          alarm_pin_hide_modal();
+          network_status_hide_modal();
       - if:
           condition:
             lambda: 'return screensaver_action_clock_mode(id(screensaver_action).current_option());'
