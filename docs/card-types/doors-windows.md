@@ -28,5 +28,5 @@ You can change the closed or open icon if your sensor needs a different look.
 
 - The card is read-only, so tapping it does nothing.
 - The icon changes when Home Assistant reports an active state such as `on`, `open`, `opening`, `closing`, or `unlocked`.
-- By default, the card uses the normal active/on colour when open. Under **Advanced**, turn off **Use On Colour When Open** if you only want the icon to change.
+- By default, **Lit When Open** is on, so the card uses the normal active/on colour when open. Turn it off if you only want the icon to change.
 - When the sensor is off, closed, unknown, or unavailable, the card returns to the Sensor card colour and closed icon.

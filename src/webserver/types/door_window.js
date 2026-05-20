@@ -58,31 +58,12 @@ registerButtonType("door_window", {
     );
     panel.appendChild(openIconPicker);
 
-    var advancedToggleSection = helpers.toggleSection(
-      "Advanced",
-      helpers.idPrefix + "door-window-advanced-toggle",
-      !doorWindowActiveColorEnabled(b)
-    );
-    var advancedToggle = advancedToggleSection.toggle;
-    var advancedSection = advancedToggleSection.section;
-    panel.appendChild(advancedToggle.row);
-    if (!doorWindowActiveColorEnabled(b)) advancedSection.classList.add("sp-visible");
-
     var activeColorToggle = helpers.toggleRow(
-      "Use On Colour When Open",
+      "Lit When Open",
       helpers.idPrefix + "door-window-active-color",
       doorWindowActiveColorEnabled(b)
     );
-    advancedSection.appendChild(activeColorToggle.row);
-    panel.appendChild(advancedSection);
-
-    advancedToggle.input.addEventListener("change", function () {
-      advancedSection.classList.toggle("sp-visible", this.checked);
-      if (this.checked) return;
-      activeColorToggle.input.checked = true;
-      setDoorWindowActiveColorEnabled(b, true);
-      helpers.saveField("options", b.options);
-    });
+    panel.appendChild(activeColorToggle.row);
 
     activeColorToggle.input.addEventListener("change", function () {
       setDoorWindowActiveColorEnabled(b, this.checked);
