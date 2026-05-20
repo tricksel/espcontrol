@@ -20,13 +20,15 @@ registerButtonType("door_window", {
     if (!b.icon || b.icon === "Auto") b.icon = doorWindowClosedIcon(b.precision);
     if (!b.icon_on || b.icon_on === "Auto") b.icon_on = doorWindowOpenIcon(b.precision);
 
-    var subtype = helpers.segmentControl([
+    var subtypeField = helpers.selectField("Type", helpers.idPrefix + "door-window-type", [
       ["door", "Door"],
       ["window", "Window"],
-    ], b.precision, function (value) {
-      setSubtype(value, true);
+    ], b.precision);
+    var subtypeSelect = subtypeField.select;
+    panel.appendChild(subtypeField.field);
+    subtypeSelect.addEventListener("change", function () {
+      setSubtype(this.value, true);
     });
-    panel.appendChild(helpers.fieldWithControl("Type", null, subtype.segment));
 
     var sensorField = helpers.entityField(
       "Sensor Entity", helpers.idPrefix + "sensor", b.sensor,
@@ -98,8 +100,7 @@ registerButtonType("door_window", {
       var previousClosed = doorWindowClosedIcon(b.precision);
       var previousOpen = doorWindowOpenIcon(b.precision);
       b.precision = normalizeDoorWindowSubtype(value);
-      subtype.buttons.door.classList.toggle("active", b.precision === "door");
-      subtype.buttons.window.classList.toggle("active", b.precision === "window");
+      subtypeSelect.value = b.precision;
 
       if (!b.icon || b.icon === "Auto" || b.icon === previousClosed) {
         b.icon = doorWindowClosedIcon(b.precision);
