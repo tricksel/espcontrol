@@ -107,6 +107,7 @@ jobs:
       - name: Compile firmware
         run: >-
           ${DOCKER} run --rm
+          --user "$(id -u):$(id -g)"
           -v "${PWD}:/config"
           -v "${HOME}/.cache/espcontrol-actions:${HOME}/.cache/espcontrol-actions"
           ghcr.io/esphome/esphome:2026.4.3

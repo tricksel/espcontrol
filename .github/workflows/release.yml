@@ -61,6 +61,7 @@ jobs:
           VERSION: ${{ github.event.release.tag_name || github.ref_name }}
         run: >-
           ${DOCKER} run --rm
+          --user "$(id -u):$(id -g)"
           -v "${PWD}:/config"
           -v "${HOME}/.cache/espcontrol-actions:${HOME}/.cache/espcontrol-actions"
           ghcr.io/esphome/esphome:2026.4.3
@@ -78,8 +79,8 @@ jobs:
             exit 1
           fi
 
-          sudo cp "${BUILD_DIR}/firmware.factory.bin" output/${{ matrix.slug }}.factory.bin
-          sudo cp "${BUILD_DIR}/firmware.bin" output/${{ matrix.slug }}.ota.bin
+          cp "${BUILD_DIR}/firmware.factory.bin" output/${{ matrix.slug }}.factory.bin
+          cp "${BUILD_DIR}/firmware.bin" output/${{ matrix.slug }}.ota.bin
 
           OTA_MD5=$(md5sum output/${{ matrix.slug }}.ota.bin | cut -d ' ' -f 1)
           VERSION="${{ github.event.release.tag_name || github.ref_name }}"
