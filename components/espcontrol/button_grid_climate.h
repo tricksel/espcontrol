@@ -790,9 +790,8 @@ inline lv_obj_t *climate_create_option_chip(lv_obj_t *parent, const char *icon,
                                             const lv_font_t *value_font,
                                             int width_compensation_percent) {
   lv_obj_t *btn = lv_btn_create(parent);
-  lv_obj_set_size(btn, 240, 94);
+  lv_obj_set_size(btn, compensated_width(240, width_compensation_percent), 94);
   lv_obj_set_flex_grow(btn, 0);
-  apply_width_compensation(btn, width_compensation_percent);
   lv_obj_set_style_radius(btn, 47, LV_PART_MAIN);
   lv_obj_set_style_bg_color(btn, lv_color_hex(DARK_BACKGROUND_SECONDARY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
@@ -1209,7 +1208,8 @@ inline void climate_control_layout_modal(ClimateControlCtx *ctx) {
   lv_obj_set_width(ui.chips, lv_pct(CLIMATE_OPTION_ROW_WIDTH_PERCENT));
   lv_obj_set_height(ui.chips, chip_h);
   lv_obj_set_style_pad_column(ui.chips, chip_gap, LV_PART_MAIN);
-  lv_coord_t option_chip_w = layout.short_side < 520 ? 180 : 240;
+  lv_coord_t option_chip_w = compensated_width(
+    layout.short_side < 520 ? 180 : 240, ctx->width_compensation_percent);
   if (ui.mode_chip) {
     lv_obj_set_size(ui.mode_chip, option_chip_w, chip_h);
     lv_obj_set_style_radius(ui.mode_chip, chip_h / 2, LV_PART_MAIN);
@@ -1226,12 +1226,11 @@ inline void climate_control_layout_modal(ClimateControlCtx *ctx) {
     lv_coord_t tile_w = layout.panel_w - layout.inset * 2;
     if (tile_w > 280) tile_w = 280;
     lv_coord_t tile_h = layout.short_side < 520 ? 86 : 94;
-    lv_obj_set_size(ui.menu_mode_btn, tile_w, tile_h);
-    lv_obj_set_size(ui.menu_preset_btn, tile_w, tile_h);
+    lv_coord_t visual_tile_w = compensated_width(tile_w, ctx->width_compensation_percent);
+    lv_obj_set_size(ui.menu_mode_btn, visual_tile_w, tile_h);
+    lv_obj_set_size(ui.menu_preset_btn, visual_tile_w, tile_h);
     lv_obj_set_style_radius(ui.menu_mode_btn, tile_h / 2, LV_PART_MAIN);
     lv_obj_set_style_radius(ui.menu_preset_btn, tile_h / 2, LV_PART_MAIN);
-    apply_width_compensation(ui.menu_mode_btn, ctx->width_compensation_percent);
-    apply_width_compensation(ui.menu_preset_btn, ctx->width_compensation_percent);
     lv_obj_align(ui.menu_mode_btn, LV_ALIGN_CENTER, 0, -(tile_h + menu_gap) / 2);
     lv_obj_align(ui.menu_preset_btn, LV_ALIGN_CENTER, 0, (tile_h + menu_gap) / 2);
     if (ui.option_list_view) {
