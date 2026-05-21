@@ -603,7 +603,8 @@ inline lv_obj_t *alarm_create_key_button(lv_obj_t *parent, lv_coord_t width,
                                          lv_coord_t height,
                                          const char *text,
                                          const lv_font_t *font,
-                                         int width_compensation_percent) {
+                                         int width_compensation_percent,
+                                         uint16_t label_zoom = 256) {
   lv_coord_t radius = width < height ? width / 2 : height / 2;
   lv_obj_t *btn = control_modal_create_round_button(
     parent, width, text, font, DARK_BORDER, DARK_BACKGROUND_TERTIARY,
@@ -611,6 +612,10 @@ inline lv_obj_t *alarm_create_key_button(lv_obj_t *parent, lv_coord_t width,
   lv_obj_set_size(btn, width, height);
   lv_obj_set_style_radius(btn, radius, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+  lv_obj_t *label = lv_obj_get_child(btn, 0);
+  if (label && label_zoom != 256) {
+    lv_obj_set_style_transform_zoom(label, label_zoom, LV_PART_MAIN);
+  }
   return btn;
 }
 
@@ -741,16 +746,20 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   for (int i = 0; i < 12; i++) {
     const char *text = key_data[i];
     const lv_font_t *key_font = key_label_font;
+    uint16_t key_zoom = 256;
     if (strcmp(text, "back") == 0) {
       text = "\U000F0156";
       key_font = icon_font;
+      key_zoom = 170;
     } else if (strcmp(text, "submit") == 0) {
       text = find_icon("Check");
       key_font = icon_font;
+      key_zoom = 170;
     }
 
     lv_obj_t *key_btn = alarm_create_key_button(
-      ui.panel, key_size, key_size, text, key_font, action->card->width_compensation_percent);
+      ui.panel, key_size, key_size, text, key_font,
+      action->card->width_compensation_percent, key_zoom);
     if (strcmp(key_data[i], "submit") == 0) {
       lv_obj_set_style_bg_color(key_btn, lv_color_hex(DEFAULT_SLIDER_COLOR), LV_PART_MAIN);
       lv_obj_set_style_border_color(key_btn, lv_color_hex(DEFAULT_SLIDER_COLOR), LV_PART_MAIN);
@@ -961,7 +970,7 @@ inline AlarmCardCtx *create_alarm_card_context(
   ctx->icon_lbl = slot.icon_lbl;
   ctx->label_font = label_font;
   ctx->pin_label_font = label_font;
-  ctx->key_label_font = value_font ? value_font : label_font;
+  ctx->key_label_font = label_font ? label_font : value_font;
   ctx->icon_font = icon_font;
   ctx->on_color = on_color;
   ctx->off_color = off_color;
