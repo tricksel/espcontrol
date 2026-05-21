@@ -1099,6 +1099,7 @@ inline AlarmCardCtx *create_alarm_card_context(
     uint32_t tertiary_color,
     const lv_font_t *icon_font,
     const lv_font_t *value_font,
+    const lv_font_t *key_font,
     const lv_font_t *label_font,
     lv_color_t text_color,
     int width_compensation_percent,
@@ -1113,7 +1114,7 @@ inline AlarmCardCtx *create_alarm_card_context(
   ctx->show_status_label = alarm_card_show_status_label(p);
   ctx->label_font = label_font;
   ctx->pin_label_font = label_font;
-  ctx->key_label_font = label_font ? label_font : value_font;
+  ctx->key_label_font = key_font ? key_font : (label_font ? label_font : value_font);
   ctx->icon_font = icon_font;
   ctx->on_color = on_color;
   ctx->off_color = off_color;
