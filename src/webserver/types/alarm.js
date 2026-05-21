@@ -7,7 +7,7 @@ function alarmUsesDefaultIcon(icon) {
 
 function alarmCardTypeOptions() {
   var options = [
-    { value: ALARM_CONTROL_PANEL_VALUE, label: "Alarm Control Panel" },
+    { value: ALARM_CONTROL_PANEL_VALUE, label: "Combined Control" },
   ];
   for (var i = 0; i < ALARM_ACTIONS.length; i++) options.push(ALARM_ACTIONS[i]);
   return options;
