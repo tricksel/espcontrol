@@ -26,6 +26,7 @@ struct AlarmCardCtx {
   const lv_font_t *pin_label_font = nullptr;
   const lv_font_t *key_label_font = nullptr;
   const lv_font_t *icon_font = nullptr;
+  const lv_font_t *arming_title_font = nullptr;
   uint32_t on_color = DEFAULT_SLIDER_COLOR;
   uint32_t off_color = DEFAULT_OFF_COLOR;
   uint32_t tertiary_color = DEFAULT_TERTIARY_COLOR;
@@ -686,6 +687,29 @@ inline uint32_t alarm_control_inactive_color(AlarmCardCtx *ctx) {
   return ctx ? ctx->off_color : DEFAULT_OFF_COLOR;
 }
 
+inline lv_coord_t alarm_control_mode_button_radius(const ControlModalLayout &layout,
+                                                   lv_coord_t width,
+                                                   lv_coord_t height) {
+  lv_coord_t radius = (width < height ? width : height) / 2;
+  if (control_modal_is_jc4880p443_size(layout)) {
+    lv_coord_t compact_radius = control_modal_scaled_px(10, layout.short_side);
+    if (compact_radius < 8) compact_radius = 8;
+    if (radius > compact_radius) radius = compact_radius;
+  }
+  return radius;
+}
+
+inline lv_coord_t alarm_control_rail_radius(const ControlModalLayout &layout,
+                                            lv_coord_t control_radius,
+                                            lv_coord_t button_inset) {
+  if (control_modal_is_jc4880p443_size(layout)) {
+    lv_coord_t radius = control_modal_scaled_px(14, layout.short_side);
+    if (radius < control_radius) radius = control_radius;
+    return radius;
+  }
+  return control_radius + button_inset;
+}
+
 inline void alarm_control_update_modal(AlarmCardCtx *ctx) {
   AlarmControlModalUi &ui = alarm_control_modal_ui();
   if (!ctx || ui.active != ctx) return;
@@ -818,6 +842,15 @@ inline lv_coord_t alarm_pin_key_size(lv_coord_t keypad_w, lv_coord_t keypad_h,
   return key_size;
 }
 
+inline lv_coord_t alarm_pin_label_y(const ControlModalLayout &layout, lv_coord_t pin_h) {
+  lv_coord_t pin_y = layout.inset + (layout.back_size - pin_h) / 2;
+  if (control_modal_is_jc4880p443_size(layout)) {
+    pin_y += control_modal_scaled_px(16, layout.short_side);
+  }
+  if (pin_y < layout.inset) pin_y = layout.inset;
+  return pin_y;
+}
+
 inline void alarm_pin_key_cb(lv_event_t *e) {
   const char *key = static_cast<const char *>(lv_event_get_user_data(e));
   if (!key) return;
@@ -894,8 +927,7 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   alarm_pin_update_display();
   lv_obj_update_layout(ui.pin_lbl);
   lv_coord_t pin_h = lv_obj_get_height(ui.pin_lbl);
-  lv_coord_t pin_y = layout.inset + (layout.back_size - pin_h) / 2;
-  if (pin_y < layout.inset) pin_y = layout.inset;
+  lv_coord_t pin_y = alarm_pin_label_y(layout, pin_h);
   lv_obj_align(ui.pin_lbl, LV_ALIGN_TOP_MID, 0, pin_y);
 
   lv_coord_t pin_button_gap = control_modal_scaled_px(24, layout.short_side);
@@ -1022,6 +1054,7 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
                                              AlarmCardCtx *ctx,
                                              const ControlModalLayout &layout,
                                              const lv_font_t *title_font,
+                                             const lv_font_t *countdown_font,
                                              const lv_font_t *label_font) {
   ui.arming_view = lv_obj_create(ui.panel);
   lv_obj_set_size(ui.arming_view, layout.panel_w, layout.panel_h);
@@ -1033,13 +1066,10 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
   lv_obj_add_flag(ui.arming_view, LV_OBJ_FLAG_HIDDEN);
 
   bool jc4880p443_layout = control_modal_is_jc4880p443_size(layout);
-  lv_coord_t title_y = layout.panel_h / 12;
-  lv_coord_t countdown_gap = control_modal_scaled_px(58, layout.short_side);
+  lv_coord_t countdown_gap = control_modal_scaled_px(18, layout.short_side);
   lv_coord_t disarm_extra_padding = 0;
   if (jc4880p443_layout) {
-    title_y -= control_modal_scaled_px(18, layout.short_side);
-    if (title_y < layout.inset) title_y = layout.inset;
-    countdown_gap = control_modal_scaled_px(82, layout.short_side);
+    countdown_gap = control_modal_scaled_px(24, layout.short_side);
     disarm_extra_padding = control_modal_scaled_px(24, layout.short_side);
   }
 
@@ -1048,19 +1078,20 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
   lv_obj_set_style_text_color(ui.arming_title, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.arming_title, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (title_font) lv_obj_set_style_text_font(ui.arming_title, title_font, LV_PART_MAIN);
-  lv_obj_set_style_transform_zoom(ui.arming_title, 260, LV_PART_MAIN);
   apply_width_compensation(ui.arming_title, ctx ? ctx->width_compensation_percent : 100);
   lv_obj_set_width(ui.arming_title, layout.panel_w - layout.inset * 2);
-  lv_obj_align(ui.arming_title, LV_ALIGN_TOP_MID, 0, title_y);
+  lv_obj_align(ui.arming_title, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_update_layout(ui.arming_title);
+  lv_coord_t countdown_y = lv_obj_get_height(ui.arming_title) / 2 + countdown_gap;
 
   ui.arming_countdown = lv_label_create(ui.arming_view);
   lv_label_set_text(ui.arming_countdown, "");
-  lv_obj_set_style_text_color(ui.arming_countdown, lv_color_hex(DARK_TEXT_SOFT), LV_PART_MAIN);
+  lv_obj_set_style_text_color(ui.arming_countdown, lv_color_hex(DARK_TEXT_MUTED), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.arming_countdown, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (label_font) lv_obj_set_style_text_font(ui.arming_countdown, label_font, LV_PART_MAIN);
+  if (countdown_font) lv_obj_set_style_text_font(ui.arming_countdown, countdown_font, LV_PART_MAIN);
   apply_width_compensation(ui.arming_countdown, ctx ? ctx->width_compensation_percent : 100);
   lv_obj_set_width(ui.arming_countdown, layout.panel_w - layout.inset * 2);
-  lv_obj_align(ui.arming_countdown, LV_ALIGN_TOP_MID, 0, title_y + countdown_gap);
+  lv_obj_align(ui.arming_countdown, LV_ALIGN_CENTER, 0, countdown_y);
   lv_obj_add_flag(ui.arming_countdown, LV_OBJ_FLAG_HIDDEN);
 
   lv_coord_t disarm_h = control_modal_scaled_px(52, layout.short_side);
@@ -1111,7 +1142,10 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
   const lv_font_t *icon_font = ctx->icon_font
     ? ctx->icon_font
     : ctx->icon_lbl ? lv_obj_get_style_text_font(ctx->icon_lbl, LV_PART_MAIN) : label_font;
-  const lv_font_t *title_font = ctx->key_label_font ? ctx->key_label_font : label_font;
+  const lv_font_t *title_font = ctx->arming_title_font
+    ? ctx->arming_title_font
+    : ctx->key_label_font ? ctx->key_label_font : label_font;
+  const lv_font_t *countdown_font = ctx->key_label_font ? ctx->key_label_font : label_font;
 
   ui.overlay = lv_obj_create(lv_layer_top());
   control_modal_style_overlay(ui.overlay);
@@ -1152,8 +1186,8 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
   lv_coord_t btn_h = (rail_h - button_inset * 2 - button_gap * 2) / 3;
   if (btn_w < 1) btn_w = rail_w;
   if (btn_h < 1) btn_h = rail_h / 3;
-  lv_coord_t control_radius = (btn_w < btn_h ? btn_w : btn_h) / 2;
-  lv_coord_t background_radius = control_radius + button_inset;
+  lv_coord_t control_radius = alarm_control_mode_button_radius(layout, btn_w, btn_h);
+  lv_coord_t background_radius = alarm_control_rail_radius(layout, control_radius, button_inset);
 
   ui.rail = lv_obj_create(ui.panel);
   lv_obj_set_size(ui.rail, rail_w, rail_h);
@@ -1178,7 +1212,7 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
     lv_obj_add_event_cb(ui.mode_btn[i], alarm_control_mode_cb, LV_EVENT_CLICKED, &ui.actions[i]);
   }
 
-  alarm_control_create_arming_view(ui, ctx, layout, title_font, label_font);
+  alarm_control_create_arming_view(ui, ctx, layout, title_font, countdown_font, label_font);
   alarm_control_update_modal(ctx);
   lv_obj_move_foreground(ui.back_btn);
   lv_obj_move_foreground(ui.overlay);
@@ -1211,6 +1245,7 @@ inline AlarmCardCtx *create_alarm_card_context(
     uint32_t off_color,
     uint32_t tertiary_color,
     const lv_font_t *icon_font,
+    const lv_font_t *arming_title_font,
     const lv_font_t *value_font,
     const lv_font_t *key_font,
     const lv_font_t *label_font,
@@ -1229,6 +1264,7 @@ inline AlarmCardCtx *create_alarm_card_context(
   ctx->pin_label_font = key_font ? key_font : (label_font ? label_font : value_font);
   ctx->key_label_font = key_font ? key_font : (label_font ? label_font : value_font);
   ctx->icon_font = icon_font;
+  ctx->arming_title_font = arming_title_font;
   ctx->on_color = on_color;
   ctx->off_color = off_color;
   ctx->tertiary_color = tertiary_color;

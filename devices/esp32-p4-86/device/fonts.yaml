@@ -57,8 +57,10 @@ font:
     id: volume_modal_number_font_md_square
     size: 144
     bpp: 4
-    glyphs:
-      - "0123456789.-°Of"
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo@Light"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
 
   # Volume/climate modal labels: 22px on the 480px S3 reference scaled to this 720px short side
   - file: "gfonts://Roboto"

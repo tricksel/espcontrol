@@ -635,6 +635,7 @@ inline void grid_phase2(
           has_off ? off_val : DEFAULT_OFF_COLOR,
           has_sensor_color ? sensor_val : DEFAULT_TERTIARY_COLOR,
           cfg.icon_font,
+          cfg.volume_number_font ? cfg.volume_number_font : cfg.sp_sensor_font,
           cfg.sp_sensor_font,
           cfg.media_title_font,
           lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
@@ -664,6 +665,9 @@ inline void grid_phase2(
           : alarm_action_card->label_font;
         alarm_action_card->pin_label_font = alarm_action_card->key_label_font;
         alarm_action_card->icon_font = cfg.icon_font;
+        alarm_action_card->arming_title_font = cfg.volume_number_font
+          ? cfg.volume_number_font
+          : cfg.sp_sensor_font;
         alarm_action_card->on_color = has_on ? on_val : DEFAULT_SLIDER_COLOR;
         alarm_action_card->off_color = has_off ? off_val : DEFAULT_OFF_COLOR;
         alarm_action_card->tertiary_color = has_sensor_color ? sensor_val : DEFAULT_TERTIARY_COLOR;
@@ -1175,6 +1179,9 @@ inline void grid_phase2(
             : alarm_action_card->label_font;
           alarm_action_card->pin_label_font = alarm_action_card->key_label_font;
           alarm_action_card->icon_font = cfg.icon_font;
+          alarm_action_card->arming_title_font = cfg.volume_number_font
+            ? cfg.volume_number_font
+            : cfg.sp_sensor_font;
           alarm_action_card->on_color = has_on ? on_val : DEFAULT_SLIDER_COLOR;
           alarm_action_card->off_color = has_off ? off_val : DEFAULT_OFF_COLOR;
           alarm_action_card->tertiary_color = has_sensor_color ? sensor_val : DEFAULT_TERTIARY_COLOR;

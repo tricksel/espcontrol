@@ -57,8 +57,10 @@ font:
     id: volume_modal_number_font_lg
     size: 135
     bpp: 4
-    glyphs:
-      - "0123456789.-°Of"
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo@Light"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
 
   # Top bar clock and temperature (25px)
   - file: "gfonts://Roboto"

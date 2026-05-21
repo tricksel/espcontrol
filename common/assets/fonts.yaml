@@ -17,8 +17,10 @@ font:
     id: volume_modal_number_font
     size: 96
     bpp: 4
-    glyphs:
-      - "0123456789.-°Of"
+    glyphs: !include text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo@Light"
+        glyphs: !include hebrew_glyphs.yaml
 
   # Main page: media now-playing titles (sensor value size, full text glyph coverage)
   - file: "gfonts://Roboto@Light"
