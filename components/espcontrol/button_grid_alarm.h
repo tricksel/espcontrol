@@ -1067,7 +1067,6 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
     icon_size = control_modal_scaled_px(120, layout.short_side);
   if (icon_size > layout.panel_w - layout.inset * 2)
     icon_size = layout.panel_w - layout.inset * 2;
-  lv_coord_t icon_y = layout.panel_h * 34 / 100;
   lv_obj_t *icon_box = lv_obj_create(ui.arming_view);
   lv_obj_set_size(icon_box, icon_size, icon_size);
   apply_width_compensation(icon_box, ctx ? ctx->width_compensation_percent : 100);
@@ -1076,37 +1075,35 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
   lv_obj_set_style_shadow_width(icon_box, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(icon_box, 0, LV_PART_MAIN);
   lv_obj_clear_flag(icon_box, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_pos(icon_box, (layout.panel_w - icon_size) / 2, icon_y);
+  lv_obj_align(icon_box, LV_ALIGN_CENTER, 0, 0);
 
   ui.arming_icon = lv_label_create(icon_box);
   lv_label_set_text(ui.arming_icon, find_icon("Security"));
   lv_obj_set_style_text_color(ui.arming_icon, lv_color_hex(ctx ? ctx->on_color : DEFAULT_SLIDER_COLOR), LV_PART_MAIN);
   lv_obj_set_style_text_align(ui.arming_icon, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (icon_font) lv_obj_set_style_text_font(ui.arming_icon, icon_font, LV_PART_MAIN);
-  lv_obj_set_style_transform_zoom(ui.arming_icon, 900, LV_PART_MAIN);
+  lv_obj_set_style_transform_zoom(ui.arming_icon, 768, LV_PART_MAIN);
   apply_width_compensation(ui.arming_icon, ctx ? ctx->width_compensation_percent : 100);
   lv_obj_center(ui.arming_icon);
 
-  lv_coord_t disarm_w = layout.panel_w * 58 / 100;
-  if (disarm_w < control_modal_scaled_px(160, layout.short_side))
-    disarm_w = control_modal_scaled_px(160, layout.short_side);
-  if (disarm_w > layout.panel_w - layout.inset * 2)
-    disarm_w = layout.panel_w - layout.inset * 2;
-  lv_coord_t disarm_h = layout.short_side * 22 / 100;
-  if (disarm_h < control_modal_scaled_px(68, layout.short_side))
-    disarm_h = control_modal_scaled_px(68, layout.short_side);
-  if (disarm_h > layout.panel_h / 5) disarm_h = layout.panel_h / 5;
+  lv_coord_t disarm_h = control_modal_scaled_px(52, layout.short_side);
+  if (disarm_h < 44) disarm_h = 44;
+  if (disarm_h > layout.panel_h / 8) disarm_h = layout.panel_h / 8;
   ui.arming_disarm_btn = control_modal_create_round_button(
     ui.arming_view, disarm_h, "Disarm", label_font,
     ctx ? ctx->on_color : DEFAULT_SLIDER_COLOR,
     ctx ? ctx->on_color : DEFAULT_SLIDER_COLOR,
     ctx ? ctx->width_compensation_percent : 100);
-  lv_obj_set_size(ui.arming_disarm_btn, disarm_w, disarm_h);
   lv_obj_set_style_radius(ui.arming_disarm_btn, disarm_h / 2, LV_PART_MAIN);
   lv_obj_set_style_border_width(ui.arming_disarm_btn, 0, LV_PART_MAIN);
   ui.arming_disarm_label = lv_obj_get_child(ui.arming_disarm_btn, 0);
   if (ui.arming_disarm_label) {
     lv_obj_set_style_text_color(ui.arming_disarm_label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+    lv_obj_update_layout(ui.arming_disarm_label);
+    lv_coord_t disarm_w = lv_obj_get_width(ui.arming_disarm_label) + disarm_h;
+    lv_coord_t max_disarm_w = layout.panel_w - layout.inset * 2;
+    if (disarm_w > max_disarm_w) disarm_w = max_disarm_w;
+    lv_obj_set_width(ui.arming_disarm_btn, disarm_w);
     lv_obj_center(ui.arming_disarm_label);
   }
   lv_obj_align(ui.arming_disarm_btn, LV_ALIGN_BOTTOM_MID, 0, -layout.panel_h / 14);
