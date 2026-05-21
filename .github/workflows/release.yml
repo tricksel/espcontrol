@@ -10,6 +10,8 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ESPCONTROL_PLATFORMIO_CACHE_MAX_MB: 6144
+  ESPCONTROL_BUILD_CACHE_MAX_MB: 1024
 
 jobs:
   build-firmware:
@@ -17,6 +19,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - device: guition-esp32-p4-jc1060p470
@@ -60,8 +63,11 @@ jobs:
         run: |
           CACHE_ROOT="${HOME}/.cache/espcontrol-actions/esphome"
           PLATFORMIO_CACHE="${CACHE_ROOT}/shared"
-          BUILD_CACHE="${CACHE_ROOT}/release/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.slug }}"
+          RUN_CACHE_ROOT="${CACHE_ROOT}/release/${{ github.run_id }}-${{ github.run_attempt }}"
+          BUILD_CACHE="${RUN_CACHE_ROOT}/${{ matrix.slug }}"
           mkdir -p "${PLATFORMIO_CACHE}" "${BUILD_CACHE}" builds
+          bash scripts/prune_actions_cache.sh "${CACHE_ROOT}/release" "${ESPCONTROL_BUILD_CACHE_MAX_MB}" --protect "${RUN_CACHE_ROOT}"
+          bash scripts/prune_actions_cache.sh "${PLATFORMIO_CACHE}" "${ESPCONTROL_PLATFORMIO_CACHE_MAX_MB}" --strategy reset
           rm -rf .esphome
           rm -rf builds/.esphome
           echo "PLATFORMIO_CACHE=${PLATFORMIO_CACHE}" >> "$GITHUB_ENV"
@@ -128,6 +134,19 @@ jobs:
         with:
           name: firmware-${{ matrix.slug }}
           path: output/
+
+      - name: Clean firmware caches
+        if: always()
+        working-directory: espcontrol-${{ matrix.slug }}
+        run: |
+          if [ -z "${BUILD_CACHE:-}" ] || [ -z "${PLATFORMIO_CACHE:-}" ]; then
+            echo "No firmware cache paths were prepared."
+            exit 0
+          fi
+          rm -rf "${BUILD_CACHE}"
+          RUN_CACHE_ROOT="$(dirname "${BUILD_CACHE}")"
+          bash scripts/prune_actions_cache.sh "${PLATFORMIO_CACHE}" "${ESPCONTROL_PLATFORMIO_CACHE_MAX_MB}" --strategy reset
+          bash scripts/prune_actions_cache.sh "$(dirname "${RUN_CACHE_ROOT}")" "${ESPCONTROL_BUILD_CACHE_MAX_MB}" --protect "${RUN_CACHE_ROOT}"
 
   publish:
     name: Publish to Release
