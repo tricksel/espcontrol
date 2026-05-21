@@ -54,6 +54,8 @@ script:
           cfg.media_title_font = id(media_title_font)->get_lv_font();
           cfg.volume_number_font = id(volume_modal_number_font_600)->get_lv_font();
           cfg.volume_label_font = id(volume_modal_label_font_600)->get_lv_font();
+          cfg.climate_option_title_font = id(climate_option_title_font_600)->get_lv_font();
+          cfg.climate_option_value_font = id(label_font_lt)->get_lv_font();
           cfg.temperature_unit = id(temperature_unit_select).current_option();
           cfg.timezone = id(timezone_select).current_option();
           cfg.pause_home_idle = []() {
@@ -113,6 +115,8 @@ esphome:
             cfg.media_title_font = id(media_title_font)->get_lv_font();
             cfg.volume_number_font = id(volume_modal_number_font_600)->get_lv_font();
             cfg.volume_label_font = id(volume_modal_label_font_600)->get_lv_font();
+            cfg.climate_option_title_font = id(climate_option_title_font_600)->get_lv_font();
+            cfg.climate_option_value_font = id(label_font_lt)->get_lv_font();
             cfg.temperature_unit = id(temperature_unit_select).current_option();
             cfg.timezone = id(timezone_select).current_option();
             cfg.pause_home_idle = []() {
@@ -205,6 +209,8 @@ esphome:
             cfg.media_title_font = id(media_title_font)->get_lv_font();
             cfg.volume_number_font = id(volume_modal_number_font_600)->get_lv_font();
             cfg.volume_label_font = id(volume_modal_label_font_600)->get_lv_font();
+            cfg.climate_option_title_font = id(climate_option_title_font_600)->get_lv_font();
+            cfg.climate_option_value_font = id(label_font_lt)->get_lv_font();
             cfg.temperature_unit = id(temperature_unit_select).current_option();
             cfg.timezone = id(timezone_select).current_option();
             cfg.pause_home_idle = []() {

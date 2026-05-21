@@ -40,6 +40,8 @@ def slot_device(slug: str, device: dict, settings: dict) -> dict:
         "media_title_font": fonts["mediaTitle"],
         "volume_number_font": fonts["volumeNumber"],
         "volume_label_font": fonts["volumeLabel"],
+        "climate_option_title_font": fonts.get("climateOptionTitle"),
+        "climate_option_value_font": fonts.get("climateOptionValue"),
         "wrap_tall_labels": display["wrapTallLabels"],
     }
     if "portraitCols" in layout:
@@ -152,6 +154,14 @@ def cfg_lines(device: dict) -> list[str]:
     lines.append(f"            cfg.media_title_font = id({device['media_title_font']})->get_lv_font();")
     lines.append(f"            cfg.volume_number_font = id({device['volume_number_font']})->get_lv_font();")
     lines.append(f"            cfg.volume_label_font = id({device['volume_label_font']})->get_lv_font();")
+    if device.get("climate_option_title_font"):
+        lines.append(
+            f"            cfg.climate_option_title_font = id({device['climate_option_title_font']})->get_lv_font();"
+        )
+    if device.get("climate_option_value_font"):
+        lines.append(
+            f"            cfg.climate_option_value_font = id({device['climate_option_value_font']})->get_lv_font();"
+        )
     lines.append("            cfg.temperature_unit = id(temperature_unit_select).current_option();")
     lines.append("            cfg.timezone = id(timezone_select).current_option();")
     lines.append("            cfg.pause_home_idle = []() {")

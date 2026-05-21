@@ -26,6 +26,8 @@ struct GridConfig {
   const lv_font_t *media_title_font;
   const lv_font_t *volume_number_font;
   const lv_font_t *volume_label_font = nullptr;
+  const lv_font_t *climate_option_title_font = nullptr;
+  const lv_font_t *climate_option_value_font = nullptr;
   const lv_font_t *volume_icon_font = nullptr;
   std::string temperature_unit;
   std::string timezone;
@@ -815,6 +817,12 @@ inline void grid_phase2(
           cfg.volume_label_font
             ? cfg.volume_label_font
             : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          cfg.climate_option_title_font
+            ? cfg.climate_option_title_font
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          cfg.climate_option_value_font
+            ? cfg.climate_option_value_font
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
           cfg.icon_font,
           cfg.volume_width_compensation_percent,
           s.sensor_container, s.sensor_lbl, s.unit_lbl);
@@ -1357,6 +1365,12 @@ inline void grid_phase2(
               : lv_obj_get_style_text_font(sub_slot.unit_lbl, LV_PART_MAIN),
             cfg.volume_label_font
               ? cfg.volume_label_font
+              : lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
+            cfg.climate_option_title_font
+              ? cfg.climate_option_title_font
+              : lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
+            cfg.climate_option_value_font
+              ? cfg.climate_option_value_font
               : lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
             cfg.icon_font,
             cfg.volume_width_compensation_percent,

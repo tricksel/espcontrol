@@ -42,6 +42,16 @@ font:
       - file: "gfonts://Heebo"
         glyphs: !include hebrew_glyphs.yaml
 
+  # Climate modal option titles: smaller first line above the option value
+  - file: "gfonts://Roboto"
+    id: climate_option_title_font
+    size: 18
+    bpp: 4
+    glyphs: !include text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include hebrew_glyphs.yaml
+
   # Top bar: clock and temperature
   - file: "gfonts://Roboto"
     id: clockbar_font
