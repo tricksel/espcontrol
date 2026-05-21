@@ -36,11 +36,15 @@ registerButtonType("climate", {
       "Add a climate entity before saving.");
     panel.appendChild(entityField.field);
 
-    panel.appendChild(helpers.textField(
-      "Label", helpers.idPrefix + "label", b.label, "Climate", "label", true).field);
-
     function setActive(buttons, value) {
       for (var key in buttons) buttons[key].classList.toggle("active", key === value);
+    }
+
+    var labelField = condField();
+    labelField.appendChild(helpers.textField(
+      "Label", helpers.idPrefix + "label", b.label, "Climate", "label", true).field);
+    function syncLabelField() {
+      labelField.classList.toggle("sp-visible", climateLabelDisplayMode(b) === "label");
     }
 
     var labelDisplayField = helpers.segmentControl([
@@ -52,9 +56,12 @@ registerButtonType("climate", {
       setActive(labelDisplayField.buttons, value);
       setClimateLabelDisplayMode(b, value);
       helpers.saveField("options", b.options);
+      syncLabelField();
       scheduleRender();
     });
     panel.appendChild(helpers.fieldWithControl("Label Display", null, labelDisplayField.segment));
+    syncLabelField();
+    panel.appendChild(labelField);
 
     var numberDisplayField = helpers.segmentControl([
       ["icon", "Icon"],
