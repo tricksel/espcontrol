@@ -114,8 +114,8 @@ jobs:
           mkdir -p "${PLATFORMIO_CACHE}" "${BUILD_CACHE}" builds
           rm -rf .esphome
           rm -rf builds/.esphome
-          ln -s "${PLATFORMIO_CACHE}" .esphome
-          ln -s "${BUILD_CACHE}" builds/.esphome
+          echo "PLATFORMIO_CACHE=${PLATFORMIO_CACHE}" >> "$GITHUB_ENV"
+          echo "BUILD_CACHE=${BUILD_CACHE}" >> "$GITHUB_ENV"
 
       - name: Compile firmware
         run: >-
@@ -125,5 +125,7 @@ jobs:
           -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio
           -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false
           -v "${PWD}:/config"
+          -v "${PLATFORMIO_CACHE}:/config/.esphome"
+          -v "${BUILD_CACHE}:/config/builds/.esphome"
           ghcr.io/esphome/esphome:2026.4.3
           compile /config/builds/${{ matrix.slug }}.factory.yaml

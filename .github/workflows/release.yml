@@ -60,8 +60,8 @@ jobs:
           mkdir -p "${PLATFORMIO_CACHE}" "${BUILD_CACHE}" builds
           rm -rf .esphome
           rm -rf builds/.esphome
-          ln -s "${PLATFORMIO_CACHE}" .esphome
-          ln -s "${BUILD_CACHE}" builds/.esphome
+          echo "PLATFORMIO_CACHE=${PLATFORMIO_CACHE}" >> "$GITHUB_ENV"
+          echo "BUILD_CACHE=${BUILD_CACHE}" >> "$GITHUB_ENV"
 
       - name: Compile firmware
         env:
@@ -73,6 +73,8 @@ jobs:
           -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio
           -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false
           -v "${PWD}:/config"
+          -v "${PLATFORMIO_CACHE}:/config/.esphome"
+          -v "${BUILD_CACHE}:/config/builds/.esphome"
           ghcr.io/esphome/esphome:2026.4.3
           -s firmware_version "${VERSION}"
           compile /config/builds/${{ matrix.slug }}.factory.yaml
@@ -80,14 +82,15 @@ jobs:
       - name: Collect firmware files and generate manifest
         id: firmware
         run: |
-          BUILD_DIR=$(dirname "$(find .esphome/build builds/.esphome/build -name firmware.factory.bin -print -quit 2>/dev/null)")
+          FIRMWARE_FACTORY=$(find "${BUILD_CACHE}/build" -name firmware.factory.bin -print -quit 2>/dev/null || true)
           mkdir -p output
 
-          if [ ! -f "${BUILD_DIR}/firmware.factory.bin" ]; then
+          if [ -z "${FIRMWARE_FACTORY}" ] || [ ! -f "${FIRMWARE_FACTORY}" ]; then
             echo "::error::Firmware compilation failed — factory binary not found"
             exit 1
           fi
 
+          BUILD_DIR=$(dirname "${FIRMWARE_FACTORY}")
           cp "${BUILD_DIR}/firmware.factory.bin" output/${{ matrix.slug }}.factory.bin
           cp "${BUILD_DIR}/firmware.bin" output/${{ matrix.slug }}.ota.bin
 
