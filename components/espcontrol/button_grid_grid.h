@@ -1543,10 +1543,10 @@ inline void grid_phase2(
           ParsedCfg *c = (ParsedCfg *)lv_event_get_user_data(e);
           lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
           if (!c || c->entity.empty()) return;
-          if (switch_confirmation_enabled(*c) && target &&
-              lv_obj_has_state(target, LV_STATE_CHECKED) &&
+          bool currently_on = target && lv_obj_has_state(target, LV_STATE_CHECKED);
+          if (switch_confirmation_required(*c, currently_on) && target &&
               !is_button_entity(c->entity)) {
-            switch_confirmation_open_modal(*c, target);
+            switch_confirmation_open_modal(*c, target, !currently_on);
           } else {
             send_toggle_action(c->entity);
           }

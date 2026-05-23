@@ -519,12 +519,31 @@ inline bool door_window_active_color_enabled(const ParsedCfg &p) {
 }
 
 inline bool switch_confirmation_enabled(const ParsedCfg &p) {
-  return p.type.empty() && cfg_option_enabled(p.options, "confirm_off");
+  return p.type.empty() &&
+         (cfg_option_enabled(p.options, "confirm_off") ||
+          cfg_option_enabled(p.options, "confirm_on"));
+}
+
+inline bool switch_confirmation_required(const ParsedCfg &p, bool currently_on) {
+  if (p.type.empty()) {
+    return currently_on
+      ? cfg_option_enabled(p.options, "confirm_off")
+      : cfg_option_enabled(p.options, "confirm_on");
+  }
+  return false;
+}
+
+inline std::string switch_confirmation_default_message(const ParsedCfg &p) {
+  bool confirm_off = cfg_option_enabled(p.options, "confirm_off");
+  bool confirm_on = cfg_option_enabled(p.options, "confirm_on");
+  if (confirm_off && confirm_on) return "Toggle this device?";
+  if (confirm_on) return "Turn on this device?";
+  return "Turn off this device?";
 }
 
 inline std::string switch_confirmation_message(const ParsedCfg &p) {
   std::string value = cfg_option_value(p.options, "confirm_message");
-  return value.empty() ? std::string("Turn off this device?") : value;
+  return value.empty() ? switch_confirmation_default_message(p) : value;
 }
 
 inline std::string switch_confirmation_yes_text(const ParsedCfg &p) {

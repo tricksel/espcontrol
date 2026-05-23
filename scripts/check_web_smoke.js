@@ -95,9 +95,23 @@ const confirmationButton = {
 const confirmationRoundTrip = hooks.parseButtonConfig(hooks.serializeButtonConfig(confirmationButton));
 assert.deepStrictEqual(plain(confirmationRoundTrip), confirmationButton);
 assert.strictEqual(hooks.switchConfirmationEnabled(confirmationRoundTrip), true);
+assert.strictEqual(hooks.switchConfirmationMode(confirmationRoundTrip), "off");
 assert.strictEqual(hooks.switchConfirmationMessage(confirmationRoundTrip), "Stop the print?");
 assert.strictEqual(hooks.switchConfirmationYesText(confirmationRoundTrip), "Power Down");
 assert.strictEqual(hooks.switchConfirmationNoText(confirmationRoundTrip), "Keep On");
+const confirmationOnRoundTrip = hooks.parseButtonConfig(hooks.serializeButtonConfig({
+  entity: "switch.printer",
+  label: "3D Printer",
+  icon: "Printer 3D",
+  icon_on: "Printer 3D",
+  sensor: "",
+  unit: "",
+  type: "",
+  precision: "",
+  options: "confirm_on",
+}));
+assert.strictEqual(hooks.switchConfirmationMode(confirmationOnRoundTrip), "on");
+assert.strictEqual(hooks.switchConfirmationMessage(confirmationOnRoundTrip), "Turn on this device?");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", false, false), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true, false), true);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("alarm", true, true), true);

@@ -157,10 +157,13 @@ function fanCardDefaultIcon(type) {
 var SENSOR_LARGE_NUMBERS_OPTION = "large_numbers";
 var SENSOR_ACTIVE_COLOR_OPTION = "active_color";
 var SWITCH_CONFIRM_OFF_OPTION = "confirm_off";
+var SWITCH_CONFIRM_ON_OPTION = "confirm_on";
 var SWITCH_CONFIRM_MESSAGE_OPTION = "confirm_message";
 var SWITCH_CONFIRM_YES_OPTION = "confirm_yes";
 var SWITCH_CONFIRM_NO_OPTION = "confirm_no";
 var SWITCH_CONFIRM_DEFAULT_MESSAGE = "Turn off this device?";
+var SWITCH_CONFIRM_ON_DEFAULT_MESSAGE = "Turn on this device?";
+var SWITCH_CONFIRM_BOTH_DEFAULT_MESSAGE = "Toggle this device?";
 var SWITCH_CONFIRM_DEFAULT_YES = "Yes";
 var SWITCH_CONFIRM_DEFAULT_NO = "No";
 var ALARM_PIN_ARM_OPTION = "pin_arm";
@@ -315,12 +318,28 @@ function normalizeDoorWindowOptions(options) {
 }
 
 function switchConfirmationEnabled(b) {
-  return !!(b && configOptionEnabled(b.options, SWITCH_CONFIRM_OFF_OPTION));
+  return !!switchConfirmationMode(b);
+}
+
+function switchConfirmationMode(b) {
+  var options = b && b.options;
+  var confirmOff = configOptionEnabled(options, SWITCH_CONFIRM_OFF_OPTION);
+  var confirmOn = configOptionEnabled(options, SWITCH_CONFIRM_ON_OPTION);
+  if (confirmOff && confirmOn) return "both";
+  if (confirmOn) return "on";
+  if (confirmOff) return "off";
+  return "";
+}
+
+function switchConfirmationDefaultMessageForMode(mode) {
+  if (mode === "on") return SWITCH_CONFIRM_ON_DEFAULT_MESSAGE;
+  if (mode === "both") return SWITCH_CONFIRM_BOTH_DEFAULT_MESSAGE;
+  return SWITCH_CONFIRM_DEFAULT_MESSAGE;
 }
 
 function switchConfirmationMessage(b) {
   return configOptionValue(b && b.options, SWITCH_CONFIRM_MESSAGE_OPTION) ||
-    SWITCH_CONFIRM_DEFAULT_MESSAGE;
+    switchConfirmationDefaultMessageForMode(switchConfirmationMode(b));
 }
 
 function switchConfirmationYesText(b) {
@@ -334,12 +353,15 @@ function switchConfirmationNoText(b) {
 }
 
 function normalizeSwitchConfirmationOptions(options) {
-  if (!configOptionEnabled(options, SWITCH_CONFIRM_OFF_OPTION)) return "";
-  var out = setConfigOption("", SWITCH_CONFIRM_OFF_OPTION, true);
+  var mode = switchConfirmationMode({ options: options });
+  if (!mode) return "";
+  var out = "";
+  out = setConfigOption(out, SWITCH_CONFIRM_OFF_OPTION, mode === "off" || mode === "both");
+  out = setConfigOption(out, SWITCH_CONFIRM_ON_OPTION, mode === "on" || mode === "both");
   var msg = configOptionValue(options, SWITCH_CONFIRM_MESSAGE_OPTION);
   var yes = configOptionValue(options, SWITCH_CONFIRM_YES_OPTION);
   var no = configOptionValue(options, SWITCH_CONFIRM_NO_OPTION);
-  if (msg && msg !== SWITCH_CONFIRM_DEFAULT_MESSAGE) {
+  if (msg && msg !== switchConfirmationDefaultMessageForMode(mode)) {
     out = setConfigOptionValue(out, SWITCH_CONFIRM_MESSAGE_OPTION, msg);
   }
   if (yes && yes !== SWITCH_CONFIRM_DEFAULT_YES) {
@@ -351,11 +373,15 @@ function normalizeSwitchConfirmationOptions(options) {
   return out;
 }
 
-function setSwitchConfirmationOptions(b, enabled, message, yesText, noText) {
+function setSwitchConfirmationOptions(b, mode, message, yesText, noText) {
   if (!b) return "";
-  var out = setConfigOption("", SWITCH_CONFIRM_OFF_OPTION, !!enabled);
-  if (enabled) {
-    if (message && message !== SWITCH_CONFIRM_DEFAULT_MESSAGE) {
+  mode = mode === true ? "off" : mode;
+  mode = mode === "on" || mode === "both" || mode === "off" ? mode : "";
+  var out = "";
+  out = setConfigOption(out, SWITCH_CONFIRM_OFF_OPTION, mode === "off" || mode === "both");
+  out = setConfigOption(out, SWITCH_CONFIRM_ON_OPTION, mode === "on" || mode === "both");
+  if (mode) {
+    if (message && message !== switchConfirmationDefaultMessageForMode(mode)) {
       out = setConfigOptionValue(out, SWITCH_CONFIRM_MESSAGE_OPTION, message);
     }
     if (yesText && yesText !== SWITCH_CONFIRM_DEFAULT_YES) {

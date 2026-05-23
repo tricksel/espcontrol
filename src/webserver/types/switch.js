@@ -112,6 +112,7 @@ registerButtonType("", {
     });
 
     var confirmOn = switchConfirmationEnabled(b);
+    var confirmMode = switchConfirmationMode(b) || "off";
     var confirmToggleSection = helpers.toggleSection(
       "Confirmation Required",
       helpers.idPrefix + "confirm-toggle",
@@ -121,6 +122,20 @@ registerButtonType("", {
     var confirmSection = confirmToggleSection.section;
     panel.appendChild(confirmToggle.row);
     if (confirmOn) confirmSection.classList.add("sp-visible");
+
+    var directionMode = helpers.segmentControl([
+      ["off", "Off"],
+      ["on", "On"],
+      ["both", "Both"],
+    ], confirmMode, function (value) {
+      var previousDefault = switchConfirmationDefaultMessageForMode(confirmMode);
+      confirmMode = value;
+      if (!messageInput.value || messageInput.value === previousDefault) {
+        messageInput.value = switchConfirmationDefaultMessageForMode(confirmMode);
+      }
+      saveConfirmationOptions();
+    });
+    confirmSection.appendChild(helpers.fieldWithControl("When", null, directionMode.segment));
 
     var messageField = helpers.textField(
       "Message",
@@ -157,8 +172,8 @@ registerButtonType("", {
     function saveConfirmationOptions() {
       setSwitchConfirmationOptions(
         b,
-        confirmToggle.input.checked,
-        messageInput.value || SWITCH_CONFIRM_DEFAULT_MESSAGE,
+        confirmToggle.input.checked ? confirmMode : "",
+        messageInput.value || switchConfirmationDefaultMessageForMode(confirmMode),
         yesInput.value || SWITCH_CONFIRM_DEFAULT_YES,
         noInput.value || SWITCH_CONFIRM_DEFAULT_NO
       );
@@ -168,7 +183,7 @@ registerButtonType("", {
     confirmToggle.input.addEventListener("change", function () {
       confirmSection.classList.toggle("sp-visible", this.checked);
       if (this.checked) {
-        if (!messageInput.value) messageInput.value = SWITCH_CONFIRM_DEFAULT_MESSAGE;
+        if (!messageInput.value) messageInput.value = switchConfirmationDefaultMessageForMode(confirmMode);
         if (!yesInput.value) yesInput.value = SWITCH_CONFIRM_DEFAULT_YES;
         if (!noInput.value) noInput.value = SWITCH_CONFIRM_DEFAULT_NO;
       }

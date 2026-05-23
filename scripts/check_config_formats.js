@@ -286,9 +286,18 @@ assert.strictEqual(hooks.switchConfirmationEnabled(parsedConfirmSwitch), true, "
 assert.strictEqual(hooks.switchConfirmationMessage(parsedConfirmSwitch), "Stop the print?", "switch confirmation message");
 assert.strictEqual(hooks.switchConfirmationYesText(parsedConfirmSwitch), "Power Down", "switch confirmation yes text");
 assert.strictEqual(hooks.switchConfirmationNoText(parsedConfirmSwitch), "Keep On", "switch confirmation no text");
+assert.strictEqual(hooks.switchConfirmationMode(parsedConfirmSwitch), "off", "switch confirmation defaults to off mode");
 const defaultConfirmSwitch = hooks.parseButtonConfig("switch.printer;Printer;Printer 3D;Auto;;;;;confirm_off");
 assert.strictEqual(hooks.switchConfirmationYesText(defaultConfirmSwitch), "Yes", "switch confirmation default yes text");
 assert.strictEqual(hooks.switchConfirmationNoText(defaultConfirmSwitch), "No", "switch confirmation default no text");
+const confirmOnSwitch = hooks.parseButtonConfig("switch.printer;Printer;Printer 3D;Auto;;;;;confirm_on");
+assert.strictEqual(hooks.switchConfirmationEnabled(confirmOnSwitch), true, "switch on confirmation enabled");
+assert.strictEqual(hooks.switchConfirmationMode(confirmOnSwitch), "on", "switch on confirmation mode");
+assert.strictEqual(hooks.switchConfirmationMessage(confirmOnSwitch), "Turn on this device?", "switch on confirmation default message");
+assert.strictEqual(hooks.serializeButtonConfig(confirmOnSwitch), "switch.printer;Printer;Printer 3D;Auto;;;;;confirm_on", "switch on confirmation round-trip");
+const confirmBothSwitch = hooks.parseButtonConfig("switch.printer;Printer;Printer 3D;Auto;;;;;confirm_off,confirm_on");
+assert.strictEqual(hooks.switchConfirmationMode(confirmBothSwitch), "both", "switch both confirmation mode");
+assert.strictEqual(hooks.switchConfirmationMessage(confirmBothSwitch), "Toggle this device?", "switch both confirmation default message");
 
 assertButtonRoundTrip(hooks, "delimiter button", {
   entity: "sensor.kitchen_temperature",

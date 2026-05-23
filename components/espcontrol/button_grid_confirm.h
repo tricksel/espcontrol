@@ -11,6 +11,7 @@ struct SwitchConfirmationModalUi {
   lv_obj_t *confirm_btn = nullptr;
   lv_obj_t *btn_obj = nullptr;
   ParsedCfg cfg;
+  bool turn_on = false;
 };
 
 inline SwitchConfirmationModalUi &switch_confirmation_modal_ui() {
@@ -102,12 +103,18 @@ inline lv_obj_t *switch_confirmation_create_text_button(
 
 inline void switch_confirmation_confirm() {
   SwitchConfirmationModalUi &ui = switch_confirmation_modal_ui();
-  if (!ui.cfg.entity.empty()) send_turn_off_action(ui.cfg.entity);
-  if (ui.btn_obj) lv_obj_clear_state(ui.btn_obj, LV_STATE_CHECKED);
+  if (!ui.cfg.entity.empty()) {
+    if (ui.turn_on) send_turn_on_action(ui.cfg.entity);
+    else send_turn_off_action(ui.cfg.entity);
+  }
+  if (ui.btn_obj) {
+    if (ui.turn_on) lv_obj_add_state(ui.btn_obj, LV_STATE_CHECKED);
+    else lv_obj_clear_state(ui.btn_obj, LV_STATE_CHECKED);
+  }
   switch_confirmation_hide_modal();
 }
 
-inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj) {
+inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj, bool turn_on) {
   if (p.entity.empty()) return;
   media_volume_hide_modal();
   climate_control_hide_modal();
@@ -116,6 +123,7 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   SwitchConfirmationModalUi &ui = switch_confirmation_modal_ui();
   ui.cfg = p;
   ui.btn_obj = btn_obj;
+  ui.turn_on = turn_on;
 
   ControlModalLayout layout = control_modal_calc_layout(100);
   lv_coord_t radius = control_modal_card_radius(btn_obj);

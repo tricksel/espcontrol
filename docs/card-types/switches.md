@@ -24,27 +24,28 @@ Use a [Lock](/card-types/locks) card for door locks. Lock cards use Home Assista
 4. Choose an **Off Icon**, or leave it as **Auto** so the panel picks an icon from the entity type.
 5. Choose an **On Icon** if you want a different icon while the entity is active.
 6. Optionally turn on **Active Display** if the card should show a live sensor value or text state while active.
-7. Optionally turn on **Confirmation Required** if turning this device off by accident would be a problem.
+7. Optionally turn on **Confirmation Required** if turning this device on or off by accident would be a problem.
 
 ## How It Works on the Panel
 
 - Tapping most Switch cards sends a Home Assistant toggle action for the entity.
 - If the entity starts with `button.`, tapping the card sends a button press instead.
-- If **Confirmation Required** is on, the panel asks for confirmation before turning an active entity off. Turning it on does not require confirmation.
+- If **Confirmation Required** is on, the panel asks before changing the entity in the direction you choose: off, on, or both.
 - The card lights up when Home Assistant reports an active state such as `on`, `open`, `opening`, `closing`, `playing`, `home`, or `unlocked`.
 - If the entity is changed somewhere else, such as in Home Assistant or by an automation, the card updates to match.
 
-## Off Confirmation
+## Toggle Confirmation
 
-Use **Confirmation Required** for important devices such as 3D printers, heaters, pumps, or anything you do not want to turn off with an accidental tap.
+Use **Confirmation Required** for important devices such as 3D printers, heaters, pumps, or anything you do not want to change with an accidental tap.
 
 When enabled, the card shows three extra fields:
 
+- **When** - choose whether the popup appears when turning the entity off, on, or both.
 - **Message** - the text shown in the confirmation popup.
-- **Confirm Button** - the button that turns the device off.
-- **Cancel Button** - the button that leaves the device on.
+- **Confirm Button** - the button that allows the change.
+- **Cancel Button** - the button that leaves the entity unchanged.
 
-The confirmation only appears when Home Assistant currently reports the entity as active. If the entity is already off, tapping the card turns it on as normal.
+The default behavior is still **Off**, so existing cards keep asking only when Home Assistant currently reports the entity as active.
 
 ## Active State Display
 
