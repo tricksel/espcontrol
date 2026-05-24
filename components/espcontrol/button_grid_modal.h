@@ -1,0 +1,469 @@
+#pragma once
+
+// Internal implementation detail for button_grid.h. Include button_grid.h from device YAML.
+
+// Shared control modal helpers.
+
+constexpr lv_coord_t CONTROL_MODAL_REFERENCE_SIDE_PX = 480;
+constexpr lv_coord_t CONTROL_MODAL_ARC_STROKE_REF_PX = 17;
+constexpr lv_coord_t CONTROL_MODAL_BACK_BUTTON_REF_PX = 46;
+constexpr lv_coord_t CONTROL_MODAL_BUTTON_REF_PX = 80;
+constexpr lv_coord_t CONTROL_MODAL_INSET_REF_PX = 18;
+constexpr lv_coord_t CONTROL_MODAL_CONTROLS_GAP_REF_PX = 24;
+constexpr lv_coord_t CONTROL_MODAL_CONTROLS_DOWN_REF_PX = 22;
+constexpr lv_coord_t CONTROL_MODAL_TITLE_GAP_REF_PX = 10;
+
+enum class ControlModalKind {
+  NONE,
+  MEDIA_VOLUME,
+  CLIMATE,
+  SWITCH_CONFIRMATION,
+  OPTION_SELECT,
+  FAN_PRESET,
+  NETWORK_STATUS,
+  ALARM_PIN,
+  ALARM_CONTROL,
+};
+
+struct ControlModalActive {
+  ControlModalKind kind = ControlModalKind::NONE;
+  lv_obj_t *overlay = nullptr;
+  void (*close_callback)() = nullptr;
+  bool closing = false;
+};
+
+inline ControlModalActive &control_modal_active() {
+  static ControlModalActive active;
+  return active;
+}
+
+inline void control_modal_reset_active() {
+  control_modal_active() = ControlModalActive();
+}
+
+inline void control_modal_clear_active(ControlModalKind kind) {
+  ControlModalActive &active = control_modal_active();
+  if (active.kind == kind) control_modal_reset_active();
+}
+
+inline void control_modal_set_active(ControlModalKind kind, lv_obj_t *overlay,
+                                     void (*close_callback)()) {
+  ControlModalActive &active = control_modal_active();
+  active.kind = kind;
+  active.overlay = overlay;
+  active.close_callback = close_callback;
+  active.closing = false;
+}
+
+inline void control_modal_close_active() {
+  ControlModalActive &active = control_modal_active();
+  if (active.kind == ControlModalKind::NONE || active.closing) return;
+
+  ControlModalKind closing_kind = active.kind;
+  void (*close_callback)() = active.close_callback;
+  active.closing = true;
+  if (close_callback) close_callback();
+  if (control_modal_active().kind == closing_kind) control_modal_reset_active();
+}
+
+struct ControlModalGridMetrics {
+  lv_obj_t *page = nullptr;
+  lv_obj_t *first_card = nullptr;
+  int cols = 3;
+  int rows = 3;
+};
+
+inline ControlModalGridMetrics &control_modal_grid_metrics() {
+  static ControlModalGridMetrics metrics;
+  return metrics;
+}
+
+using MediaHomeGridMetrics = ControlModalGridMetrics;
+
+inline MediaHomeGridMetrics &media_home_grid_metrics() {
+  return control_modal_grid_metrics();
+}
+
+inline void set_control_modal_grid_metrics(lv_obj_t *page, int cols, int rows,
+                                           lv_obj_t *first_card = nullptr) {
+  ControlModalGridMetrics &metrics = control_modal_grid_metrics();
+  metrics.page = page;
+  metrics.first_card = first_card;
+  metrics.cols = cols > 0 ? cols : 3;
+  metrics.rows = rows > 0 ? rows : 3;
+}
+
+inline void set_media_home_grid_metrics(lv_obj_t *page, int cols, int rows,
+                                        lv_obj_t *first_card = nullptr) {
+  set_control_modal_grid_metrics(page, cols, rows, first_card);
+}
+
+struct ControlModalLayout {
+  lv_coord_t sw = 480;
+  lv_coord_t sh = 480;
+  lv_coord_t short_side = 480;
+  lv_coord_t panel_x = 4;
+  lv_coord_t panel_y = 0;
+  lv_coord_t panel_w = 472;
+  lv_coord_t panel_h = 480;
+  lv_coord_t inset = CONTROL_MODAL_INSET_REF_PX;
+  lv_coord_t back_inset_x = CONTROL_MODAL_INSET_REF_PX;
+  lv_coord_t back_inset_y = CONTROL_MODAL_INSET_REF_PX;
+  lv_coord_t back_size = CONTROL_MODAL_BACK_BUTTON_REF_PX;
+  lv_coord_t btn_size = CONTROL_MODAL_BUTTON_REF_PX;
+  lv_coord_t arc_stroke = CONTROL_MODAL_ARC_STROKE_REF_PX;
+  lv_coord_t controls_gap = CONTROL_MODAL_CONTROLS_GAP_REF_PX;
+  lv_coord_t arc_size = 320;
+  lv_coord_t arc_center_x = 0;
+  lv_coord_t arc_center_y = 0;
+  lv_coord_t value_center_y = 0;
+  lv_coord_t title_gap = CONTROL_MODAL_TITLE_GAP_REF_PX;
+  lv_coord_t controls_center_y = 0;
+};
+
+struct ControlModalShell {
+  lv_obj_t *overlay = nullptr;
+  lv_obj_t *panel = nullptr;
+  lv_obj_t *close_btn = nullptr;
+  ControlModalLayout layout;
+  lv_coord_t content_w = 0;
+};
+
+inline lv_coord_t control_modal_scaled_px(lv_coord_t px, lv_coord_t short_side) {
+  return px * short_side / CONTROL_MODAL_REFERENCE_SIDE_PX;
+}
+
+inline bool control_modal_is_jc4880p443_size(const ControlModalLayout &layout) {
+  return (layout.sw == 480 && layout.sh == 800) ||
+         (layout.sw == 800 && layout.sh == 480);
+}
+
+inline lv_coord_t control_modal_card_radius(lv_obj_t *btn) {
+  if (btn) return lv_obj_get_style_radius(btn, LV_PART_MAIN);
+  ControlModalGridMetrics &metrics = control_modal_grid_metrics();
+  return metrics.first_card ? lv_obj_get_style_radius(metrics.first_card, LV_PART_MAIN) : 18;
+}
+
+inline ControlModalLayout control_modal_calc_layout(int width_compensation_percent) {
+  ControlModalLayout layout;
+  lv_disp_t *disp = lv_disp_get_default();
+  layout.sw = disp ? lv_disp_get_hor_res(disp) : 480;
+  layout.sh = disp ? lv_disp_get_ver_res(disp) : 480;
+  layout.short_side = layout.sw < layout.sh ? layout.sw : layout.sh;
+
+  layout.panel_x = 4;
+  layout.panel_y = 0;
+  layout.panel_w = layout.sw - layout.panel_x - 4;
+  layout.panel_h = layout.sh;
+  ControlModalGridMetrics &metrics = control_modal_grid_metrics();
+  if (metrics.page) {
+    lv_obj_update_layout(metrics.page);
+    layout.panel_x = lv_obj_get_style_pad_left(metrics.page, LV_PART_MAIN);
+    layout.panel_y = lv_obj_get_style_pad_top(metrics.page, LV_PART_MAIN);
+    layout.panel_w = layout.sw - layout.panel_x - lv_obj_get_style_pad_right(metrics.page, LV_PART_MAIN);
+    layout.panel_h = layout.sh - layout.panel_y - lv_obj_get_style_pad_bottom(metrics.page, LV_PART_MAIN);
+  }
+
+  layout.back_size = control_modal_scaled_px(CONTROL_MODAL_BACK_BUTTON_REF_PX, layout.short_side);
+  layout.btn_size = control_modal_scaled_px(CONTROL_MODAL_BUTTON_REF_PX, layout.short_side);
+  layout.inset = control_modal_scaled_px(CONTROL_MODAL_INSET_REF_PX, layout.short_side);
+  if (layout.inset < 8) layout.inset = 8;
+  layout.back_inset_x = layout.inset;
+  layout.back_inset_y = layout.inset;
+  if (control_modal_is_jc4880p443_size(layout)) {
+    lv_coord_t back_offset = control_modal_scaled_px(12, layout.short_side);
+    layout.back_inset_x += back_offset;
+    layout.back_inset_y += back_offset;
+  }
+  layout.arc_stroke = control_modal_scaled_px(CONTROL_MODAL_ARC_STROKE_REF_PX, layout.short_side);
+  layout.controls_gap = control_modal_scaled_px(CONTROL_MODAL_CONTROLS_GAP_REF_PX, layout.short_side);
+  layout.title_gap = control_modal_scaled_px(CONTROL_MODAL_TITLE_GAP_REF_PX, layout.short_side);
+
+  layout.arc_size = layout.panel_w < layout.panel_h ? layout.panel_w : layout.panel_h;
+  layout.arc_size -= layout.inset * 2;
+  lv_coord_t reserved_bottom = layout.btn_size / 3 + layout.inset;
+  lv_coord_t available_h = layout.panel_h - layout.inset * 2;
+  if (available_h > reserved_bottom) {
+    lv_coord_t fit_h = available_h - reserved_bottom + layout.arc_stroke;
+    if (layout.arc_size > fit_h) layout.arc_size = fit_h;
+  }
+  if (layout.arc_size < 74) layout.arc_size = 74;
+
+  int width_percent = normalize_width_compensation_percent(width_compensation_percent);
+  lv_coord_t visible_arc_w = compensated_width(layout.arc_size, width_percent);
+  if (visible_arc_w > layout.panel_w - layout.inset * 2) {
+    layout.arc_size = (layout.panel_w - layout.inset * 2) * 100 / width_percent;
+    visible_arc_w = compensated_width(layout.arc_size, width_percent);
+  }
+
+  layout.arc_center_x = (layout.arc_size - visible_arc_w) / 2;
+  layout.arc_center_y = 0;
+  layout.value_center_y = layout.arc_stroke / 2;
+  layout.controls_center_y = layout.arc_size / 2 - layout.btn_size / 2 - layout.inset +
+    control_modal_scaled_px(CONTROL_MODAL_CONTROLS_DOWN_REF_PX, layout.short_side);
+  return layout;
+}
+
+inline void control_modal_style_overlay(lv_obj_t *overlay) {
+  if (!overlay) return;
+  lv_obj_set_size(overlay, lv_pct(100), lv_pct(100));
+  lv_obj_set_style_bg_opa(overlay, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_set_style_border_width(overlay, 0, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(overlay, 0, LV_PART_MAIN);
+  lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+inline void control_modal_style_panel(lv_obj_t *panel, lv_coord_t radius) {
+  if (!panel) return;
+  lv_obj_set_style_bg_color(panel, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_width(panel, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(panel, 0, LV_PART_MAIN);
+  lv_obj_set_style_radius(panel, radius, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(panel, 0, LV_PART_MAIN);
+  lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
+}
+
+inline void control_modal_apply_panel_layout(lv_obj_t *overlay, lv_obj_t *panel,
+                                             const ControlModalLayout &layout,
+                                             lv_coord_t radius) {
+  if (overlay) lv_obj_set_size(overlay, lv_pct(100), lv_pct(100));
+  if (!panel) return;
+  lv_obj_set_size(panel, layout.panel_w, layout.panel_h);
+  lv_obj_set_pos(panel, layout.panel_x, layout.panel_y);
+  lv_obj_set_style_radius(panel, radius, LV_PART_MAIN);
+}
+
+inline void control_modal_apply_back_button_layout(lv_obj_t *btn,
+                                                   const ControlModalLayout &layout) {
+  if (!btn) return;
+  lv_obj_set_size(btn, layout.back_size, layout.back_size);
+  lv_obj_set_style_radius(btn, layout.back_size / 2, LV_PART_MAIN);
+  lv_obj_align(btn, LV_ALIGN_TOP_LEFT, layout.back_inset_x, layout.back_inset_y);
+}
+
+inline void control_modal_apply_arc_layout(lv_obj_t *arc,
+                                           const ControlModalLayout &layout,
+                                           int width_compensation_percent,
+                                           bool with_knob = true) {
+  if (!arc) return;
+  lv_obj_set_size(arc, layout.arc_size, layout.arc_size);
+  apply_width_compensation(arc, width_compensation_percent);
+  lv_obj_align(arc, LV_ALIGN_CENTER, layout.arc_center_x, layout.arc_center_y);
+  lv_obj_set_style_arc_width(arc, layout.arc_stroke, LV_PART_MAIN);
+  lv_obj_set_style_arc_width(arc, layout.arc_stroke, LV_PART_INDICATOR);
+  if (with_knob) lv_obj_set_style_pad_all(arc, layout.short_side < 520 ? 4 : 6, LV_PART_KNOB);
+}
+
+inline void control_modal_apply_step_buttons_layout(lv_obj_t *minus_btn,
+                                                    lv_obj_t *plus_btn,
+                                                    const ControlModalLayout &layout) {
+  if (minus_btn) {
+    lv_obj_set_size(minus_btn, layout.btn_size, layout.btn_size);
+    lv_obj_set_style_radius(minus_btn, layout.btn_size / 2, LV_PART_MAIN);
+    lv_obj_align(minus_btn, LV_ALIGN_CENTER,
+      -(layout.btn_size + layout.controls_gap) / 2, layout.controls_center_y);
+  }
+  if (plus_btn) {
+    lv_obj_set_size(plus_btn, layout.btn_size, layout.btn_size);
+    lv_obj_set_style_radius(plus_btn, layout.btn_size / 2, LV_PART_MAIN);
+    lv_obj_align(plus_btn, LV_ALIGN_CENTER,
+      (layout.btn_size + layout.controls_gap) / 2, layout.controls_center_y);
+  }
+}
+
+inline void control_modal_apply_pressed_fill(lv_obj_t *btn) {
+  if (!btn) return;
+  lv_obj_set_style_bg_color(btn, lv_color_hex(DARK_BACKGROUND_SECONDARY),
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
+  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
+  apply_push_button_transition(btn);
+}
+
+inline lv_obj_t *control_modal_create_round_button(lv_obj_t *parent, lv_coord_t size,
+                                                  const char *text,
+                                                  const lv_font_t *font,
+                                                  uint32_t border_color,
+                                                  uint32_t bg_color,
+                                                  int width_compensation_percent = 100) {
+  lv_obj_t *btn = lv_btn_create(parent);
+  lv_obj_set_size(btn, size, size);
+  apply_width_compensation(btn, width_compensation_percent);
+  lv_obj_set_style_radius(btn, size / 2, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_color(btn, lv_color_hex(border_color), LV_PART_MAIN);
+  lv_obj_set_style_border_width(btn, 2, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+  control_modal_apply_pressed_fill(btn);
+  lv_obj_t *label = lv_label_create(btn);
+  lv_label_set_text(label, text);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+  lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+  lv_obj_center(label);
+  return btn;
+}
+
+inline void control_modal_style_chrome_button(lv_obj_t *btn,
+                                              const ControlModalLayout &layout,
+                                              bool top_right) {
+  if (!btn) return;
+  lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
+  lv_obj_set_size(btn, layout.back_size, layout.back_size);
+  lv_obj_set_style_radius(btn, layout.back_size / 2, LV_PART_MAIN);
+  if (top_right) lv_obj_align(btn, LV_ALIGN_TOP_RIGHT, -layout.inset, layout.inset);
+  else control_modal_apply_back_button_layout(btn, layout);
+}
+
+inline ControlModalShell control_modal_open_shell(ControlModalKind kind,
+                                                  lv_obj_t *source_btn,
+                                                  int width_compensation_percent,
+                                                  const lv_font_t *icon_font,
+                                                  const char *button_text,
+                                                  bool button_top_right,
+                                                  void (*close_callback)()) {
+  control_modal_close_active();
+
+  ControlModalShell shell;
+  shell.layout = control_modal_calc_layout(width_compensation_percent);
+  lv_coord_t radius = control_modal_card_radius(source_btn);
+  shell.content_w = shell.layout.panel_w - shell.layout.inset * 2;
+  if (shell.content_w < 120) shell.content_w = shell.layout.panel_w;
+
+  shell.overlay = lv_obj_create(lv_layer_top());
+  control_modal_style_overlay(shell.overlay);
+
+  shell.panel = lv_obj_create(shell.overlay);
+  control_modal_style_panel(shell.panel, radius);
+  control_modal_apply_panel_layout(shell.overlay, shell.panel, shell.layout, radius);
+
+  if (button_text) {
+    shell.close_btn = control_modal_create_round_button(
+      shell.panel, 32, button_text, icon_font,
+      DARK_BORDER, DARK_BACKGROUND_TERTIARY, width_compensation_percent);
+    control_modal_style_chrome_button(shell.close_btn, shell.layout, button_top_right);
+    lv_obj_add_event_cb(shell.close_btn, [](lv_event_t *) {
+      control_modal_close_active();
+    }, LV_EVENT_CLICKED, nullptr);
+  }
+
+  control_modal_set_active(kind, shell.overlay, close_callback);
+  return shell;
+}
+
+inline lv_obj_t *control_modal_create_title(lv_obj_t *parent,
+                                            const std::string &text,
+                                            lv_coord_t width,
+                                            const lv_font_t *font,
+                                            int width_compensation_percent) {
+  lv_obj_t *title = lv_label_create(parent);
+  lv_label_set_text(title, text.c_str());
+  lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
+  lv_obj_set_width(title, width);
+  lv_obj_set_style_text_color(title, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+  lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  if (font) lv_obj_set_style_text_font(title, font, LV_PART_MAIN);
+  apply_width_compensation(title, width_compensation_percent);
+  return title;
+}
+
+inline lv_obj_t *control_modal_create_scroll_list(lv_obj_t *parent,
+                                                  lv_coord_t width,
+                                                  lv_coord_t height,
+                                                  lv_coord_t gap) {
+  lv_obj_t *list = lv_obj_create(parent);
+  lv_obj_set_size(list, width, height);
+  lv_obj_set_style_bg_opa(list, LV_OPA_TRANSP, LV_PART_MAIN);
+  lv_obj_set_style_border_width(list, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(list, 0, LV_PART_MAIN);
+  lv_obj_set_style_pad_all(list, 0, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(list, gap, LV_PART_MAIN);
+  lv_obj_set_layout(list, LV_LAYOUT_FLEX);
+  lv_obj_set_style_flex_flow(list, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
+  lv_obj_set_scroll_dir(list, LV_DIR_VER);
+  return list;
+}
+
+inline lv_obj_t *control_modal_create_list_row(lv_obj_t *parent,
+                                               const std::string &label,
+                                               bool active,
+                                               lv_coord_t height,
+                                               lv_coord_t radius,
+                                               uint32_t active_color,
+                                               uint32_t inactive_color,
+                                               const lv_font_t *font,
+                                               int width_compensation_percent) {
+  lv_obj_t *btn = lv_btn_create(parent);
+  lv_obj_set_width(btn, lv_pct(100));
+  lv_obj_set_height(btn, height);
+  lv_obj_set_style_radius(btn, radius, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(btn, lv_color_hex(active ? active_color : inactive_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+  lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+  control_modal_apply_pressed_fill(btn);
+
+  lv_obj_t *value = lv_label_create(btn);
+  lv_label_set_text(value, label.c_str());
+  lv_label_set_long_mode(value, LV_LABEL_LONG_DOT);
+  lv_obj_set_width(value, lv_pct(100));
+  lv_obj_set_style_text_color(value, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+  lv_obj_set_style_text_align(value, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  if (font) lv_obj_set_style_text_font(value, font, LV_PART_MAIN);
+  apply_width_compensation(value, width_compensation_percent);
+  lv_obj_center(value);
+  return btn;
+}
+
+inline lv_obj_t *control_modal_create_text_button(
+    lv_obj_t *parent,
+    const std::string &text,
+    lv_coord_t max_width,
+    lv_coord_t min_width,
+    lv_coord_t min_height,
+    lv_coord_t radius,
+    uint32_t bg_color,
+    const lv_font_t *font) {
+  lv_obj_t *btn = lv_btn_create(parent);
+  lv_obj_set_size(btn, min_width, min_height);
+  lv_obj_set_style_radius(btn, radius, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
+  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
+  lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
+  control_modal_apply_pressed_fill(btn);
+
+  lv_obj_t *label = lv_label_create(btn);
+  lv_label_set_text(label, text.c_str());
+  lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
+  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
+  lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+  if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+
+  lv_obj_update_layout(label);
+  lv_coord_t pad_x = min_height / 2;
+  if (pad_x < 14) pad_x = 14;
+  lv_coord_t pad_y = min_height / 5;
+  if (pad_y < 8) pad_y = 8;
+
+  lv_coord_t natural_width = lv_obj_get_width(label) + pad_x * 2;
+  if (natural_width < min_width) natural_width = min_width;
+  if (natural_width > max_width) natural_width = max_width;
+
+  lv_coord_t label_width = natural_width - pad_x * 2;
+  if (label_width < 24) label_width = 24;
+  lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(label, label_width);
+  lv_obj_update_layout(label);
+
+  lv_coord_t button_height = lv_obj_get_height(label) + pad_y * 2;
+  if (button_height < min_height) button_height = min_height;
+  lv_obj_set_size(btn, natural_width, button_height);
+  lv_obj_center(label);
+  return btn;
+}

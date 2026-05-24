@@ -226,37 +226,7 @@ inline void option_select_hide_modal() {
   OptionSelectModalUi &ui = option_select_modal_ui();
   if (ui.overlay) lv_obj_del(ui.overlay);
   ui = OptionSelectModalUi();
-}
-
-inline lv_obj_t *option_select_create_option_button(lv_obj_t *parent,
-                                                    const std::string &label,
-                                                    bool active,
-                                                    lv_coord_t height,
-                                                    lv_coord_t radius,
-                                                    uint32_t active_color,
-                                                    uint32_t inactive_color,
-                                                    const lv_font_t *font,
-                                                    int width_compensation_percent) {
-  lv_obj_t *btn = lv_btn_create(parent);
-  lv_obj_set_width(btn, lv_pct(100));
-  lv_obj_set_height(btn, height);
-  lv_obj_set_style_radius(btn, radius, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(btn, lv_color_hex(active ? active_color : inactive_color), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
-  lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-
-  lv_obj_t *value = lv_label_create(btn);
-  lv_label_set_text(value, label.c_str());
-  lv_label_set_long_mode(value, LV_LABEL_LONG_DOT);
-  lv_obj_set_width(value, lv_pct(100));
-  lv_obj_set_style_text_color(value, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_set_style_text_align(value, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (font) lv_obj_set_style_text_font(value, font, LV_PART_MAIN);
-  apply_width_compensation(value, width_compensation_percent);
-  lv_obj_center(value);
-  return btn;
+  control_modal_clear_active(ControlModalKind::OPTION_SELECT);
 }
 
 inline void option_select_open_modal(OptionSelectCtx *ctx) {
@@ -264,19 +234,17 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
       !option_select_entity_supported(ctx->entity_id)) {
     return;
   }
-  media_volume_hide_modal();
-  climate_control_hide_modal();
-  switch_confirmation_hide_modal();
-  fan_preset_close();
-  option_select_hide_modal();
-
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::OPTION_SELECT, ctx->btn, ctx->width_compensation_percent,
+    ctx->icon_font, "\U000F0156", true, option_select_hide_modal);
   OptionSelectModalUi &ui = option_select_modal_ui();
   ui.active = ctx;
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.close_btn = shell.close_btn;
 
-  ControlModalLayout layout = control_modal_calc_layout(ctx->width_compensation_percent);
-  lv_coord_t radius = control_modal_card_radius(ctx->btn);
-  lv_coord_t content_w = layout.panel_w - layout.inset * 2;
-  if (content_w < 120) content_w = layout.panel_w;
+  ControlModalLayout &layout = shell.layout;
+  lv_coord_t content_w = shell.content_w;
   lv_coord_t gap = control_modal_scaled_px(12, layout.short_side);
   if (gap < 8) gap = 8;
   lv_coord_t row_h = control_modal_scaled_px(48, layout.short_side);
@@ -287,51 +255,21 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
   lv_coord_t list_h = layout.panel_h - list_y - layout.inset;
   if (list_h < row_h) list_h = row_h;
 
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, radius);
-  control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
-
-  ui.close_btn = control_modal_create_round_button(
-    ui.panel, 32, "\U000F0156", ctx->icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY);
-  lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
-  lv_obj_set_size(ui.close_btn, layout.back_size, layout.back_size);
-  lv_obj_set_style_radius(ui.close_btn, layout.back_size / 2, LV_PART_MAIN);
-  lv_obj_align(ui.close_btn, LV_ALIGN_TOP_RIGHT, -layout.inset, layout.inset);
-
-  ui.title_lbl = lv_label_create(ui.panel);
   std::string title = option_select_label(ctx);
-  lv_label_set_text(ui.title_lbl, title.c_str());
-  lv_label_set_long_mode(ui.title_lbl, LV_LABEL_LONG_DOT);
-  lv_obj_set_width(ui.title_lbl, content_w - layout.back_size - gap);
-  lv_obj_set_style_text_color(ui.title_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_set_style_text_align(ui.title_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (ctx->label_font) lv_obj_set_style_text_font(ui.title_lbl, ctx->label_font, LV_PART_MAIN);
-  apply_width_compensation(ui.title_lbl, ctx->width_compensation_percent);
+  ui.title_lbl = control_modal_create_title(
+    ui.panel, title, content_w - layout.back_size - gap,
+    ctx->label_font, ctx->width_compensation_percent);
   lv_obj_align(ui.title_lbl, LV_ALIGN_TOP_MID, 0, title_y - layout.back_size / 2);
 
-  ui.list = lv_obj_create(ui.panel);
-  lv_obj_set_size(ui.list, content_w, list_h);
+  ui.list = control_modal_create_scroll_list(ui.panel, content_w, list_h, gap);
   lv_obj_align(ui.list, LV_ALIGN_TOP_LEFT, layout.inset, list_y);
-  lv_obj_set_style_bg_opa(ui.list, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.list, 0, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(ui.list, 0, LV_PART_MAIN);
-  lv_obj_set_style_pad_all(ui.list, 0, LV_PART_MAIN);
-  lv_obj_set_style_pad_row(ui.list, gap, LV_PART_MAIN);
-  lv_obj_set_layout(ui.list, LV_LAYOUT_FLEX);
-  lv_obj_set_style_flex_flow(ui.list, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
-  lv_obj_set_scroll_dir(ui.list, LV_DIR_VER);
 
   int count = ctx->options.size() > OPTION_SELECT_MAX_OPTIONS
     ? OPTION_SELECT_MAX_OPTIONS
     : static_cast<int>(ctx->options.size());
   for (int i = 0; i < count; i++) {
     bool active = ctx->options[i] == ctx->current_option;
-    lv_obj_t *btn = option_select_create_option_button(
+    lv_obj_t *btn = control_modal_create_list_row(
       ui.list, ctx->options[i], active, row_h, row_radius,
       ctx->accent_color, DARK_BACKGROUND_SECONDARY,
       ctx->label_font, ctx->width_compensation_percent);
@@ -354,10 +292,6 @@ inline void option_select_open_modal(OptionSelectCtx *ctx) {
     lv_obj_set_style_text_align(ui.empty_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     if (ctx->label_font) lv_obj_set_style_text_font(ui.empty_lbl, ctx->label_font, LV_PART_MAIN);
   }
-
-  lv_obj_add_event_cb(ui.close_btn, [](lv_event_t *) {
-    option_select_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
 
   lv_obj_move_foreground(ui.overlay);
 }

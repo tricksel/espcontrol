@@ -1494,25 +1494,19 @@ inline void climate_control_hide_modal() {
   ClimateControlModalUi &ui = climate_control_modal_ui();
   if (ui.overlay) lv_obj_del(ui.overlay);
   ui = ClimateControlModalUi();
+  control_modal_clear_active(ControlModalKind::CLIMATE);
 }
 
 inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   if (!ctx || !ctx->available) return;
-  fan_preset_close();
-  climate_control_hide_modal();
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::CLIMATE, ctx->btn, ctx->width_compensation_percent,
+    ctx->icon_font, "\U000F0141", false, climate_control_hide_modal);
   ClimateControlModalUi &ui = climate_control_modal_ui();
   ui.active = ctx;
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, control_modal_card_radius(ctx->btn));
-
-  ui.back_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0141", ctx->icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
-  lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
-  lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) { climate_control_hide_modal(); }, LV_EVENT_CLICKED, nullptr);
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.back_btn = shell.close_btn;
 
   ui.menu_view = lv_obj_create(ui.panel);
   lv_obj_set_style_bg_opa(ui.menu_view, LV_OPA_TRANSP, LV_PART_MAIN);

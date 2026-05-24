@@ -51,54 +51,7 @@ inline void switch_confirmation_hide_modal() {
   SwitchConfirmationModalUi &ui = switch_confirmation_modal_ui();
   if (ui.overlay) lv_obj_del(ui.overlay);
   ui = SwitchConfirmationModalUi();
-}
-
-inline lv_obj_t *switch_confirmation_create_text_button(
-    lv_obj_t *parent,
-    const std::string &text,
-    lv_coord_t max_width,
-    lv_coord_t min_width,
-    lv_coord_t min_height,
-    lv_coord_t radius,
-    uint32_t bg_color,
-    const lv_font_t *font) {
-  lv_obj_t *btn = lv_btn_create(parent);
-  lv_obj_set_size(btn, min_width, min_height);
-  lv_obj_set_style_radius(btn, radius, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_border_width(btn, 0, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
-  lv_obj_clear_flag(btn, LV_OBJ_FLAG_SCROLLABLE);
-
-  lv_obj_t *label = lv_label_create(btn);
-  lv_label_set_text(label, text.c_str());
-  lv_label_set_long_mode(label, LV_LABEL_LONG_CLIP);
-  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-
-  lv_obj_update_layout(label);
-  lv_coord_t pad_x = min_height / 2;
-  if (pad_x < 14) pad_x = 14;
-  lv_coord_t pad_y = min_height / 5;
-  if (pad_y < 8) pad_y = 8;
-
-  lv_coord_t natural_width = lv_obj_get_width(label) + pad_x * 2;
-  if (natural_width < min_width) natural_width = min_width;
-  if (natural_width > max_width) natural_width = max_width;
-
-  lv_coord_t label_width = natural_width - pad_x * 2;
-  if (label_width < 24) label_width = 24;
-  lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
-  lv_obj_set_width(label, label_width);
-  lv_obj_update_layout(label);
-
-  lv_coord_t button_height = lv_obj_get_height(label) + pad_y * 2;
-  if (button_height < min_height) button_height = min_height;
-  lv_obj_set_size(btn, natural_width, button_height);
-  lv_obj_center(label);
-  return btn;
+  control_modal_clear_active(ControlModalKind::SWITCH_CONFIRMATION);
 }
 
 inline void switch_confirmation_confirm() {
@@ -116,20 +69,25 @@ inline void switch_confirmation_confirm() {
 
 inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj, bool turn_on) {
   if (p.entity.empty()) return;
-  media_volume_hide_modal();
-  climate_control_hide_modal();
-  fan_preset_close();
-  switch_confirmation_hide_modal();
+  const lv_font_t *button_font = btn_obj
+    ? lv_obj_get_style_text_font(btn_obj, LV_PART_MAIN)
+    : nullptr;
+  const lv_font_t *message_font = switch_confirmation_message_font(button_font);
+  const lv_font_t *icon_font = switch_confirmation_icon_font(button_font);
 
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::SWITCH_CONFIRMATION, btn_obj, 100, icon_font,
+    "\U000F0156", true, switch_confirmation_hide_modal);
   SwitchConfirmationModalUi &ui = switch_confirmation_modal_ui();
   ui.cfg = p;
   ui.btn_obj = btn_obj;
   ui.turn_on = turn_on;
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.close_btn = shell.close_btn;
 
-  ControlModalLayout layout = control_modal_calc_layout(100);
-  lv_coord_t radius = control_modal_card_radius(btn_obj);
-  lv_coord_t content_w = layout.panel_w - layout.inset * 2;
-  if (content_w < 120) content_w = layout.panel_w;
+  ControlModalLayout &layout = shell.layout;
+  lv_coord_t content_w = shell.content_w;
   lv_coord_t button_gap = control_modal_scaled_px(12, layout.short_side);
   if (button_gap < 8) button_gap = 8;
   lv_coord_t message_button_gap = control_modal_scaled_px(28, layout.short_side);
@@ -142,28 +100,6 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   if (button_min_w < 56) button_min_w = 56;
   if (button_min_w > button_max_w) button_min_w = button_max_w;
 
-  const lv_font_t *button_font = btn_obj
-    ? lv_obj_get_style_text_font(btn_obj, LV_PART_MAIN)
-    : nullptr;
-  const lv_font_t *message_font = switch_confirmation_message_font(button_font);
-  const lv_font_t *icon_font = switch_confirmation_icon_font(button_font);
-
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, radius);
-  control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
-
-  ui.close_btn = control_modal_create_round_button(
-    ui.panel, 32, "\U000F0156", icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY);
-  lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
-  lv_obj_set_size(ui.close_btn, layout.back_size, layout.back_size);
-  lv_obj_set_style_radius(ui.close_btn, layout.back_size / 2, LV_PART_MAIN);
-  lv_obj_align(ui.close_btn, LV_ALIGN_TOP_RIGHT, -layout.inset, layout.inset);
-
   ui.message_lbl = lv_label_create(ui.panel);
   std::string message = switch_confirmation_message(p);
   lv_label_set_text(ui.message_lbl, message.c_str());
@@ -173,10 +109,10 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   lv_obj_set_style_text_align(ui.message_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   if (message_font) lv_obj_set_style_text_font(ui.message_lbl, message_font, LV_PART_MAIN);
 
-  ui.no_btn = switch_confirmation_create_text_button(
+  ui.no_btn = control_modal_create_text_button(
     ui.panel, switch_confirmation_no_text(p), button_max_w, button_min_w, button_h,
     button_h / 2, DARK_BORDER, button_font);
-  ui.confirm_btn = switch_confirmation_create_text_button(
+  ui.confirm_btn = control_modal_create_text_button(
     ui.panel, switch_confirmation_yes_text(p), button_max_w, button_min_w, button_h,
     button_h / 2, DEFAULT_SLIDER_COLOR, button_font);
 
@@ -206,9 +142,6 @@ inline void switch_confirmation_open_modal(const ParsedCfg &p, lv_obj_t *btn_obj
   lv_obj_align(ui.no_btn, LV_ALIGN_CENTER, no_x, action_y);
   lv_obj_align(ui.confirm_btn, LV_ALIGN_CENTER, confirm_x, action_y);
 
-  lv_obj_add_event_cb(ui.close_btn, [](lv_event_t *) {
-    switch_confirmation_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
   lv_obj_add_event_cb(ui.no_btn, [](lv_event_t *) {
     switch_confirmation_hide_modal();
   }, LV_EVENT_CLICKED, nullptr);

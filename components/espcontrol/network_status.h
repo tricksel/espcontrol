@@ -101,6 +101,7 @@ inline void network_status_hide_modal() {
   ui.device_name_lbl = nullptr;
   ui.ip_lbl = nullptr;
   ui.firmware_lbl = nullptr;
+  control_modal_clear_active(ControlModalKind::NETWORK_STATUS);
 }
 
 inline lv_obj_t *network_status_add_center_label(lv_obj_t *parent,
@@ -123,37 +124,18 @@ inline void network_status_open_modal(const std::string &device_name,
                                       const std::string &firmware_version,
                                       const lv_font_t *text_font,
                                       const lv_font_t *icon_font) {
-  media_volume_hide_modal();
-  climate_control_hide_modal();
-  switch_confirmation_hide_modal();
-  fan_preset_close();
-  network_status_hide_modal();
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::NETWORK_STATUS, nullptr, 100, icon_font,
+    "\U000F0156", true, network_status_hide_modal);
   NetworkStatusModalUi &ui = network_status_modal_ui();
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.close_btn = shell.close_btn;
 
-  ControlModalLayout layout = control_modal_calc_layout(100);
-  lv_coord_t radius = control_modal_card_radius(nullptr);
-  lv_coord_t content_w = layout.panel_w - layout.inset * 2;
-  if (content_w < 120) content_w = layout.panel_w;
-
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, radius);
-  control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
-
-  ui.close_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0156",
-    icon_font, DARK_BORDER, DARK_BACKGROUND_TERTIARY, 100);
-  lv_obj_set_style_bg_opa(ui.close_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.close_btn, 0, LV_PART_MAIN);
+  ControlModalLayout &layout = shell.layout;
+  lv_coord_t content_w = shell.content_w;
   lv_obj_t *close_label = lv_obj_get_child(ui.close_btn, 0);
   if (close_label) lv_obj_set_style_text_color(close_label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_add_event_cb(ui.close_btn, [](lv_event_t *) {
-    network_status_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
-  lv_obj_set_size(ui.close_btn, layout.back_size, layout.back_size);
-  lv_obj_set_style_radius(ui.close_btn, layout.back_size / 2, LV_PART_MAIN);
-  lv_obj_align(ui.close_btn, LV_ALIGN_TOP_RIGHT, -layout.inset, layout.inset);
 
   ui.content = lv_obj_create(ui.panel);
   network_status_clean_obj(ui.content);

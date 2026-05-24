@@ -54,14 +54,14 @@ struct MediaNowPlayingCtx {
 
 constexpr uint32_t MEDIA_SEEK_PENDING_TIMEOUT_MS = 3000;
 constexpr float MEDIA_SEEK_MATCH_TOLERANCE_SECONDS = 2.0f;
-constexpr lv_coord_t MEDIA_VOLUME_REFERENCE_SIDE_PX = 480;
-constexpr lv_coord_t MEDIA_VOLUME_ARC_STROKE_REF_PX = 17;
-constexpr lv_coord_t MEDIA_VOLUME_BACK_BUTTON_REF_PX = 46;
-constexpr lv_coord_t MEDIA_VOLUME_BUTTON_REF_PX = 80;
-constexpr lv_coord_t MEDIA_VOLUME_INSET_REF_PX = 18;
-constexpr lv_coord_t MEDIA_VOLUME_CONTROLS_GAP_REF_PX = 24;
-constexpr lv_coord_t MEDIA_VOLUME_CONTROLS_DOWN_REF_PX = 22;
-constexpr lv_coord_t MEDIA_VOLUME_TITLE_GAP_REF_PX = 10;
+constexpr lv_coord_t MEDIA_VOLUME_REFERENCE_SIDE_PX = CONTROL_MODAL_REFERENCE_SIDE_PX;
+constexpr lv_coord_t MEDIA_VOLUME_ARC_STROKE_REF_PX = CONTROL_MODAL_ARC_STROKE_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_BACK_BUTTON_REF_PX = CONTROL_MODAL_BACK_BUTTON_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_BUTTON_REF_PX = CONTROL_MODAL_BUTTON_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_INSET_REF_PX = CONTROL_MODAL_INSET_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_CONTROLS_GAP_REF_PX = CONTROL_MODAL_CONTROLS_GAP_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_CONTROLS_DOWN_REF_PX = CONTROL_MODAL_CONTROLS_DOWN_REF_PX;
+constexpr lv_coord_t MEDIA_VOLUME_TITLE_GAP_REF_PX = CONTROL_MODAL_TITLE_GAP_REF_PX;
 constexpr lv_coord_t MEDIA_VOLUME_UNIT_Y_REF_PX = -22;
 
 struct MediaVolumeCtx {
@@ -87,193 +87,6 @@ struct MediaVolumeCtx {
   std::function<void()> resume_home_idle;
   bool available = true;
 };
-
-struct MediaHomeGridMetrics {
-  lv_obj_t *page = nullptr;
-  lv_obj_t *first_card = nullptr;
-  int cols = 3;
-  int rows = 3;
-};
-
-inline MediaHomeGridMetrics &media_home_grid_metrics() {
-  static MediaHomeGridMetrics metrics;
-  return metrics;
-}
-
-inline void set_media_home_grid_metrics(lv_obj_t *page, int cols, int rows,
-                                        lv_obj_t *first_card = nullptr) {
-  MediaHomeGridMetrics &metrics = media_home_grid_metrics();
-  metrics.page = page;
-  metrics.first_card = first_card;
-  metrics.cols = cols > 0 ? cols : 3;
-  metrics.rows = rows > 0 ? rows : 3;
-}
-
-struct ControlModalLayout {
-  lv_coord_t sw = 480;
-  lv_coord_t sh = 480;
-  lv_coord_t short_side = 480;
-  lv_coord_t panel_x = 4;
-  lv_coord_t panel_y = 0;
-  lv_coord_t panel_w = 472;
-  lv_coord_t panel_h = 480;
-  lv_coord_t inset = MEDIA_VOLUME_INSET_REF_PX;
-  lv_coord_t back_inset_x = MEDIA_VOLUME_INSET_REF_PX;
-  lv_coord_t back_inset_y = MEDIA_VOLUME_INSET_REF_PX;
-  lv_coord_t back_size = MEDIA_VOLUME_BACK_BUTTON_REF_PX;
-  lv_coord_t btn_size = MEDIA_VOLUME_BUTTON_REF_PX;
-  lv_coord_t arc_stroke = MEDIA_VOLUME_ARC_STROKE_REF_PX;
-  lv_coord_t controls_gap = MEDIA_VOLUME_CONTROLS_GAP_REF_PX;
-  lv_coord_t arc_size = 320;
-  lv_coord_t arc_center_x = 0;
-  lv_coord_t arc_center_y = 0;
-  lv_coord_t value_center_y = 0;
-  lv_coord_t title_gap = MEDIA_VOLUME_TITLE_GAP_REF_PX;
-  lv_coord_t controls_center_y = 0;
-};
-
-inline lv_coord_t control_modal_scaled_px(lv_coord_t px, lv_coord_t short_side) {
-  return px * short_side / MEDIA_VOLUME_REFERENCE_SIDE_PX;
-}
-
-inline bool control_modal_is_jc4880p443_size(const ControlModalLayout &layout) {
-  return (layout.sw == 480 && layout.sh == 800) ||
-         (layout.sw == 800 && layout.sh == 480);
-}
-
-inline lv_coord_t control_modal_card_radius(lv_obj_t *btn) {
-  if (btn) return lv_obj_get_style_radius(btn, LV_PART_MAIN);
-  MediaHomeGridMetrics &metrics = media_home_grid_metrics();
-  return metrics.first_card ? lv_obj_get_style_radius(metrics.first_card, LV_PART_MAIN) : 18;
-}
-
-inline ControlModalLayout control_modal_calc_layout(int width_compensation_percent) {
-  ControlModalLayout layout;
-  lv_disp_t *disp = lv_disp_get_default();
-  layout.sw = disp ? lv_disp_get_hor_res(disp) : 480;
-  layout.sh = disp ? lv_disp_get_ver_res(disp) : 480;
-  layout.short_side = layout.sw < layout.sh ? layout.sw : layout.sh;
-
-  layout.panel_x = 4;
-  layout.panel_y = 0;
-  layout.panel_w = layout.sw - layout.panel_x - 4;
-  layout.panel_h = layout.sh;
-  MediaHomeGridMetrics &metrics = media_home_grid_metrics();
-  if (metrics.page) {
-    lv_obj_update_layout(metrics.page);
-    layout.panel_x = lv_obj_get_style_pad_left(metrics.page, LV_PART_MAIN);
-    layout.panel_y = lv_obj_get_style_pad_top(metrics.page, LV_PART_MAIN);
-    layout.panel_w = layout.sw - layout.panel_x - lv_obj_get_style_pad_right(metrics.page, LV_PART_MAIN);
-    layout.panel_h = layout.sh - layout.panel_y - lv_obj_get_style_pad_bottom(metrics.page, LV_PART_MAIN);
-  }
-
-  layout.back_size = control_modal_scaled_px(MEDIA_VOLUME_BACK_BUTTON_REF_PX, layout.short_side);
-  layout.btn_size = control_modal_scaled_px(MEDIA_VOLUME_BUTTON_REF_PX, layout.short_side);
-  layout.inset = control_modal_scaled_px(MEDIA_VOLUME_INSET_REF_PX, layout.short_side);
-  if (layout.inset < 8) layout.inset = 8;
-  layout.back_inset_x = layout.inset;
-  layout.back_inset_y = layout.inset;
-  if (control_modal_is_jc4880p443_size(layout)) {
-    lv_coord_t back_offset = control_modal_scaled_px(12, layout.short_side);
-    layout.back_inset_x += back_offset;
-    layout.back_inset_y += back_offset;
-  }
-  layout.arc_stroke = control_modal_scaled_px(MEDIA_VOLUME_ARC_STROKE_REF_PX, layout.short_side);
-  layout.controls_gap = control_modal_scaled_px(MEDIA_VOLUME_CONTROLS_GAP_REF_PX, layout.short_side);
-  layout.title_gap = control_modal_scaled_px(MEDIA_VOLUME_TITLE_GAP_REF_PX, layout.short_side);
-
-  layout.arc_size = layout.panel_w < layout.panel_h ? layout.panel_w : layout.panel_h;
-  layout.arc_size -= layout.inset * 2;
-  lv_coord_t reserved_bottom = layout.btn_size / 3 + layout.inset;
-  lv_coord_t available_h = layout.panel_h - layout.inset * 2;
-  if (available_h > reserved_bottom) {
-    lv_coord_t fit_h = available_h - reserved_bottom + layout.arc_stroke;
-    if (layout.arc_size > fit_h) layout.arc_size = fit_h;
-  }
-  if (layout.arc_size < 74) layout.arc_size = 74;
-
-  int width_percent = normalize_width_compensation_percent(width_compensation_percent);
-  lv_coord_t visible_arc_w = compensated_width(layout.arc_size, width_percent);
-  if (visible_arc_w > layout.panel_w - layout.inset * 2) {
-    layout.arc_size = (layout.panel_w - layout.inset * 2) * 100 / width_percent;
-    visible_arc_w = compensated_width(layout.arc_size, width_percent);
-  }
-
-  layout.arc_center_x = (layout.arc_size - visible_arc_w) / 2;
-  layout.arc_center_y = 0;
-  layout.value_center_y = layout.arc_stroke / 2;
-  layout.controls_center_y = layout.arc_size / 2 - layout.btn_size / 2 - layout.inset +
-    control_modal_scaled_px(MEDIA_VOLUME_CONTROLS_DOWN_REF_PX, layout.short_side);
-  return layout;
-}
-
-inline void control_modal_style_overlay(lv_obj_t *overlay) {
-  if (!overlay) return;
-  lv_obj_set_size(overlay, lv_pct(100), lv_pct(100));
-  lv_obj_set_style_bg_opa(overlay, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(overlay, 0, LV_PART_MAIN);
-  lv_obj_set_style_pad_all(overlay, 0, LV_PART_MAIN);
-  lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
-}
-
-inline void control_modal_style_panel(lv_obj_t *panel, lv_coord_t radius) {
-  if (!panel) return;
-  lv_obj_set_style_bg_color(panel, lv_color_hex(DARK_BACKGROUND_TERTIARY), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(panel, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_border_width(panel, 0, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(panel, 0, LV_PART_MAIN);
-  lv_obj_set_style_radius(panel, radius, LV_PART_MAIN);
-  lv_obj_set_style_pad_all(panel, 0, LV_PART_MAIN);
-  lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
-}
-
-inline void control_modal_apply_panel_layout(lv_obj_t *overlay, lv_obj_t *panel,
-                                             const ControlModalLayout &layout,
-                                             lv_coord_t radius) {
-  if (overlay) lv_obj_set_size(overlay, lv_pct(100), lv_pct(100));
-  if (!panel) return;
-  lv_obj_set_size(panel, layout.panel_w, layout.panel_h);
-  lv_obj_set_pos(panel, layout.panel_x, layout.panel_y);
-  lv_obj_set_style_radius(panel, radius, LV_PART_MAIN);
-}
-
-inline void control_modal_apply_back_button_layout(lv_obj_t *btn,
-                                                   const ControlModalLayout &layout) {
-  if (!btn) return;
-  lv_obj_set_size(btn, layout.back_size, layout.back_size);
-  lv_obj_set_style_radius(btn, layout.back_size / 2, LV_PART_MAIN);
-  lv_obj_align(btn, LV_ALIGN_TOP_LEFT, layout.back_inset_x, layout.back_inset_y);
-}
-
-inline void control_modal_apply_arc_layout(lv_obj_t *arc,
-                                           const ControlModalLayout &layout,
-                                           int width_compensation_percent,
-                                           bool with_knob = true) {
-  if (!arc) return;
-  lv_obj_set_size(arc, layout.arc_size, layout.arc_size);
-  apply_width_compensation(arc, width_compensation_percent);
-  lv_obj_align(arc, LV_ALIGN_CENTER, layout.arc_center_x, layout.arc_center_y);
-  lv_obj_set_style_arc_width(arc, layout.arc_stroke, LV_PART_MAIN);
-  lv_obj_set_style_arc_width(arc, layout.arc_stroke, LV_PART_INDICATOR);
-  if (with_knob) lv_obj_set_style_pad_all(arc, layout.short_side < 520 ? 4 : 6, LV_PART_KNOB);
-}
-
-inline void control_modal_apply_step_buttons_layout(lv_obj_t *minus_btn,
-                                                    lv_obj_t *plus_btn,
-                                                    const ControlModalLayout &layout) {
-  if (minus_btn) {
-    lv_obj_set_size(minus_btn, layout.btn_size, layout.btn_size);
-    lv_obj_set_style_radius(minus_btn, layout.btn_size / 2, LV_PART_MAIN);
-    lv_obj_align(minus_btn, LV_ALIGN_CENTER,
-      -(layout.btn_size + layout.controls_gap) / 2, layout.controls_center_y);
-  }
-  if (plus_btn) {
-    lv_obj_set_size(plus_btn, layout.btn_size, layout.btn_size);
-    lv_obj_set_style_radius(plus_btn, layout.btn_size / 2, LV_PART_MAIN);
-    lv_obj_align(plus_btn, LV_ALIGN_CENTER,
-      (layout.btn_size + layout.controls_gap) / 2, layout.controls_center_y);
-  }
-}
 
 struct MediaVolumeModalUi {
   lv_obj_t *overlay = nullptr;
@@ -911,40 +724,7 @@ inline void media_volume_hide_modal() {
   ui.plus_btn = nullptr;
   ui.active = nullptr;
   ui.updating_arc = false;
-}
-
-inline void control_modal_apply_pressed_fill(lv_obj_t *btn) {
-  if (!btn) return;
-  lv_obj_set_style_bg_color(btn, lv_color_hex(DARK_BACKGROUND_SECONDARY),
-    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
-  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER,
-    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
-  apply_push_button_transition(btn);
-}
-
-inline lv_obj_t *control_modal_create_round_button(lv_obj_t *parent, lv_coord_t size,
-                                                  const char *text,
-                                                  const lv_font_t *font,
-                                                  uint32_t border_color,
-                                                  uint32_t bg_color,
-                                                  int width_compensation_percent = 100) {
-  lv_obj_t *btn = lv_btn_create(parent);
-  lv_obj_set_size(btn, size, size);
-  apply_width_compensation(btn, width_compensation_percent);
-  lv_obj_set_style_radius(btn, size / 2, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
-  lv_obj_set_style_bg_opa(btn, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_border_color(btn, lv_color_hex(border_color), LV_PART_MAIN);
-  lv_obj_set_style_border_width(btn, 2, LV_PART_MAIN);
-  lv_obj_set_style_shadow_width(btn, 0, LV_PART_MAIN);
-  control_modal_apply_pressed_fill(btn);
-  lv_obj_t *label = lv_label_create(btn);
-  lv_label_set_text(label, text);
-  lv_obj_set_style_text_color(label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-  if (font) lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
-  lv_obj_center(label);
-  return btn;
+  control_modal_clear_active(ControlModalKind::MEDIA_VOLUME);
 }
 
 inline lv_coord_t media_volume_scaled_px(lv_coord_t px, lv_coord_t short_side) {
@@ -1032,31 +812,18 @@ inline void media_volume_set_modal_value(MediaVolumeCtx *ctx, int pct) {
   if (ui.pct_unit_lbl) lv_label_set_text(ui.pct_unit_lbl, "");
 }
 
-inline void fan_preset_close();
-
 inline void media_volume_open_modal(MediaVolumeCtx *ctx) {
   if (!ctx || !ctx->available) return;
-  media_volume_hide_modal();
-  fan_preset_close();
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::MEDIA_VOLUME, ctx->btn, ctx->width_compensation_percent,
+    ctx->icon_font, "\U000F0141", false, media_volume_hide_modal);
   MediaVolumeModalUi &ui = media_volume_modal_ui();
   ui.active = ctx;
-
-  lv_obj_t *parent = lv_layer_top();
-  ui.overlay = lv_obj_create(parent);
-  control_modal_style_overlay(ui.overlay);
-
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, media_volume_card_radius(ctx));
-
-  ui.back_btn = control_modal_create_round_button(ui.panel, 32, "\U000F0141",
-    ctx->icon_font, DARK_BORDER, DARK_BACKGROUND_TERTIARY, ctx->width_compensation_percent);
-  lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.back_btn = shell.close_btn;
   lv_obj_t *back_label = lv_obj_get_child(ui.back_btn, 0);
   if (back_label) lv_obj_set_style_text_color(back_label, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
-  lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) {
-    media_volume_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
 
   ui.arc = lv_arc_create(ui.panel);
   lv_arc_set_bg_angles(ui.arc, 135, 45);

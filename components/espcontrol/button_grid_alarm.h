@@ -759,6 +759,7 @@ inline void alarm_control_hide_modal() {
   AlarmControlModalUi &ui = alarm_control_modal_ui();
   if (ui.overlay) lv_obj_del(ui.overlay);
   ui = AlarmControlModalUi();
+  control_modal_clear_active(ControlModalKind::ALARM_CONTROL);
 }
 
 inline void alarm_pin_hide_modal() {
@@ -766,6 +767,7 @@ inline void alarm_pin_hide_modal() {
   ui.pin.clear();
   if (ui.overlay) lv_obj_del(ui.overlay);
   ui = AlarmPinModalUi();
+  control_modal_clear_active(ControlModalKind::ALARM_PIN);
 }
 
 inline void alarm_action_activate(AlarmActionCtx *action);
@@ -872,19 +874,6 @@ inline void alarm_pin_key_cb(lv_event_t *e) {
 
 inline void alarm_pin_open_modal(AlarmActionCtx *action) {
   if (!action || !action->card || !action->card->available) return;
-  media_volume_hide_modal();
-  climate_control_hide_modal();
-  switch_confirmation_hide_modal();
-  option_select_hide_modal();
-  fan_preset_close();
-  alarm_pin_hide_modal();
-
-  AlarmPinModalUi &ui = alarm_pin_modal_ui();
-  ui.active = action;
-  ui.pin.clear();
-
-  ControlModalLayout layout = control_modal_calc_layout(action->card->width_compensation_percent);
-  lv_coord_t radius = control_modal_card_radius(action->card->btn);
   const lv_font_t *label_font = action->card->btn
     ? lv_obj_get_style_text_font(action->card->btn, LV_PART_MAIN)
     : nullptr;
@@ -900,22 +889,19 @@ inline void alarm_pin_open_modal(AlarmActionCtx *action) {
     ? lv_obj_get_style_text_font(action->card->icon_lbl, LV_PART_MAIN)
     : label_font;
 
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, radius);
-  control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::ALARM_PIN, action->card->btn,
+    action->card->width_compensation_percent, icon_font,
+    "\U000F0141", false, alarm_pin_hide_modal);
 
-  ui.back_btn = control_modal_create_round_button(
-    ui.panel, layout.back_size, "\U000F0141", icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY,
-    action->card->width_compensation_percent);
-  lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
-  control_modal_apply_back_button_layout(ui.back_btn, layout);
-  lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) {
-    alarm_pin_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
+  AlarmPinModalUi &ui = alarm_pin_modal_ui();
+  ui.active = action;
+  ui.pin.clear();
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.back_btn = shell.close_btn;
+
+  ControlModalLayout &layout = shell.layout;
 
   ui.pin_lbl = lv_label_create(ui.panel);
   lv_obj_set_style_text_color(ui.pin_lbl, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
@@ -1127,19 +1113,6 @@ inline void alarm_control_create_arming_view(AlarmControlModalUi &ui,
 
 inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
   if (!ctx || !ctx->available) return;
-  media_volume_hide_modal();
-  climate_control_hide_modal();
-  switch_confirmation_hide_modal();
-  option_select_hide_modal();
-  fan_preset_close();
-  alarm_pin_hide_modal();
-  alarm_control_hide_modal();
-
-  AlarmControlModalUi &ui = alarm_control_modal_ui();
-  ui.active = ctx;
-
-  ControlModalLayout layout = control_modal_calc_layout(ctx->width_compensation_percent);
-  lv_coord_t radius = control_modal_card_radius(ctx->btn);
   const lv_font_t *label_font = ctx->label_font
     ? ctx->label_font
     : ctx->btn ? lv_obj_get_style_text_font(ctx->btn, LV_PART_MAIN) : nullptr;
@@ -1151,22 +1124,17 @@ inline void alarm_control_open_modal(AlarmCardCtx *ctx) {
     : ctx->key_label_font ? ctx->key_label_font : label_font;
   const lv_font_t *countdown_font = ctx->key_label_font ? ctx->key_label_font : label_font;
 
-  ui.overlay = lv_obj_create(lv_layer_top());
-  control_modal_style_overlay(ui.overlay);
-  ui.panel = lv_obj_create(ui.overlay);
-  control_modal_style_panel(ui.panel, radius);
-  control_modal_apply_panel_layout(ui.overlay, ui.panel, layout, radius);
+  ControlModalShell shell = control_modal_open_shell(
+    ControlModalKind::ALARM_CONTROL, ctx->btn, ctx->width_compensation_percent,
+    icon_font, "\U000F0141", false, alarm_control_hide_modal);
 
-  ui.back_btn = control_modal_create_round_button(
-    ui.panel, layout.back_size, "\U000F0141", icon_font,
-    DARK_BORDER, DARK_BACKGROUND_TERTIARY,
-    ctx->width_compensation_percent);
-  lv_obj_set_style_bg_opa(ui.back_btn, LV_OPA_TRANSP, LV_PART_MAIN);
-  lv_obj_set_style_border_width(ui.back_btn, 0, LV_PART_MAIN);
-  control_modal_apply_back_button_layout(ui.back_btn, layout);
-  lv_obj_add_event_cb(ui.back_btn, [](lv_event_t *) {
-    alarm_control_hide_modal();
-  }, LV_EVENT_CLICKED, nullptr);
+  AlarmControlModalUi &ui = alarm_control_modal_ui();
+  ui.active = ctx;
+  ui.overlay = shell.overlay;
+  ui.panel = shell.panel;
+  ui.back_btn = shell.close_btn;
+
+  ControlModalLayout &layout = shell.layout;
 
   lv_coord_t rail_w = layout.panel_w * 58 / 100;
   if (rail_w < control_modal_scaled_px(156, layout.short_side))
