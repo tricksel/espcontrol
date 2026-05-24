@@ -1,4 +1,0 @@
-interface:
-  display_name: "Docs Screenshots"
-  short_description: "Refresh generated docs UI screenshots"
-  default_prompt: "Use $docs-screenshots to refresh the EspControl docs webserver screenshots."
