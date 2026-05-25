@@ -647,42 +647,13 @@ function normalizeClimatePrecisionConfig(value) {
 }
 
 function buttonConfigChangedByNormalize(raw) {
-  var before = {
-    entity: raw && raw.entity || "",
-    label: raw && raw.label || "",
-    icon: raw && raw.icon || "Auto",
-    icon_on: raw && raw.icon_on || "Auto",
-    sensor: raw && raw.sensor || "",
-    unit: raw && raw.unit || "",
-    type: raw && raw.type || "",
-    precision: raw && raw.precision || "",
-    options: raw && raw.options || "",
-  };
-  var after = normalizeButtonConfig({
-    entity: before.entity,
-    label: before.label,
-    icon: before.icon,
-    icon_on: before.icon_on,
-    sensor: before.sensor,
-    unit: before.unit,
-    type: before.type,
-    precision: before.precision,
-    options: before.options,
-  });
-  return before.entity !== after.entity ||
-    before.label !== after.label ||
-    before.icon !== after.icon ||
-    before.icon_on !== after.icon_on ||
-    before.sensor !== after.sensor ||
-    before.unit !== after.unit ||
-    before.type !== after.type ||
-    before.precision !== after.precision ||
-    before.options !== after.options;
+  var before = EspControlModel.cloneCardConfig(raw || {});
+  var after = normalizeButtonConfig(EspControlModel.cloneCardConfig(before));
+  return EspControlModel.cardConfigChanged(before, after);
 }
 
 function trimConfigFields(fields) {
-  while (fields.length > 1 && !fields[fields.length - 1]) fields.pop();
-  return fields;
+  return EspControlModel.trimConfigFields(fields);
 }
 
 function buttonConfigFields(b) {
@@ -745,22 +716,15 @@ function buttonConfigFields(b) {
 }
 
 function encodeConfigField(value) {
-  return String(value || "").replace(/[%,;|:]/g, function (ch) {
-    var hex = ch.charCodeAt(0).toString(16).toUpperCase();
-    return "%" + (hex.length < 2 ? "0" : "") + hex;
-  });
+  return EspControlModel.encodeConfigField(value);
 }
 
 function decodeConfigField(value) {
-  return String(value || "").replace(/%([0-9a-fA-F]{2})/g, function (_, hex) {
-    return String.fromCharCode(parseInt(hex, 16));
-  });
+  return EspControlModel.decodeConfigField(value);
 }
 
 function legacyButtonConfigSafe(fields) {
-  return fields.join(";").charAt(0) !== "~" && fields.every(function (field) {
-    return String(field || "").indexOf(";") < 0;
-  });
+  return EspControlModel.legacyButtonConfigSafe(fields);
 }
 
 function serializeButtonConfig(b) {
@@ -770,22 +734,7 @@ function serializeButtonConfig(b) {
 }
 
 function parseRawButtonConfig(str) {
-  var compact = str && str.charAt(0) === "~";
-  var parts = compact ? str.substring(1).split(",") : (str || "").split(";");
-  if (compact) {
-    parts = parts.map(decodeConfigField);
-  }
-  return {
-    entity: parts[0] || "",
-    label: parts[1] || "",
-    icon: parts[2] || "Auto",
-    icon_on: parts[3] || "Auto",
-    sensor: parts[4] || "",
-    unit: parts[5] || "",
-    type: parts[6] || "",
-    precision: parts[7] || "",
-    options: parts[8] || "",
-  };
+  return EspControlModel.parseRawButtonConfig(str);
 }
 
 function parseButtonConfig(str) {

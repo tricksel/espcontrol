@@ -27,19 +27,25 @@ var EspControlModel = (() => {
   __export(index_exports, {
     CARD_CONFIG_FIELDS: () => CARD_CONFIG_FIELDS,
     applySpans: () => applySpans,
+    cardConfigChanged: () => cardConfigChanged,
     clearSpans: () => clearSpans,
     cloneCardConfig: () => cloneCardConfig,
     copyCardConfig: () => copyCardConfig,
     coveredCells: () => coveredCells,
+    decodeConfigField: () => decodeConfigField,
     emptyCardConfig: () => emptyCardConfig,
+    encodeConfigField: () => encodeConfigField,
+    legacyButtonConfigSafe: () => legacyButtonConfigSafe,
     markSpannedCells: () => markSpannedCells,
     parseGridOrder: () => parseGridOrder,
+    parseRawButtonConfig: () => parseRawButtonConfig,
     serializeGridOrder: () => serializeGridOrder,
     sizeColSpan: () => sizeColSpan,
     sizeFitsAt: () => sizeFitsAt,
     sizeFromToken: () => sizeFromToken,
     sizeRowSpan: () => sizeRowSpan,
-    sizeToken: () => sizeToken
+    sizeToken: () => sizeToken,
+    trimConfigFields: () => trimConfigFields
   });
 
   // src/webserver/model/card.ts
@@ -95,6 +101,48 @@ var EspControlModel = (() => {
     target._whenOnActive = button._whenOnActive;
     target._whenOnMode = button._whenOnMode;
     return target;
+  }
+  function cardConfigChanged(before, after) {
+    for (const field of CARD_CONFIG_FIELDS) {
+      if ((before[field] || "") !== (after[field] || "")) return true;
+    }
+    return false;
+  }
+  function trimConfigFields(fields) {
+    while (fields.length > 1 && !fields[fields.length - 1]) fields.pop();
+    return fields;
+  }
+  function encodeConfigField(value) {
+    return String(value || "").replace(/[%,;|:]/g, (ch) => {
+      const hex = ch.charCodeAt(0).toString(16).toUpperCase();
+      return "%" + (hex.length < 2 ? "0" : "") + hex;
+    });
+  }
+  function decodeConfigField(value) {
+    return String(value || "").replace(/%([0-9a-fA-F]{2})/g, (_match, hex) => {
+      return String.fromCharCode(parseInt(hex, 16));
+    });
+  }
+  function legacyButtonConfigSafe(fields) {
+    return fields.join(";").charAt(0) !== "~" && fields.every((field) => {
+      return String(field || "").indexOf(";") < 0;
+    });
+  }
+  function parseRawButtonConfig(value) {
+    const compact = !!(value && value.charAt(0) === "~");
+    const parts = compact ? value.substring(1).split(",") : (value || "").split(";");
+    const decoded = compact ? parts.map(decodeConfigField) : parts;
+    return {
+      entity: decoded[0] || "",
+      label: decoded[1] || "",
+      icon: decoded[2] || "Auto",
+      icon_on: decoded[3] || "Auto",
+      sensor: decoded[4] || "",
+      unit: decoded[5] || "",
+      type: decoded[6] || "",
+      precision: decoded[7] || "",
+      options: decoded[8] || ""
+    };
   }
 
   // src/webserver/model/grid.ts

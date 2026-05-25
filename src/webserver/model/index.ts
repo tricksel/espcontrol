@@ -1,8 +1,14 @@
 export {
   CARD_CONFIG_FIELDS,
+  cardConfigChanged,
   cloneCardConfig,
   copyCardConfig,
+  decodeConfigField,
   emptyCardConfig,
+  encodeConfigField,
+  legacyButtonConfigSafe,
+  parseRawButtonConfig,
+  trimConfigFields,
 } from "./card";
 
 export {
