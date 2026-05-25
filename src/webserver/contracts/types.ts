@@ -63,6 +63,17 @@ export interface CardTypeSpec {
       legacyModes?: Readonly<Record<string, string>>;
       stateDisplayModes?: readonly string[];
     };
+    alarm?: {
+      controlPanelValue: string;
+      defaultActions: readonly string[];
+      actions: readonly {
+        value: string;
+        label: string;
+        service: string;
+        icon: string;
+        legacyIcon?: string;
+      }[];
+    };
   };
 }
 

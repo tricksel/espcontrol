@@ -1,15 +1,20 @@
 // Alarm cards: one-tap alarm_control_panel actions.
 var ALARM_CONTROL_PANEL_VALUE = "control_panel";
 
+function alarmControlPanelValue() {
+  return alarmBehaviorSpec().controlPanelValue || ALARM_CONTROL_PANEL_VALUE;
+}
+
 function alarmUsesDefaultIcon(icon) {
   return !icon || icon === "Auto" || icon === "Security" || icon === "Shield Home" || icon === "Alarm";
 }
 
 function alarmCardTypeOptions() {
   var options = [
-    { value: ALARM_CONTROL_PANEL_VALUE, label: "Combined Control" },
+    { value: alarmControlPanelValue(), label: "Combined Control" },
   ];
-  for (var i = 0; i < ALARM_ACTIONS.length; i++) options.push(ALARM_ACTIONS[i]);
+  var actions = alarmActionSpecs();
+  for (var i = 0; i < actions.length; i++) options.push(actions[i]);
   return options;
 }
 
@@ -19,16 +24,18 @@ function alarmCardTypeOptionsForSettings() {
 
 function alarmLabelIsGenerated(label) {
   if (!label) return true;
-  for (var i = 0; i < ALARM_ACTIONS.length; i++) {
-    if (label === ALARM_ACTIONS[i].label) return true;
+  var actions = alarmActionSpecs();
+  for (var i = 0; i < actions.length; i++) {
+    if (label === actions[i].label) return true;
   }
   return false;
 }
 
 function alarmIconIsGenerated(icon) {
   if (!icon || icon === "Auto" || alarmUsesDefaultIcon(icon)) return true;
-  for (var i = 0; i < ALARM_ACTIONS.length; i++) {
-    if (alarmActionIconIsGenerated(ALARM_ACTIONS[i].value, icon)) return true;
+  var actions = alarmActionSpecs();
+  for (var i = 0; i < actions.length; i++) {
+    if (alarmActionIconIsGenerated(actions[i].value, icon)) return true;
   }
   return false;
 }
@@ -37,7 +44,7 @@ function setAlarmCardType(b, value, helpers) {
   var info = alarmActionInfo(value);
   var wasAlarmAction = b.type === "alarm_action";
 
-  if (value === ALARM_CONTROL_PANEL_VALUE || !info) {
+  if (value === alarmControlPanelValue() || !info) {
     var shouldUseControlLabel = wasAlarmAction && alarmLabelIsGenerated(b.label);
     var shouldUseControlIcon = alarmIconIsGenerated(b.icon);
     b.type = "alarm";
@@ -61,7 +68,7 @@ function setAlarmCardType(b, value, helpers) {
     return;
   }
 
-  info = info || ALARM_ACTIONS[0];
+  info = info || alarmActionSpecs()[0];
   var oldInfo = alarmActionInfo(b.sensor);
   var shouldUseGeneratedLabel = !wasAlarmAction || alarmLabelIsGenerated(b.label);
   var shouldUseGeneratedIcon = !wasAlarmAction || alarmIconIsGenerated(b.icon) ||
@@ -94,8 +101,8 @@ var ALARM_CARD_METADATA = {
     options: alarmCardTypeOptionsForSettings,
     value: function (b) {
       return b.type === "alarm"
-        ? ALARM_CONTROL_PANEL_VALUE
-        : (alarmActionInfo(b.sensor) || ALARM_ACTIONS[0]).value;
+        ? alarmControlPanelValue()
+        : (alarmActionInfo(b.sensor) || alarmActionSpecs()[0]).value;
     },
   },
   entity: {
@@ -270,7 +277,7 @@ registerButtonType("alarm_action", {
   cardMetadata: ALARM_CARD_METADATA,
   isAvailable: function () { return false; },
   onSelect: function (b) {
-    var info = ALARM_ACTIONS[0];
+    var info = alarmActionSpecs()[0];
     b.entity = "";
     b.label = info.label;
     b.sensor = info.value;
@@ -317,7 +324,7 @@ registerButtonType("alarm_action", {
     });
   },
   renderPreview: function (b, helpers) {
-    var info = alarmActionInfo(b.sensor) || ALARM_ACTIONS[0];
+    var info = alarmActionInfo(b.sensor) || alarmActionSpecs()[0];
     var label = b.label || info.label;
     var iconName = iconSlug(b.icon || info.icon);
     return {

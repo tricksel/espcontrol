@@ -171,10 +171,24 @@ var ALARM_ACTIONS = [
 ];
 var ALARM_DEFAULT_ACTIONS = ["away", "home", "disarm"];
 
+function alarmBehaviorSpec() {
+  var card = cardContractCard("alarm");
+  return card && card.behavior && card.behavior.alarm || {};
+}
+
+function alarmActionSpecs() {
+  var actions = alarmBehaviorSpec().actions;
+  return actions && actions.length ? actions : ALARM_ACTIONS;
+}
+
+function alarmDefaultActions() {
+  var actions = alarmBehaviorSpec().defaultActions;
+  return actions && actions.length ? actions.slice() : ALARM_DEFAULT_ACTIONS.slice();
+}
+
 function alarmActionLegacyIcon(value) {
-  if (value === "away") return "Security";
-  if (value === "home") return "Home";
-  if (value === "disarm") return "Lock Open";
+  var info = alarmActionInfo(value);
+  if (info && info.legacyIcon) return info.legacyIcon;
   return "";
 }
 
@@ -524,14 +538,15 @@ function setClimateNumberDisplayMode(b, mode) {
 }
 
 function alarmActionInfo(value) {
-  for (var i = 0; i < ALARM_ACTIONS.length; i++) {
-    if (ALARM_ACTIONS[i].value === value) return ALARM_ACTIONS[i];
+  var actions = alarmActionSpecs();
+  for (var i = 0; i < actions.length; i++) {
+    if (actions[i].value === value) return actions[i];
   }
   return null;
 }
 
 function alarmActionValues() {
-  return ALARM_DEFAULT_ACTIONS.slice();
+  return alarmDefaultActions();
 }
 
 function alarmPinRequired(b, mode) {
@@ -549,7 +564,7 @@ function setAlarmPinRequired(b, mode, required) {
 
 function normalizeAlarmActionList(value) {
   var raw = String(value || "");
-  if (!raw) return ALARM_DEFAULT_ACTIONS.slice();
+  if (!raw) return alarmDefaultActions();
   var parts = raw.split("|");
   var out = [];
   for (var i = 0; i < parts.length; i++) {
@@ -557,7 +572,7 @@ function normalizeAlarmActionList(value) {
     if (!alarmActionInfo(action) || out.indexOf(action) >= 0) continue;
     out.push(action);
   }
-  return out.length ? out : ALARM_DEFAULT_ACTIONS.slice();
+  return out.length ? out : alarmDefaultActions();
 }
 
 function alarmVisibleActions(b) {
@@ -566,9 +581,10 @@ function alarmVisibleActions(b) {
 
 function alarmActionsAreDefault(actions) {
   actions = actions || [];
-  if (actions.length !== ALARM_DEFAULT_ACTIONS.length) return false;
-  for (var i = 0; i < ALARM_DEFAULT_ACTIONS.length; i++) {
-    if (actions[i] !== ALARM_DEFAULT_ACTIONS[i]) return false;
+  var defaults = alarmDefaultActions();
+  if (actions.length !== defaults.length) return false;
+  for (var i = 0; i < defaults.length; i++) {
+    if (actions[i] !== defaults[i]) return false;
   }
   return true;
 }
@@ -586,11 +602,17 @@ function setAlarmVisibleActions(b, actions) {
 }
 
 function normalizeAlarmIconDisplayMode(value) {
-  return String(value || "").trim() === "static" ? "static" : "status";
+  value = String(value || "").trim();
+  var spec = cardContractOptionSpec("alarm", ALARM_ICON_DISPLAY_OPTION);
+  var values = spec && spec.values ? spec.values : ["static", "status"];
+  return values.indexOf(value) >= 0 ? value : "status";
 }
 
 function normalizeAlarmLabelDisplayMode(value) {
-  return String(value || "").trim() === "name" ? "name" : "status";
+  value = String(value || "").trim();
+  var spec = cardContractOptionSpec("alarm", ALARM_LABEL_DISPLAY_OPTION);
+  var values = spec && spec.values ? spec.values : ["name", "status"];
+  return values.indexOf(value) >= 0 ? value : "status";
 }
 
 function alarmIconDisplayMode(b) {
@@ -707,7 +729,7 @@ function buttonConfigFields(b) {
   var icon = b && b.icon || "Auto";
   if (isActionOptionSelect && (!icon || icon === "Auto" || icon === "Chevron Down")) icon = "Flash";
   if (type === "alarm" && (!icon || icon === "Auto")) icon = "Security";
-  if (type === "alarm_action" && (!icon || icon === "Auto")) icon = (alarmActionInfo(sensor) || ALARM_ACTIONS[0]).icon;
+  if (type === "alarm_action" && (!icon || icon === "Auto")) icon = (alarmActionInfo(sensor) || alarmActionSpecs()[0]).icon;
   if (isFanCardType(type) && (!icon || icon === "Auto")) icon = fanCardDefaultIcon(type);
   var iconOn = (isActionOptionSelect || type === "alarm" || type === "alarm_action" || (isFanCardType(type) && type !== "fan_switch")) ? "Auto" : (b && b.icon_on || "Auto");
   if (type === "fan_switch" && (!iconOn || iconOn === "Auto")) iconOn = "Fan";

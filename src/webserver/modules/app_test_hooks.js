@@ -69,6 +69,10 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     alarmPinRequired: alarmPinRequired,
     alarmIconDisplayMode: alarmIconDisplayMode,
     alarmLabelDisplayMode: alarmLabelDisplayMode,
+    alarmControlPanelValue: alarmControlPanelValue,
+    alarmActionValues: alarmActionValues,
+    normalizeAlarmIconDisplayMode: normalizeAlarmIconDisplayMode,
+    normalizeAlarmLabelDisplayMode: normalizeAlarmLabelDisplayMode,
     alarmVisibleActions: alarmVisibleActions,
     alarmCardTypeOptionValues: function (isSub) {
       return alarmCardTypeOptionsForSettings(!!isSub).map(function (option) {

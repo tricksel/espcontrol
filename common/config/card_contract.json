@@ -80,6 +80,77 @@
       "label": "Alarm",
       "allowInSubpage": true,
       "domains": ["alarm_control_panel"],
+      "options": [
+        {
+          "name": "alarm_card_type",
+          "label": "Type",
+          "kind": "choice",
+          "values": ["control_panel", "away", "home", "disarm"],
+          "defaultValue": "control_panel"
+        },
+        {
+          "name": "pin_arm",
+          "label": "PIN required for arming",
+          "kind": "flag",
+          "defaultValue": "1"
+        },
+        {
+          "name": "pin_disarm",
+          "label": "PIN required for disarming",
+          "kind": "flag",
+          "defaultValue": "1"
+        },
+        {
+          "name": "actions",
+          "label": "Visible Actions",
+          "kind": "choice",
+          "values": ["away", "home", "disarm"],
+          "defaultValue": "away|home|disarm"
+        },
+        {
+          "name": "icon_display",
+          "label": "Icon Display",
+          "kind": "choice",
+          "values": ["static", "status"],
+          "defaultValue": "status"
+        },
+        {
+          "name": "label_display",
+          "label": "Label Display",
+          "kind": "choice",
+          "values": ["name", "status"],
+          "defaultValue": "status"
+        }
+      ],
+      "behavior": {
+        "alarm": {
+          "controlPanelValue": "control_panel",
+          "defaultActions": ["away", "home", "disarm"],
+          "actions": [
+            {
+              "value": "away",
+              "label": "Arm Away",
+              "service": "alarm_control_panel.alarm_arm_away",
+              "icon": "Shield Lock",
+              "legacyIcon": "Security"
+            },
+            {
+              "value": "home",
+              "label": "Arm Home",
+              "service": "alarm_control_panel.alarm_arm_home",
+              "icon": "Shield Home",
+              "legacyIcon": "Home"
+            },
+            {
+              "value": "disarm",
+              "label": "Disarm",
+              "service": "alarm_control_panel.alarm_disarm",
+              "icon": "Shield Off",
+              "legacyIcon": "Lock Open"
+            }
+          ]
+        }
+      },
       "default": {
         "entity": "",
         "label": "",

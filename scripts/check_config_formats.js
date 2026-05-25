@@ -347,6 +347,12 @@ assert.strictEqual(
 );
 assert.strictEqual(hooks.mediaStateDisplayModeSupported("position"), true, "media state display supports position mode");
 assert.strictEqual(hooks.mediaStateDisplayModeSupported("volume"), false, "media state display rejects volume mode");
+assert.strictEqual(hooks.alarmControlPanelValue(), "control_panel", "alarm combined-control value is spec-backed");
+assert.deepStrictEqual(Array.from(hooks.alarmActionValues()), ["away", "home", "disarm"], "alarm default actions are spec-backed");
+assert.strictEqual(hooks.normalizeAlarmIconDisplayMode("static"), "static", "alarm static icon mode is spec-backed");
+assert.strictEqual(hooks.normalizeAlarmIconDisplayMode("bad"), "status", "alarm invalid icon mode falls back to status");
+assert.strictEqual(hooks.normalizeAlarmLabelDisplayMode("name"), "name", "alarm name label mode is spec-backed");
+assert.strictEqual(hooks.normalizeAlarmLabelDisplayMode("bad"), "status", "alarm invalid label mode falls back to status");
 const coverOptionSpecs = hooks.cardContractOptions("cover");
 const coverOptionByName = Object.fromEntries(coverOptionSpecs.map((option) => [option.name, option]));
 assert.deepStrictEqual(
