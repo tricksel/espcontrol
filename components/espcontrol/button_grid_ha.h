@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 // Internal implementation detail for button_grid.h. Include button_grid.h from device YAML.
 
 // ── Home Assistant API boundary ──────────────────────────────────────
@@ -76,7 +78,7 @@ inline bool ha_subscribe_state(const std::string &entity_id,
                                HomeAssistantStateCallback callback) {
   if (!ha_api_available() || entity_id.empty()) return false;
   esphome::api::global_api_server->subscribe_home_assistant_state(
-    entity_id, {}, callback);
+    entity_id, {}, std::move(callback));
   return true;
 }
 
@@ -85,6 +87,6 @@ inline bool ha_subscribe_attribute(const std::string &entity_id,
                                    HomeAssistantStateCallback callback) {
   if (!ha_api_available() || entity_id.empty()) return false;
   esphome::api::global_api_server->subscribe_home_assistant_state(
-    entity_id, attribute, callback);
+    entity_id, attribute, std::move(callback));
   return true;
 }
