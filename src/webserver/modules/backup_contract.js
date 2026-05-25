@@ -18,19 +18,7 @@ function backupNormalizeButtonConfig(button) {
 }
 
 function backupSerializeGrid(grid, sizes) {
-  sizes = sizes || {};
-  var last = -1;
-  for (var i = grid.length - 1; i >= 0; i--) {
-    if (grid[i] > 0) {
-      last = i;
-      break;
-    }
-  }
-  if (last < 0) return "";
-  return grid.slice(0, last + 1).map(function (slot) {
-    if (slot <= 0) return "";
-    return slot + sizeToken(sizes[slot]);
-  }).join(",");
+  return EspControlModel.serializeGridOrder(grid, sizes || {});
 }
 
 function backupSerializeSubpages(subpages) {
@@ -130,30 +118,11 @@ function normalizeBackupConfig(data) {
 }
 
 function backupOrderUsedSlots(order, importedCount) {
-  var parts = String(order || "").split(",");
-  var usedSlots = [];
-  var seen = {};
-  for (var i = 0; i < parts.length; i++) {
-    var token = parts[i].trim();
-    if (!token) continue;
-    var lastCh = token.charAt(token.length - 1);
-    var parsedSize = sizeFromToken(lastCh);
-    var num = parseInt(token, 10);
-    if (isNaN(num) || num < 1 || num > importedCount || seen[num]) continue;
-    seen[num] = true;
-    usedSlots.push({ oldSlot: num, size: parsedSize });
-  }
-  return { usedSlots: usedSlots, seen: seen };
+  return EspControlModel.backupOrderUsedSlots(order, importedCount);
 }
 
 function backupPlaceSlotAt(grid, slot, pos, size, maxSlots) {
-  grid[pos] = slot;
-  if (size > 1) {
-    var covered = coveredCells(pos, size, maxSlots, false);
-    for (var i = 0; i < covered.length; i++) {
-      if (covered[i] >= 0 && covered[i] < maxSlots) grid[covered[i]] = -1;
-    }
-  }
+  EspControlModel.backupPlaceSlotAt(grid, slot, pos, size, maxSlots, GRID_COLS);
 }
 
 function planBackupImport(data, targetDevice) {
@@ -163,11 +132,6 @@ function planBackupImport(data, targetDevice) {
   var targetDeviceId = targetDevice.device || DEVICE_ID;
   var importedCount = config.buttons.length;
   var warnings = [];
-  var empty = backupEmptyButtonConfig();
-  var buttons = [];
-  var importedSizes = {};
-  var orderStr = "";
-  var spKeyMap = {};
 
   if (config.device && config.device !== targetDeviceId) {
     warnings.push("Config was exported from a different panel (" + config.device + ") - layout may look different");
@@ -176,63 +140,16 @@ function planBackupImport(data, targetDevice) {
     warnings.push("Backup has " + importedCount + " slots, current config has " + targetSlots + " - adapting");
   }
 
-  if (importedCount !== targetSlots) {
-    var orderInfo = backupOrderUsedSlots(config.button_order, importedCount);
-    var usedSlots = orderInfo.usedSlots;
-    var seen = orderInfo.seen;
-    for (var j = 0; j < importedCount; j++) {
-      var slotNum = j + 1;
-      if (seen[slotNum]) continue;
-      var button = config.buttons[j] || empty;
-      if (button.entity || button.label || button.type) {
-        usedSlots.push({ oldSlot: slotNum, size: 1 });
-      }
-    }
-
-    var limit = Math.min(usedSlots.length, targetSlots);
-    var slotMap = {};
-    for (var u = 0; u < limit; u++) {
-      var newSlot = u + 1;
-      slotMap[usedSlots[u].oldSlot] = newSlot;
-      buttons.push(config.buttons[usedSlots[u].oldSlot - 1] || empty);
-      if (usedSlots[u].size > 1) importedSizes[newSlot] = usedSlots[u].size;
-    }
-    for (var fill = limit; fill < targetSlots; fill++) buttons.push(empty);
-
-    var newGrid = [];
-    for (var g = 0; g < targetSlots; g++) newGrid.push(0);
-    var pos = 0;
-    for (var p = 0; p < limit && pos < targetSlots; p++) {
-      var ns = p + 1;
-      var targetSize = importedSizes[ns] || 1;
-      if (!sizeFitsAt(pos, targetSize, targetSlots)) {
-        targetSize = 1;
-        delete importedSizes[ns];
-      }
-      backupPlaceSlotAt(newGrid, ns, pos, targetSize, targetSlots);
-      pos++;
-      while (pos < targetSlots && newGrid[pos] === -1) pos++;
-    }
-    orderStr = backupSerializeGrid(newGrid, importedSizes);
-
-    for (var key in config.subpages) {
-      var oldKey = parseInt(key, 10);
-      if (slotMap[oldKey]) spKeyMap[key] = slotMap[oldKey];
-    }
-  } else {
-    for (var i = 0; i < targetSlots; i++) {
-      buttons.push(i < importedCount ? config.buttons[i] : empty);
-    }
-    orderStr = config.button_order || "";
-    for (var spKey in config.subpages) {
-      var keyNum = parseInt(spKey, 10);
-      if (keyNum >= 1 && keyNum <= targetSlots) spKeyMap[spKey] = keyNum;
-    }
-  }
+  var layoutPlan = EspControlModel.planBackupButtonLayout(
+    config.buttons,
+    config.button_order,
+    targetSlots,
+    GRID_COLS
+  );
 
   var subpages = {};
   for (var sourceKey in config.subpages) {
-    var mappedKey = spKeyMap[sourceKey];
+    var mappedKey = layoutPlan.slotMap[sourceKey];
     if (!mappedKey) continue;
     var subpage = parseSubpageConfig(config.subpages[sourceKey]);
     subpage.sizes = {};
@@ -244,9 +161,9 @@ function planBackupImport(data, targetDevice) {
     config: config,
     warnings: warnings,
     importedCount: importedCount,
-    buttons: buttons.map(backupNormalizeButtonConfig),
-    button_order: orderStr,
-    importedSizes: importedSizes,
+    buttons: layoutPlan.buttons.map(backupNormalizeButtonConfig),
+    button_order: layoutPlan.button_order,
+    importedSizes: layoutPlan.importedSizes,
     subpages: subpages,
     settings: config.settings,
     screen: config.screen,

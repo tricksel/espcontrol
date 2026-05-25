@@ -1,4 +1,10 @@
 export {
+  backupOrderUsedSlots,
+  backupPlaceSlotAt,
+  planBackupButtonLayout,
+} from "./backup";
+
+export {
   CARD_CONFIG_FIELDS,
   cardConfigChanged,
   cloneCardConfig,
@@ -35,6 +41,12 @@ export {
   serializeSubpageGrid,
   subpageOrderForSerialize,
 } from "./subpage";
+
+export type {
+  BackupButtonLayoutPlan,
+  BackupOrderSlots,
+  BackupUsedSlot,
+} from "./backup";
 
 export type {
   DraftCardConfig,

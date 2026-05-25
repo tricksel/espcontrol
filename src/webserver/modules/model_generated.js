@@ -29,6 +29,8 @@ var EspControlModel = (() => {
     applySpans: () => applySpans,
     backLabelFromOrder: () => backLabelFromOrder,
     backOrderToken: () => backOrderToken,
+    backupOrderUsedSlots: () => backupOrderUsedSlots,
+    backupPlaceSlotAt: () => backupPlaceSlotAt,
     buildSubpageGrid: () => buildSubpageGrid,
     cardConfigChanged: () => cardConfigChanged,
     clearSpans: () => clearSpans,
@@ -45,6 +47,7 @@ var EspControlModel = (() => {
     parseGridOrder: () => parseGridOrder,
     parseRawButtonConfig: () => parseRawButtonConfig,
     parseSubpageOrder: () => parseSubpageOrder,
+    planBackupButtonLayout: () => planBackupButtonLayout,
     serializeGridOrder: () => serializeGridOrder,
     serializeSubpageGrid: () => serializeSubpageGrid,
     sizeColSpan: () => sizeColSpan,
@@ -269,6 +272,89 @@ var EspControlModel = (() => {
     for (let i = 0; i < maxSlots; i += 1) {
       if (grid[i] === -1) grid[i] = 0;
     }
+  }
+
+  // src/webserver/model/backup.ts
+  function backupOrderUsedSlots(order, importedCount) {
+    const parts = String(order || "").split(",");
+    const usedSlots = [];
+    const seen = {};
+    for (const part of parts) {
+      const token = part.trim();
+      if (!token) continue;
+      const lastCh = token.charAt(token.length - 1);
+      const parsedSize = sizeFromToken(lastCh);
+      const num = parseInt(token, 10);
+      if (Number.isNaN(num) || num < 1 || num > importedCount || seen[String(num)]) continue;
+      seen[String(num)] = true;
+      usedSlots.push({ oldSlot: num, size: parsedSize });
+    }
+    return { usedSlots, seen };
+  }
+  function backupPlaceSlotAt(grid, slot, pos, size, maxSlots, gridCols) {
+    grid[pos] = slot;
+    if (size > 1) {
+      markSpannedCells(grid, pos, size, maxSlots, gridCols);
+    }
+  }
+  function planBackupButtonLayout(sourceButtons, buttonOrder, targetSlots, gridCols) {
+    const importedCount = sourceButtons.length;
+    const buttons = [];
+    const importedSizes = {};
+    const slotMap = {};
+    let orderStr = "";
+    if (importedCount !== targetSlots) {
+      const orderInfo = backupOrderUsedSlots(buttonOrder, importedCount);
+      const usedSlots = orderInfo.usedSlots;
+      const seen = orderInfo.seen;
+      for (let j = 0; j < importedCount; j += 1) {
+        const slotNum = j + 1;
+        if (seen[String(slotNum)]) continue;
+        const button = sourceButtons[j] || emptyCardConfig();
+        if (button.entity || button.label || button.type) {
+          usedSlots.push({ oldSlot: slotNum, size: 1 });
+        }
+      }
+      const limit = Math.min(usedSlots.length, targetSlots);
+      for (let u = 0; u < limit; u += 1) {
+        const newSlot = u + 1;
+        const used = usedSlots[u];
+        if (!used) continue;
+        slotMap[String(used.oldSlot)] = newSlot;
+        buttons.push(cloneCardConfig(sourceButtons[used.oldSlot - 1] || emptyCardConfig()));
+        if (used.size > 1) importedSizes[String(newSlot)] = used.size;
+      }
+      for (let fill = limit; fill < targetSlots; fill += 1) {
+        buttons.push(emptyCardConfig());
+      }
+      const newGrid = Array(targetSlots).fill(0);
+      let pos = 0;
+      for (let p = 0; p < limit && pos < targetSlots; p += 1) {
+        const newSlot = p + 1;
+        let targetSize = importedSizes[String(newSlot)] || 1;
+        if (!sizeFitsAt(pos, targetSize, targetSlots, gridCols)) {
+          targetSize = 1;
+          delete importedSizes[String(newSlot)];
+        }
+        backupPlaceSlotAt(newGrid, newSlot, pos, targetSize, targetSlots, gridCols);
+        pos += 1;
+        while (pos < targetSlots && newGrid[pos] === -1) pos += 1;
+      }
+      orderStr = serializeGridOrder(newGrid, importedSizes);
+    } else {
+      for (let i = 0; i < targetSlots; i += 1) {
+        buttons.push(cloneCardConfig(i < importedCount ? sourceButtons[i] : emptyCardConfig()));
+        slotMap[String(i + 1)] = i + 1;
+      }
+      orderStr = String(buttonOrder || "");
+    }
+    return {
+      importedCount,
+      buttons,
+      button_order: orderStr,
+      importedSizes,
+      slotMap
+    };
   }
 
   // src/webserver/model/subpage.ts
