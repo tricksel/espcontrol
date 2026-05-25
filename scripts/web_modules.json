@@ -1,6 +1,7 @@
 [
   "styles",
   "state",
+  "model_generated",
   "grid",
   "entity_catalog",
   "card_contract_generated",

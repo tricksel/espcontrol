@@ -12,6 +12,7 @@
     "target": "ES2022"
   },
   "include": [
-    "src/webserver/contracts/**/*.ts"
+    "src/webserver/contracts/**/*.ts",
+    "src/webserver/model/**/*.ts"
   ]
 }
