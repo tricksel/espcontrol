@@ -711,20 +711,8 @@ inline void media_volume_apply_percent(MediaVolumeCtx *ctx, int pct,
 
 inline void media_volume_hide_modal() {
   MediaVolumeModalUi &ui = media_volume_modal_ui();
-  if (ui.overlay) lv_obj_del(ui.overlay);
-  ui.overlay = nullptr;
-  ui.panel = nullptr;
-  ui.back_btn = nullptr;
-  ui.arc = nullptr;
-  ui.title_lbl = nullptr;
-  ui.pct_row = nullptr;
-  ui.pct_lbl = nullptr;
-  ui.pct_unit_lbl = nullptr;
-  ui.minus_btn = nullptr;
-  ui.plus_btn = nullptr;
-  ui.active = nullptr;
-  ui.updating_arc = false;
-  control_modal_clear_active(ControlModalKind::MEDIA_VOLUME);
+  control_modal_delete_overlay(ControlModalKind::MEDIA_VOLUME, ui.overlay);
+  ui = MediaVolumeModalUi();
 }
 
 inline lv_coord_t media_volume_scaled_px(lv_coord_t px, lv_coord_t short_side) {

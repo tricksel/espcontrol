@@ -23,7 +23,6 @@ MANUAL_OVERLAY_DELETE_ALLOWLIST = {
     "button_grid_modal.h",
     "button_grid_alarm.h",
     "button_grid_climate.h",
-    "button_grid_sliders.h",
 }
 
 
