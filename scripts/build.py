@@ -959,12 +959,23 @@ def gen_device_grid_snippet(capability):
     rows = capability["grid"]["rows"]
     cols = capability["grid"]["cols"]
     slots = capability["slots"]
+    relays = capability.get("relays", 0)
+    relay_text = "No built-in relays" if relays == 0 else f"{relays} built-in relay" + ("" if relays == 1 else "s")
+    ethernet = "Yes, manual ESPHome install only" if capability.get("ethernetManualInstall") else "No"
     return (
         generated_markdown_header("SCREEN GRID CAPABILITIES") +
         f"The home screen uses a **{rows}-row x {cols}-column** grid, giving you "
         f"**{slots} card slots**. Any home-screen card can be turned into a "
         f"[Subpage](/features/subpages) folder containing up to {slots - 1} more cards.\n\n"
-        "Flexible card sizes are supported: Single, Tall, Wide, and Large.\n"
+        "Flexible card sizes are supported: Single, Tall, Wide, and Large.\n\n"
+        "| Capability | Value |\n"
+        "|---|---|\n"
+        f"| Screen | {capability['screenSize']}, {capability['resolution']}, {capability['orientation']} |\n"
+        f"| Processor | {capability['chipFamily']} |\n"
+        f"| Built-in relays | {relay_text} |\n"
+        f"| Rotation support | {'Yes' if capability.get('rotation') else 'No'} |\n"
+        f"| Browser install slug | `{capability['installSlug']}` |\n"
+        f"| Ethernet option | {ethernet} |\n"
     )
 
 
