@@ -40,6 +40,22 @@ var ENTITY_CATALOG = {
       "domain": "text",
       "template": "Subpage {slot} Config Ext 3"
     },
+    "subpage_config_ext_4": {
+      "domain": "text",
+      "template": "Subpage {slot} Config Ext 4"
+    },
+    "subpage_config_ext_5": {
+      "domain": "text",
+      "template": "Subpage {slot} Config Ext 5"
+    },
+    "subpage_config_ext_6": {
+      "domain": "text",
+      "template": "Subpage {slot} Config Ext 6"
+    },
+    "subpage_config_ext_7": {
+      "domain": "text",
+      "template": "Subpage {slot} Config Ext 7"
+    },
     "indoor_temp_enable": {
       "domain": "switch",
       "name": "Indoor Temp Enable"
@@ -343,7 +359,11 @@ var ENTITY_CATALOG = {
       "subpage_config",
       "subpage_config_ext",
       "subpage_config_ext_2",
-      "subpage_config_ext_3"
+      "subpage_config_ext_3",
+      "subpage_config_ext_4",
+      "subpage_config_ext_5",
+      "subpage_config_ext_6",
+      "subpage_config_ext_7"
     ],
     "settings": [
       "indoor_temp_enable",

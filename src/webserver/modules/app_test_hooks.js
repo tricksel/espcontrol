@@ -133,6 +133,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     serializeSubpageConfig: serializeSubpageConfig,
     buildSubpageGrid: buildSubpageGrid,
     serializeSubpageGrid: serializeSubpageGrid,
+    splitSubpageConfigChunks: EspControlModel.splitSubpageConfigChunks,
     parseBackOrderToken: parseBackOrderToken,
     backOrderToken: backOrderToken,
     backLabelFromOrder: backLabelFromOrder,

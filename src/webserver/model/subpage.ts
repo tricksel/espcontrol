@@ -200,6 +200,20 @@ export function chooseSerializedSubpageConfig(
   return compact.length < legacy.length ? compact : legacy;
 }
 
+export function splitSubpageConfigChunks(
+  value: string | null | undefined,
+  chunkCount: number,
+  chunkSize = 255,
+): string[] | null {
+  const full = String(value || "");
+  if (chunkCount < 1 || chunkSize < 1 || full.length > chunkCount * chunkSize) return null;
+  const chunks: string[] = [];
+  for (let i = 0; i < chunkCount; i += 1) {
+    chunks.push(full.substring(i * chunkSize, (i + 1) * chunkSize));
+  }
+  return chunks;
+}
+
 export function buildSubpageGrid(
   subpage: SubpageGridSource,
   maxSlots: number,

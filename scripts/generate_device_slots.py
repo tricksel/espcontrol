@@ -316,6 +316,10 @@ def phase2_block(device: dict) -> str:
         "            #define SP_EXT(n) subpage_##n##_config_ext",
         "            #define SP_EXT2(n) subpage_##n##_config_ext_2",
         "            #define SP_EXT3(n) subpage_##n##_config_ext_3",
+        "            #define SP_EXT4(n) subpage_##n##_config_ext_4",
+        "            #define SP_EXT5(n) subpage_##n##_config_ext_5",
+        "            #define SP_EXT6(n) subpage_##n##_config_ext_6",
+        "            #define SP_EXT7(n) subpage_##n##_config_ext_7",
         "            BtnSlot slots[] = {",
     ]
     for num in range(1, device["slots"] + 1):
@@ -325,6 +329,10 @@ def phase2_block(device: dict) -> str:
     lines.extend(macro_array("sp_ext", "SP_EXT", device["slots"]))
     lines.extend(macro_array("sp_ext2", "SP_EXT2", device["slots"]))
     lines.extend(macro_array("sp_ext3", "SP_EXT3", device["slots"]))
+    lines.extend(macro_array("sp_ext4", "SP_EXT4", device["slots"]))
+    lines.extend(macro_array("sp_ext5", "SP_EXT5", device["slots"]))
+    lines.extend(macro_array("sp_ext6", "SP_EXT6", device["slots"]))
+    lines.extend(macro_array("sp_ext7", "SP_EXT7", device["slots"]))
     lines.extend(
         [
             "            #undef BTN_SLOT",
@@ -332,6 +340,10 @@ def phase2_block(device: dict) -> str:
             "            #undef SP_EXT",
             "            #undef SP_EXT2",
             "            #undef SP_EXT3",
+            "            #undef SP_EXT4",
+            "            #undef SP_EXT5",
+            "            #undef SP_EXT6",
+            "            #undef SP_EXT7",
             *cfg_lines(device),
             "            // END GENERATED PHASE 2 GRID WIRING",
         ]

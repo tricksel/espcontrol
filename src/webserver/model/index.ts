@@ -52,6 +52,7 @@ export {
   serializeCompactSubpageConfig,
   serializeLegacySubpageConfig,
   serializeSubpageGrid,
+  splitSubpageConfigChunks,
   subpageOrderForSerialize,
 } from "./subpage";
 

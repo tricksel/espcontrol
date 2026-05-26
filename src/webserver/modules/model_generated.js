@@ -85,6 +85,7 @@ var EspControlModel = (() => {
     sizeFromToken: () => sizeFromToken,
     sizeRowSpan: () => sizeRowSpan,
     sizeToken: () => sizeToken,
+    splitSubpageConfigChunks: () => splitSubpageConfigChunks,
     subpageOrderForSerialize: () => subpageOrderForSerialize,
     trimConfigFields: () => trimConfigFields,
     validateBackupEnvelope: () => validateBackupEnvelope
@@ -603,6 +604,15 @@ var EspControlModel = (() => {
     if (!compact) return legacy;
     if (!legacy) return compact;
     return compact.length < legacy.length ? compact : legacy;
+  }
+  function splitSubpageConfigChunks(value, chunkCount, chunkSize = 255) {
+    const full = String(value || "");
+    if (chunkCount < 1 || chunkSize < 1 || full.length > chunkCount * chunkSize) return null;
+    const chunks = [];
+    for (let i = 0; i < chunkCount; i += 1) {
+      chunks.push(full.substring(i * chunkSize, (i + 1) * chunkSize));
+    }
+    return chunks;
   }
   function buildSubpageGrid(subpage, maxSlots, gridCols) {
     const grid = Array(maxSlots).fill(0);

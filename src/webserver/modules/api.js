@@ -308,28 +308,16 @@ function saveButtonConfig(slot) {
 function saveSubpageEntity(slot) {
   var sp = state.subpages[slot];
   var full = sp ? serializeSubpageConfig(sp) : "";
-  var chunks = ["", "", "", ""];
-  var rest = full;
-  for (var ci = 0; ci < chunks.length && rest; ci++) {
-    if (rest.length <= 255) {
-      chunks[ci] = rest;
-      rest = "";
-      break;
-    }
-    var splitAt = rest.lastIndexOf("|", 255);
-    if (splitAt <= 0) splitAt = 255;
-    chunks[ci] = rest.substring(0, splitAt);
-    rest = rest.substring(splitAt);
-  }
-  if (rest) {
+  var keys = ENTITY_CATALOG.groups.subpage_slot;
+  var chunks = EspControlModel.splitSubpageConfigChunks(full, keys.length, 255);
+  if (!chunks) {
     showBanner("Subpage is too large to save. Shorten labels or entity IDs.", "error");
     return;
   }
   state.subpageSavePending[slot] = full;
-  postText(entityNameForSlot("subpage_config", slot), chunks[0]);
-  postText(entityNameForSlot("subpage_config_ext", slot), chunks[1]);
-  postText(entityNameForSlot("subpage_config_ext_2", slot), chunks[2]);
-  postText(entityNameForSlot("subpage_config_ext_3", slot), chunks[3]);
+  for (var ki = 0; ki < keys.length; ki++) {
+    postText(entityNameForSlot(keys[ki], slot), chunks[ki] || "");
+  }
 }
 
 function scheduleSliderSubpageMigration(slot) {

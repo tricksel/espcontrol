@@ -2261,6 +2261,59 @@ assert.deepStrictEqual(subpageShape(hooks.parseSubpageConfig("~1,B|Z,fan.bedroom
   ],
 }, "compact fan preset subpage parse");
 
+const issue248EightCardConfig = "~B,,4,2,3,,,,8,9,,,1,6,5|X,,Office,Window Closed,Window Open,binary_sensor.office_window_sensor_opening,,window,active_color|X,,Linnea 1,Window Closed,Window Open,binary_sensor.linnea_br_window_sensor_opening,,window,active_color|X,,Linnea 2,Window Closed,Window Open,binary_sensor.linnea_br_window_2_sensor_opening,,window,active_color|X,,Maxime,Window Closed,Window Open,binary_sensor.maxime_br_window_sensor_opening,,window,active_color|X,,Study 2,Window Closed,Window Open,binary_sensor.study_window_2_sensor_opening,,window,active_color|X,,Study 1,Window Closed,Window Open,binary_sensor.study_window_2_sensor_opening,,window,active_color||X,,Master 1,Window Closed,Window Open,binary_sensor.master_bedroom_window_1_sensor,,window,active_color|X,,Master 2,Window Closed,Window Open,binary_sensor.master_bedroom_window_2_sensor,,window,active_color";
+const issue248NineCardConfig = issue248EightCardConfig +
+  "|X,,Kitchen,Window Closed,Window Open,binary_sensor.kitchen_window_sensor_opening,,window,active_color";
+const issue248NineCardChunks = hooks.splitSubpageConfigChunks(issue248NineCardConfig, 4, 255);
+assert(issue248NineCardChunks, "issue 248 nine-card config should fit in four fixed chunks");
+assert(issue248NineCardChunks.some((chunk) => chunk.length === 255), "issue 248 chunks may split inside card data");
+assert.deepStrictEqual(
+  subpageShape(firmwareParseSubpageConfig(issue248NineCardChunks.join(""))),
+  subpageShape(hooks.parseSubpageConfig(issue248NineCardConfig)),
+  "issue 248 fixed chunks reassemble before firmware parse"
+);
+
+const fullJc1060DoorWindowSubpage = {
+  order: ["B", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"],
+  buttons: Array.from({ length: 14 }, (_, i) => {
+    const names = [
+      "office_front_window_sensor_opening",
+      "linnea_bedroom_left_window_sensor_opening",
+      "linnea_bedroom_right_window_sensor_opening",
+      "maxime_bedroom_window_sensor_opening",
+      "study_left_window_sensor_opening",
+      "study_right_window_sensor_opening",
+      "master_bedroom_left_window_sensor_opening",
+      "master_bedroom_right_window_sensor_opening",
+      "kitchen_patio_door_sensor_opening",
+      "living_room_wide_window_sensor_opening",
+      "utility_side_door_sensor_opening",
+      "guest_bedroom_window_sensor_opening",
+      "loft_roof_window_sensor_opening",
+      "garage_internal_door_sensor_opening",
+    ];
+    return buttonShape({
+      label: `Door Window ${i + 1}`,
+      icon: "Window Closed",
+      icon_on: "Window Open",
+      sensor: `binary_sensor.${names[i]}`,
+      type: "door_window",
+      precision: "window",
+      options: "active_color",
+    });
+  }),
+};
+const fullJc1060Encoded = assertSubpageRoundTrip(hooks, "full jc1060 door/window subpage", fullJc1060DoorWindowSubpage, true);
+assert(fullJc1060Encoded.length > 4 * 255, "full jc1060 subpage should exceed old four-chunk capacity");
+assert(fullJc1060Encoded.length <= 8 * 255, "full jc1060 subpage should fit eight chunks");
+const fullJc1060Chunks = hooks.splitSubpageConfigChunks(fullJc1060Encoded, 8, 255);
+assert(fullJc1060Chunks, "full jc1060 subpage should split into eight chunks");
+assert.deepStrictEqual(
+  subpageShape(firmwareParseSubpageConfig(fullJc1060Chunks.join(""))),
+  subpageShape(fullJc1060DoorWindowSubpage),
+  "full jc1060 chunks reassemble before firmware parse"
+);
+
 const largeSubpage = {
   order: Array.from({ length: 25 }, (_, i) => (i === 4 ? "B" : String(i + 1))),
   buttons: Array.from({ length: 25 }, (_, i) => buttonShape({
