@@ -343,6 +343,16 @@ var CARD_CONTRACT_CARDS = {
         "step": 1
       }
     ],
+    "behavior": {
+      "cover": {
+        "commandServices": {
+          "open": "cover.open_cover",
+          "close": "cover.close_cover",
+          "stop": "cover.stop_cover",
+          "set_position": "cover.set_cover_position"
+        }
+      }
+    },
     "default": {
       "entity": "",
       "label": "",
@@ -502,6 +512,18 @@ var CARD_CONTRACT_CARDS = {
         "defaultValue": "label"
       }
     ],
+    "behavior": {
+      "lock": {
+        "commandServices": {
+          "lock": "lock.lock",
+          "unlock": "lock.unlock"
+        },
+        "toggleServices": {
+          "locked": "lock.unlock",
+          "default": "lock.lock"
+        }
+      }
+    },
     "default": {
       "entity": "",
       "label": "",
@@ -638,6 +660,18 @@ var CARD_CONTRACT_CARDS = {
         "defaultValue": ""
       }
     ],
+    "behavior": {
+      "lock": {
+        "commandServices": {
+          "lock": "lock.lock",
+          "unlock": "lock.unlock"
+        },
+        "toggleServices": {
+          "locked": "lock.unlock",
+          "default": "lock.lock"
+        }
+      }
+    },
     "default": {
       "entity": "",
       "label": "",
@@ -702,7 +736,12 @@ var CARD_CONTRACT_CARDS = {
         "stateDisplayModes": [
           "play_pause",
           "position"
-        ]
+        ],
+        "playbackServices": {
+          "play_pause": "media_player.media_play_pause",
+          "previous": "media_player.media_previous_track",
+          "next": "media_player.media_next_track"
+        }
       }
     },
     "default": {

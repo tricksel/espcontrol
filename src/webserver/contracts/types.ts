@@ -62,6 +62,7 @@ export interface CardTypeSpec {
       defaultMode: string;
       legacyModes?: Readonly<Record<string, string>>;
       stateDisplayModes?: readonly string[];
+      playbackServices?: Readonly<Record<string, string>>;
     };
     alarm?: {
       controlPanelValue: string;
@@ -78,6 +79,13 @@ export interface CardTypeSpec {
       defaultLabelDisplay: string;
       defaultNumberDisplay: string;
       precisionValues: readonly string[];
+    };
+    cover?: {
+      commandServices: Readonly<Record<string, string>>;
+    };
+    lock?: {
+      commandServices: Readonly<Record<string, string>>;
+      toggleServices: Readonly<Record<string, string>>;
     };
   };
 }

@@ -551,6 +551,8 @@ def gen_card_contract_h(data):
     option_actions = data["optionSelect"]["actions"]
     cards = data["cards"]
     alarm_behavior = cards["alarm"]["behavior"]["alarm"]
+    cover_behavior = cards["cover"]["behavior"]["cover"]
+    lock_behavior = cards["lock"]["behavior"]["lock"]
     media_behavior = cards["media"]["behavior"]["media"]
     climate_behavior = cards["climate"]["behavior"]["climate"]
     large_numbers = data["largeNumbers"]
@@ -681,8 +683,52 @@ def gen_card_contract_h(data):
         "    sizeof(CARD_CONTRACT_WEATHER_FORECAST_PRECISIONS) / sizeof(CARD_CONTRACT_WEATHER_FORECAST_PRECISIONS[0]));\n",
         "}\n",
         "\n",
-        "inline const char *card_contract_alarm_action_icon_name(const std::string &mode) {\n",
+        "inline const char *card_contract_cover_command_service(const std::string &mode) {\n",
     ]
+    for mode, service in cover_behavior["commandServices"].items():
+        lines.append(f'  if (mode == {json.dumps(mode)}) return {json.dumps(service)};\n')
+    lines.extend([
+        "  return nullptr;\n",
+        "}\n",
+        "\n",
+        "inline const char *card_contract_lock_command_service(const std::string &mode) {\n",
+    ])
+    for mode, service in lock_behavior["commandServices"].items():
+        lines.append(f'  if (mode == {json.dumps(mode)}) return {json.dumps(service)};\n')
+    lines.extend([
+        "  return nullptr;\n",
+        "}\n",
+        "\n",
+        "inline const char *card_contract_lock_toggle_service(const std::string &state) {\n",
+    ])
+    lock_toggle_services = lock_behavior["toggleServices"]
+    for state, service in lock_toggle_services.items():
+        if state == "default":
+            continue
+        lines.append(f'  if (state == {json.dumps(state)}) return {json.dumps(service)};\n')
+    lines.extend([
+        f'  return {json.dumps(lock_toggle_services["default"])};\n',
+        "}\n",
+        "\n",
+        "inline const char *card_contract_media_playback_service(const std::string &mode) {\n",
+    ])
+    media_playback_services = media_behavior["playbackServices"]
+    for mode, service in media_playback_services.items():
+        lines.append(f'  if (mode == {json.dumps(mode)}) return {json.dumps(service)};\n')
+    lines.extend([
+        f'  return {json.dumps(media_playback_services[media_behavior["defaultMode"]])};\n',
+        "}\n",
+        "\n",
+        "inline const char *card_contract_alarm_action_service(const std::string &mode) {\n",
+    ])
+    for action in alarm_behavior["actions"]:
+        lines.append(f'  if (mode == {json.dumps(action["value"])}) return {json.dumps(action["service"])};\n')
+    lines.extend([
+        "  return nullptr;\n",
+        "}\n",
+        "\n",
+        "inline const char *card_contract_alarm_action_icon_name(const std::string &mode) {\n",
+    ])
     for action in alarm_behavior["actions"]:
         lines.append(f'  if (mode == {json.dumps(action["value"])}) return {json.dumps(action["icon"])};\n')
     lines.extend([

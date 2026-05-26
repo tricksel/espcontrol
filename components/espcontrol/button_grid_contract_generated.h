@@ -124,6 +124,39 @@ inline bool card_contract_weather_forecast_precision(const std::string &precisio
     sizeof(CARD_CONTRACT_WEATHER_FORECAST_PRECISIONS) / sizeof(CARD_CONTRACT_WEATHER_FORECAST_PRECISIONS[0]));
 }
 
+inline const char *card_contract_cover_command_service(const std::string &mode) {
+  if (mode == "open") return "cover.open_cover";
+  if (mode == "close") return "cover.close_cover";
+  if (mode == "stop") return "cover.stop_cover";
+  if (mode == "set_position") return "cover.set_cover_position";
+  return nullptr;
+}
+
+inline const char *card_contract_lock_command_service(const std::string &mode) {
+  if (mode == "lock") return "lock.lock";
+  if (mode == "unlock") return "lock.unlock";
+  return nullptr;
+}
+
+inline const char *card_contract_lock_toggle_service(const std::string &state) {
+  if (state == "locked") return "lock.unlock";
+  return "lock.lock";
+}
+
+inline const char *card_contract_media_playback_service(const std::string &mode) {
+  if (mode == "play_pause") return "media_player.media_play_pause";
+  if (mode == "previous") return "media_player.media_previous_track";
+  if (mode == "next") return "media_player.media_next_track";
+  return "media_player.media_play_pause";
+}
+
+inline const char *card_contract_alarm_action_service(const std::string &mode) {
+  if (mode == "away") return "alarm_control_panel.alarm_arm_away";
+  if (mode == "home") return "alarm_control_panel.alarm_arm_home";
+  if (mode == "disarm") return "alarm_control_panel.alarm_disarm";
+  return nullptr;
+}
+
 inline const char *card_contract_alarm_action_icon_name(const std::string &mode) {
   if (mode == "away") return "Shield Lock";
   if (mode == "home") return "Shield Home";
