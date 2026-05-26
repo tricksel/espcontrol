@@ -27,6 +27,20 @@ MODE_ARRAY_PATTERN = re.compile(
     r"\{[^}\n]*\"(?:play_pause|previous|next|volume|position|now_playing|"
     r"open|close|stop|set_position|tilt|toggle|lock|unlock|away|home|disarm)\""
 )
+SERVICE_MAPPING_PATTERN = re.compile(
+    r"\"(?:cover\.(?:open_cover|close_cover|stop_cover|set_cover_position)|"
+    r"lock\.(?:lock|unlock)|"
+    r"media_player\.(?:media_play_pause|media_previous_track|media_next_track)|"
+    r"alarm_control_panel\.(?:alarm_arm_away|alarm_arm_home|alarm_disarm))\""
+)
+
+
+def service_mapping_line_allowed(line: str) -> bool:
+    if "ESP_LOGW" in line:
+        return True
+    if "cover.set_cover_tilt_position" in line:
+        return True
+    return False
 
 
 def firmware_headers(root: Path) -> list[Path]:
@@ -43,6 +57,12 @@ def check_root(root: Path) -> list[str]:
                 failures.append(f"{rel}:{line_no}: access generated card contract through button_grid_card_runtime.h")
             if filename not in MODE_ARRAY_ALLOWLIST and MODE_ARRAY_PATTERN.search(line):
                 failures.append(f"{rel}:{line_no}: keep shared card mode lists in the card runtime/contract boundary")
+            if (
+                filename not in CARD_RUNTIME_BOUNDARY_FILES
+                and SERVICE_MAPPING_PATTERN.search(line)
+                and not service_mapping_line_allowed(line)
+            ):
+                failures.append(f"{rel}:{line_no}: keep shared card service mappings in the card runtime/contract boundary")
     return failures
 
 
@@ -61,6 +81,14 @@ def run_self_test() -> None:
             ("keep shared card mode lists in the card runtime/contract boundary",),
         ),
         (
+            {"button_grid_actions.h": "if (mode == \"lock\") return \"lock.lock\";\n"},
+            ("keep shared card service mappings in the card runtime/contract boundary",),
+        ),
+        (
+            {"button_grid_alarm.h": "return \"alarm_control_panel.alarm_arm_away\";\n"},
+            ("keep shared card service mappings in the card runtime/contract boundary",),
+        ),
+        (
             {"button_grid_card_runtime.h": "return card_contract_media_mode_valid(mode);\n"},
             (),
         ),
@@ -70,6 +98,14 @@ def run_self_test() -> None:
         ),
         (
             {"button_grid_alarm.h": "static const char *modes[3] = {\"home\", \"away\", \"disarm\"};\n"},
+            (),
+        ),
+        (
+            {"button_grid_actions.h": "ESP_LOGW(\"cover\", \"cover.stop_cover failed\");\n"},
+            (),
+        ),
+        (
+            {"button_grid_actions.h": "cover_tilt ? \"cover.set_cover_tilt_position\" : \"cover.set_cover_position\";\n"},
             (),
         ),
     )

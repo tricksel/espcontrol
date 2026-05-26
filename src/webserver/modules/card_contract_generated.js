@@ -512,18 +512,6 @@ var CARD_CONTRACT_CARDS = {
         "defaultValue": "label"
       }
     ],
-    "behavior": {
-      "lock": {
-        "commandServices": {
-          "lock": "lock.lock",
-          "unlock": "lock.unlock"
-        },
-        "toggleServices": {
-          "locked": "lock.unlock",
-          "default": "lock.lock"
-        }
-      }
-    },
     "default": {
       "entity": "",
       "label": "",
