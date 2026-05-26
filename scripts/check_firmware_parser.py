@@ -13,6 +13,7 @@ from tempfile import TemporaryDirectory
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_HEADER = ROOT / "components" / "espcontrol" / "button_grid_config.h"
 CONTRACT_HEADER = ROOT / "components" / "espcontrol" / "button_grid_contract_generated.h"
+CARD_RUNTIME_HEADER = ROOT / "components" / "espcontrol" / "button_grid_card_runtime.h"
 LAYOUT_HEADER = ROOT / "components" / "espcontrol" / "button_grid_layout.h"
 
 
@@ -146,6 +147,7 @@ def main() -> int:
         tmp_path = Path(tmp)
         (tmp_path / "button_grid_config_pure.h").write_text(pure_config_header(), encoding="utf-8")
         shutil.copy2(CONTRACT_HEADER, tmp_path / "button_grid_contract_generated.h")
+        shutil.copy2(CARD_RUNTIME_HEADER, tmp_path / "button_grid_card_runtime.h")
         shutil.copy2(LAYOUT_HEADER, tmp_path / "button_grid_layout.h")
         source = tmp_path / "check_firmware_parser.cpp"
         binary = tmp_path / "check_firmware_parser"

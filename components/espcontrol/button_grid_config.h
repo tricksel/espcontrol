@@ -52,6 +52,7 @@ constexpr int MAX_GRID_SLOTS = 25;
 constexpr int MAX_SUBPAGE_ITEMS = MAX_GRID_SLOTS * MAX_GRID_SLOTS;
 
 #include "button_grid_contract_generated.h"
+#include "button_grid_card_runtime.h"
 
 inline int bounded_grid_slots(int num_slots) {
   if (num_slots < 0) return 0;
@@ -132,23 +133,23 @@ struct ParsedCfg {
 };
 
 inline bool card_large_numbers_supported(const ParsedCfg &p) {
-  return card_contract_large_numbers_supported(p.type, p.precision);
+  return card_runtime_large_numbers_supported(p.type, p.precision);
 }
 
 inline bool brightness_slider_type(const std::string &type) {
-  return card_contract_is_brightness_slider_type(type);
+  return card_runtime_brightness_slider_type(type);
 }
 
 inline bool fan_card_type(const std::string &type) {
-  return card_contract_is_fan_card_type(type);
+  return card_runtime_fan_card_type(type);
 }
 
 inline const char *fan_card_default_icon_name(const std::string &type) {
-  return card_contract_fan_default_icon_name(type);
+  return card_runtime_fan_default_icon_name(type);
 }
 
 inline bool action_card_option_select_action(const std::string &action) {
-  return card_contract_is_option_select_action(action);
+  return card_runtime_option_select_action(action);
 }
 
 inline bool action_card_option_select(const ParsedCfg &p) {
