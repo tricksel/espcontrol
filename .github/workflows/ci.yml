@@ -114,7 +114,7 @@ jobs:
           bash scripts/prune_actions_cache.sh "${NPM_CACHE}" "${ESPCONTROL_NPM_CACHE_MAX_MB}" --strategy reset
 
       - name: Install browser runtime
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
 
       - run: npm run check:ci
 
