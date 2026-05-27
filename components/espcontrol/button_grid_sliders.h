@@ -252,8 +252,6 @@ inline lv_obj_t *setup_slider_widget(lv_obj_t *btn, uint32_t on_color, bool hori
   }
   lv_slider_set_range(slider, 0, 100);
   lv_slider_set_value(slider, 0, LV_ANIM_OFF);
-  lv_obj_update_layout(btn);
-  slider_fit_to_button(slider, btn, horizontal);
 
   lv_obj_set_style_bg_opa(slider, LV_OPA_TRANSP, LV_PART_MAIN);
   lv_obj_set_style_bg_opa(slider, LV_OPA_TRANSP,
