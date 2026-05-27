@@ -459,12 +459,12 @@ async function assertBackupImportSmoke(page, posts, slug) {
   await importBackup(page, backupFixture(slug, 20), "same-device-backup");
   await page.waitForSelector(".sp-banner.sp-success");
   assert((await page.locator(".sp-banner").textContent()).includes("Configuration imported successfully"), "same-device import succeeds");
-  await waitForPost(posts, { domain: "text", name: "button_on_color", action: "set", value: "AA5500" }, "backup color import", before);
-  await waitForPost(posts, { domain: "text", name: "button_3_config", action: "set" }, "backup subpage button config", before);
-  await waitForPost(posts, { domain: "text", name: "subpage_3_config", action: "set" }, "backup subpage config", before);
-  await waitForPost(posts, { domain: "select", name: "screen__timezone", action: "set", option: "Europe/London (GMT+0)" }, "backup timezone import", before);
-  await waitForPost(posts, { domain: "number", name: "screen__daytime_brightness", action: "set", value: "88" }, "backup brightness import", before);
-  await waitForPost(posts, { domain: "select", name: "screen__rotation", action: "set", option: "90" }, "backup rotation import", before);
+  await waitForPost(posts, { domain: "text", name: "Button On Color", action: "set", value: "AA5500" }, "backup color import", before);
+  await waitForPost(posts, { domain: "text", name: "Button 3 Config", action: "set" }, "backup subpage button config", before);
+  await waitForPost(posts, { domain: "text", name: "Subpage 3 Config", action: "set" }, "backup subpage config", before);
+  await waitForPost(posts, { domain: "select", name: "Screen: Timezone", action: "set", option: "Europe/London (GMT+0)" }, "backup timezone import", before);
+  await waitForPost(posts, { domain: "number", name: "Screen: Daytime Brightness", action: "set", value: "88" }, "backup brightness import", before);
+  await waitForPost(posts, { domain: "select", name: "Screen: Rotation", action: "set", option: "90" }, "backup rotation import", before);
 
   await importBackup(page, "{", "invalid-backup");
   await page.waitForSelector(".sp-banner.sp-error");
@@ -505,7 +505,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "button_1_config",
+    name: "Button 1 Config",
     action: "set",
     value: "switch.kitchen_main;Kitchen Main;Lightbulb;Lightbulb",
   }, "switch card edit", before);
@@ -516,7 +516,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "button_2_config",
+    name: "Button 2 Config",
     action: "set",
     value: "sensor.energy;Energy Usage;Gauge;Auto;sensor.energy;W;sensor;0",
   }, "sensor card edit", before);
@@ -527,14 +527,14 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "button_4_config",
+    name: "Button 4 Config",
     action: "set",
   }, "media card edit", before);
 
   await page.getByRole("button", { name: "Apply Configuration" }).click();
   await waitForPost(posts, {
     domain: "button",
-    name: "apply_configuration",
+    name: "Apply Configuration",
     action: "press",
   }, "apply configuration", before);
   assert.deepStrictEqual(errors, [], "browser errors were reported during edit interactions");

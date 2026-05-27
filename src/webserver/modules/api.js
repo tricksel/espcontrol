@@ -284,12 +284,15 @@ function hasRememberedPostPath(domain, name, objectIds) {
 }
 
 function entityPostUrls(domain, name, objectIds, action) {
-  var urls = rememberedPostUrls(domain, name, objectIds || [], action);
+  var urls = [];
+  uniquePush(urls, "/" + domain + "/" + encodeURIComponent(name) + "/" + action);
+  rememberedPostUrls(domain, name, objectIds || [], action).forEach(function (url) {
+    uniquePush(urls, url);
+  });
   (objectIds || []).forEach(function (objectId) {
     uniquePush(urls, "/" + domain + "/" + encodeURIComponent(objectId) + "/" + action);
   });
   uniquePush(urls, "/" + domain + "/" + encodeURIComponent(esphomeObjectId(name)) + "/" + action);
-  uniquePush(urls, "/" + domain + "/" + encodeURIComponent(name) + "/" + action);
   return urls;
 }
 
