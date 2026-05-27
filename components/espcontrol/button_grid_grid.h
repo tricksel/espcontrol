@@ -228,7 +228,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     return;
   }
   if (p.type == "todo") {
-    setup_todo_card(s, p, palette.has_sensor_color, palette.sensor_val);
+    setup_todo_card(s, p, palette.off_val);
     return;
   }
   if (p.type == "media") {

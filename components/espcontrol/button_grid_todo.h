@@ -102,12 +102,9 @@ inline void todo_apply_card_text(TodoCardCtx *ctx) {
   }
 }
 
-inline void setup_todo_card(BtnSlot &s, const ParsedCfg &p,
-                            bool has_sensor_color, uint32_t sensor_val) {
-  if (has_sensor_color) {
-    lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
-      static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
-  }
+inline void setup_todo_card(BtnSlot &s, const ParsedCfg &p, uint32_t secondary_color) {
+  lv_obj_set_style_bg_color(s.btn, lv_color_hex(secondary_color),
+    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
   bool show_count = todo_card_show_count(p);
   if (show_count) {
     lv_obj_add_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
