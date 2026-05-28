@@ -36,6 +36,7 @@ struct TodoCardCtx {
 struct TodoItemClick {
   TodoCardCtx *ctx = nullptr;
   std::string key;
+  bool completed = false;
 };
 
 struct TodoModalUi {
@@ -47,6 +48,8 @@ struct TodoModalUi {
   lv_obj_t *status_lbl = nullptr;
   TodoCardCtx *active = nullptr;
   TodoItemClick item_clicks[TODO_MAX_ITEMS];
+  int visible_item_count = 0;
+  bool more_items_visible = false;
 };
 
 inline TodoModalUi &todo_modal_ui() {
@@ -173,6 +176,8 @@ inline void todo_modal_clear_items() {
   TodoModalUi &ui = todo_modal_ui();
   if (ui.list) lv_obj_clean(ui.list);
   ui.status_lbl = nullptr;
+  ui.visible_item_count = 0;
+  ui.more_items_visible = false;
   for (int i = 0; i < TODO_MAX_ITEMS; i++) ui.item_clicks[i] = TodoItemClick();
 }
 
@@ -313,6 +318,7 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
   int click_index = 0;
   for (const auto &item : items) {
     if (item.more) {
+      ui.more_items_visible = true;
       std::string label = item.summary.empty() ? "More items" : item.summary + " more";
       todo_modal_create_list_item_row(
         ui.list, label, false, false, false, row_h, content_w,
@@ -327,11 +333,20 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
       ctx->label_font, ctx->icon_font, ctx->width_compensation_percent);
     ui.item_clicks[click_index].ctx = ctx;
     ui.item_clicks[click_index].key = todo_item_action_key(item);
+    ui.visible_item_count++;
     lv_obj_add_event_cb(row, [](lv_event_t *e) {
       TodoItemClick *click = (TodoItemClick *)lv_event_get_user_data(e);
+      if (!click || !click->ctx || click->completed) return;
+      click->completed = true;
       lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
-      if (target) lv_obj_add_state(target, LV_STATE_DISABLED);
-      if (click && click->ctx) send_todo_complete_action(click->ctx, click->key);
+      if (target) {
+        lv_obj_add_state(target, LV_STATE_DISABLED);
+        lv_obj_add_flag(target, LV_OBJ_FLAG_HIDDEN);
+      }
+      TodoModalUi &ui = todo_modal_ui();
+      if (ui.visible_item_count > 0) ui.visible_item_count--;
+      if (ui.visible_item_count == 0 && !ui.more_items_visible) todo_modal_set_status("All done");
+      send_todo_complete_action(click->ctx, click->key);
     }, LV_EVENT_CLICKED, &ui.item_clicks[click_index]);
     click_index++;
   }
