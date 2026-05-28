@@ -306,6 +306,7 @@ const wideClockPreview = hooks.buttonTypePreviewFor("clock", {
   clockFormat: "24h",
 });
 assert(wideClockPreview.iconHtml.includes("sp-sensor-preview-large"), "clock wide preview supports large numbers");
+assert.strictEqual(wideClockPreview.buttonClass, "sp-clock-wide-large", "clock wide large preview is left aligned");
 assert.strictEqual(wideClockPreview.labelHtml, "", "clock wide preview does not render a date label");
 
 const timezonePreview = hooks.buttonTypePreviewFor("timezone", {
@@ -327,6 +328,7 @@ const wideTimezonePreview = hooks.buttonTypePreviewFor("timezone", {
   clockFormat: "24h",
 });
 assert(wideTimezonePreview.iconHtml.includes("sp-sensor-preview-large"), "world clock wide preview supports large numbers");
+assert.strictEqual(wideTimezonePreview.buttonClass, "sp-date-time-wide-large", "world clock wide large preview stays centered");
 assert.strictEqual(wideTimezonePreview.labelHtml, "", "world clock wide large preview hides the city label");
 
 const timezoneSamples = [

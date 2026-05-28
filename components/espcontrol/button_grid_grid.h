@@ -131,9 +131,10 @@ inline bool wide_large_date_time_card_layout(int row_span, int col_span) {
   return row_span == 1 && col_span == 2;
 }
 
-inline void apply_wide_large_date_time_card_layout(const BtnSlot &s) {
+inline void apply_wide_large_date_time_card_layout(const BtnSlot &s,
+                                                   lv_align_t align = LV_ALIGN_CENTER) {
   if (s.text_lbl) lv_obj_add_flag(s.text_lbl, LV_OBJ_FLAG_HIDDEN);
-  if (s.sensor_container) lv_obj_align(s.sensor_container, LV_ALIGN_CENTER, 0, 0);
+  if (s.sensor_container) lv_obj_align(s.sensor_container, align, 0, 0);
 }
 
 inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
@@ -180,7 +181,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
       if (wide_large_date_time_card_layout(row_span, col_span)) {
-        apply_wide_large_date_time_card_layout(s);
+        apply_wide_large_date_time_card_layout(s, LV_ALIGN_LEFT_MID);
       }
     }
     return;

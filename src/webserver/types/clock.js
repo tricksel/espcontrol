@@ -37,7 +37,7 @@ registerButtonType("clock", {
     var time = dateTimeCardTimeParts();
     return {
       buttonClass: cardLargeNumbersHidePreviewLabel(b, helpers, DATE_TIME_CARD_METADATA)
-        ? "sp-date-time-wide-large"
+        ? "sp-clock-wide-large"
         : undefined,
       iconHtml: cardSensorPreviewHtml(b, helpers, time.value, time.unit),
       labelHtml: "",
