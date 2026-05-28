@@ -33,6 +33,9 @@ api:
     - delay: 10s
     - lambda: |-
         refresh_weather_forecast_cards();
+  on_client_disconnected:
+    - lambda: |-
+        todo_cancel_pending_request("api disconnected");
 
 interval:
   - interval: 1h

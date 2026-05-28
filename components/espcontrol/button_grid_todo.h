@@ -81,6 +81,12 @@ inline void todo_cancel_request(uint32_t call_id, const char *reason) {
   ha_cancel_action_response_callback(call_id, reason);
 }
 
+inline void todo_cancel_pending_request(const char *reason) {
+  uint32_t call_id = todo_request_state().call_id;
+  if (call_id == 0) return;
+  todo_cancel_request(call_id, reason);
+}
+
 inline void todo_cancel_stale_request() {
   TodoRequestState &state = todo_request_state();
   if (state.call_id == 0) return;

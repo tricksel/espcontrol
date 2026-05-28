@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).resolve().parents[1]
 FIRMWARE_DIR = ROOT / "components" / "espcontrol"
+CORE_INFRA_PATH = ROOT / "common" / "device" / "core_infra.yaml"
 HA_BOUNDARY_ALLOWLIST = {
     "button_grid_ha.h",
 }
@@ -109,10 +110,28 @@ def firmware_todo_request_errors(firmware_dir: Path, root: Path) -> list[str]:
     return errors
 
 
+def firmware_todo_disconnect_errors(firmware_dir: Path, core_infra_path: Path, root: Path) -> list[str]:
+    todo_path = firmware_dir / "button_grid_todo.h"
+    if not todo_path.exists() or not core_infra_path.exists():
+        return []
+    todo_rel = todo_path.relative_to(root)
+    core_rel = core_infra_path.relative_to(root)
+    todo_text = todo_path.read_text(encoding="utf-8")
+    core_text = core_infra_path.read_text(encoding="utf-8")
+    errors: list[str] = []
+
+    if "todo_cancel_pending_request" not in todo_text:
+        errors.append(f"{todo_rel}: expose a helper to cancel pending todo requests")
+    if "on_client_disconnected:" not in core_text or "todo_cancel_pending_request" not in core_text:
+        errors.append(f"{core_rel}: cancel pending todo requests when the HA API disconnects")
+    return errors
+
+
 def run_scan() -> int:
     errors = firmware_ha_binding_errors(FIRMWARE_DIR, ROOT)
     errors.extend(firmware_ha_boundary_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_todo_request_errors(FIRMWARE_DIR, ROOT))
+    errors.extend(firmware_todo_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     if errors:
         print("Firmware Home Assistant binding check failed:")
         for error in errors:
@@ -160,6 +179,28 @@ def expect_todo_request_errors(name: str, text: str, expected: tuple[str, ...]) 
         (firmware_dir / "button_grid_todo.h").write_text(text, encoding="utf-8")
 
         errors = firmware_todo_request_errors(firmware_dir, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_todo_disconnect_errors(
+    name: str,
+    todo_text: str,
+    core_text: str,
+    expected: tuple[str, ...],
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        firmware_dir = root / "components" / "espcontrol"
+        core_path = root / "common" / "device" / "core_infra.yaml"
+        firmware_dir.mkdir(parents=True)
+        core_path.parent.mkdir(parents=True)
+        (firmware_dir / "button_grid_todo.h").write_text(todo_text, encoding="utf-8")
+        core_path.write_text(core_text, encoding="utf-8")
+
+        errors = firmware_todo_disconnect_errors(firmware_dir, core_path, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -305,6 +346,12 @@ def run_self_test() -> int:
         '  ha_register_action_response_callback(other_call_id, cb);\n'
         '}\n',
         ("only todo list loading should register a response callback",),
+    )
+    expect_todo_disconnect_errors(
+        "missing disconnect cleanup",
+        "inline void todo_cancel_pending_request(const char *reason) {}\n",
+        "api:\n  on_client_connected:\n    - lambda: refresh_weather_forecast_cards();\n",
+        ("cancel pending todo requests when the HA API disconnects",),
     )
     print("Firmware Home Assistant binding self-tests passed.")
     return 0
