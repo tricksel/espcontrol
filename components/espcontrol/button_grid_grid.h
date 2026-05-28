@@ -168,6 +168,11 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_door_window_card(s, p, palette.has_sensor_color, palette.sensor_val);
     return;
   }
+  if (p.type == "presence") {
+    if (p.sensor.empty()) return;
+    setup_presence_card(s, p, palette.has_sensor_color, palette.sensor_val);
+    return;
+  }
   if (p.type == "calendar") {
     setup_calendar_card(s, p, palette.has_sensor_color, palette.sensor_val);
     if (large_date_time_card_layout(row_span, col_span) &&
@@ -321,6 +326,16 @@ inline bool bind_basic_sensor_card(BtnSlot &s, const ParsedCfg &p,
       subscribe_door_window_state(s.btn, s.icon_lbl, p.sensor,
         door_window_closed_icon(p), door_window_open_icon(p),
         door_window_active_color_enabled(p), palette.on_val, palette.sensor_val);
+      if (p.label.empty())
+        subscribe_friendly_name(s.text_lbl, p.sensor);
+    }
+    return true;
+  }
+  if (p.type == "presence") {
+    if (!p.sensor.empty()) {
+      subscribe_presence_state(s.btn, s.icon_lbl, p.sensor,
+        presence_clear_icon(p), presence_detected_icon(p),
+        presence_active_color_enabled(p), palette.on_val, palette.sensor_val);
       if (p.label.empty())
         subscribe_friendly_name(s.text_lbl, p.sensor);
     }

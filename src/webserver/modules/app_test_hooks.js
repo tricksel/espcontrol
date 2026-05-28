@@ -53,6 +53,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     lightTempLegacySensorValues: lightTempLegacySensorValues,
     lightTempSensorNeedsCleanup: lightTempSensorNeedsCleanup,
     doorWindowActiveColorEnabled: doorWindowActiveColorEnabled,
+    presenceActiveColorEnabled: presenceActiveColorEnabled,
     garageModeOptionValues: garageModeOptionValues,
     normalizeGarageMode: normalizeGarageMode,
     normalizeGarageLabelDisplayMode: normalizeGarageLabelDisplayMode,

@@ -12,7 +12,7 @@ struct SubpageBtn {
   std::string icon_on;
   std::string sensor;     // sensor entity, cover/internal mode, or action name
   std::string unit;
-  std::string type;       // button type: "" (toggle), action, sensor, door_window, calendar, timezone, weather_forecast, slider, light_brightness, light_switch, fan_*, cover, garage, lock, alarm, alarm_action, media, push, webhook, todo, internal, subpage
+  std::string type;       // button type: "" (toggle), action, sensor, door_window, presence, calendar, timezone, weather_forecast, slider, light_brightness, light_switch, fan_*, cover, garage, lock, alarm, alarm_action, media, push, webhook, todo, internal, subpage
   std::string precision;  // decimal places for sensor display; "text" = text sensor mode
   std::string options;    // comma-delimited card options
 };
@@ -159,6 +159,14 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
     if (b.icon_on.empty() || b.icon_on == "Auto") b.icon_on = door_window_open_icon_name(b.precision);
     b.options = door_window_card_options_normalized(b.options);
   }
+  if (b.type == "presence") {
+    b.entity.clear();
+    b.unit.clear();
+    b.precision.clear();
+    if (b.icon.empty() || b.icon == "Auto") b.icon = "Motion Sensor Off";
+    if (b.icon_on.empty() || b.icon_on == "Auto") b.icon_on = "Motion Sensor";
+    b.options = presence_card_options_normalized(b.options);
+  }
   ParsedCfg p;
   p.type = b.type;
   p.precision = b.precision;
@@ -167,7 +175,7 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
       b.type != "climate" && b.type != "garage" &&
       b.type != "webhook" &&
       b.type != "todo" &&
-      b.type != "sensor" && b.type != "door_window" &&
+      b.type != "sensor" && b.type != "door_window" && b.type != "presence" &&
       b.type != "subpage" &&
       !fan_card_type(b.type) && !card_large_numbers_supported(p)) {
     b.options.clear();

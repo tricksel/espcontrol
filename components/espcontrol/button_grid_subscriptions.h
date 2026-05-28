@@ -121,6 +121,28 @@ inline void subscribe_door_window_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
   );
 }
 
+inline void subscribe_presence_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
+                                     const std::string &sensor_id,
+                                     const char *clear_icon, const char *detected_icon,
+                                     bool active_color,
+                                     uint32_t on_color,
+                                     uint32_t sensor_color) {
+  ha_subscribe_state(
+    sensor_id,
+    std::function<void(esphome::StringRef)>(
+      [btn_ptr, icon_lbl, clear_icon, detected_icon, active_color, on_color, sensor_color](esphome::StringRef state) {
+        bool unavailable = ha_state_unavailable_ref(state);
+        apply_control_availability(btn_ptr, btn_ptr, !unavailable, false);
+        bool detected = !unavailable && presence_detected_ref(state);
+        lv_label_set_text(icon_lbl, detected ? detected_icon : clear_icon);
+        if (btn_ptr && active_color) {
+          lv_obj_set_style_bg_color(btn_ptr, lv_color_hex(detected ? on_color : sensor_color),
+            static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+        }
+      })
+  );
+}
+
 inline void subscribe_weather_state(lv_obj_t *icon_lbl, lv_obj_t *text_lbl, const std::string &entity_id) {
   ha_subscribe_state(
     entity_id,

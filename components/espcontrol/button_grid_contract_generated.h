@@ -181,6 +181,7 @@ inline const char *card_contract_card_label(const std::string &type) {
   if (type == "climate") return "Climate";
   if (type == "cover") return "Cover";
   if (type == "door_window") return "Doors & Windows";
+  if (type == "presence") return "Presence";
   if (type == "fan_direction") return "Fans";
   if (type == "fan_oscillate") return "Fans";
   if (type == "fan_preset") return "Fans";
@@ -216,6 +217,7 @@ inline bool card_contract_allow_in_subpage(const std::string &type) {
   if (type == "climate") return true;
   if (type == "cover") return true;
   if (type == "door_window") return true;
+  if (type == "presence") return true;
   if (type == "fan_direction") return true;
   if (type == "fan_oscillate") return true;
   if (type == "fan_preset") return true;
@@ -251,6 +253,7 @@ inline const char *card_contract_default_icon_name(const std::string &type) {
   if (type == "climate") return "Thermostat";
   if (type == "cover") return "Blinds";
   if (type == "door_window") return "Door";
+  if (type == "presence") return "Motion Sensor Off";
   if (type == "fan_direction") return "Swap Horizontal";
   if (type == "fan_oscillate") return "Fan";
   if (type == "fan_preset") return "Fan Auto";
@@ -286,6 +289,7 @@ inline const char *card_contract_default_icon_on_name(const std::string &type) {
   if (type == "climate") return "Auto";
   if (type == "cover") return "Blinds Open";
   if (type == "door_window") return "Door Open";
+  if (type == "presence") return "Motion Sensor";
   if (type == "fan_direction") return "Auto";
   if (type == "fan_oscillate") return "Auto";
   if (type == "fan_preset") return "Auto";
@@ -348,6 +352,7 @@ inline const char *card_contract_subpage_type_code(const std::string &type) {
   if (type == "timezone") return "T";
   if (type == "sensor") return "S";
   if (type == "door_window") return "X";
+  if (type == "presence") return "PR";
   if (type == "weather") return "W";
   if (type == "weather_forecast") return "F";
   if (type == "option_select") return "U";
@@ -382,6 +387,7 @@ inline std::string card_contract_subpage_type_from_code(const std::string &code)
   if (code == "T") return "timezone";
   if (code == "S") return "sensor";
   if (code == "X") return "door_window";
+  if (code == "PR") return "presence";
   if (code == "W") return "weather";
   if (code == "F") return "weather_forecast";
   if (code == "U") return "option_select";

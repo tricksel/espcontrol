@@ -819,6 +819,11 @@
       "mdi": "motion-sensor"
     },
     {
+      "name": "Motion Sensor Off",
+      "codepoint": "F1435",
+      "mdi": "motion-sensor-off"
+    },
+    {
       "name": "Movie Roll",
       "codepoint": "F07DE",
       "mdi": "movie-roll"

@@ -18,6 +18,7 @@ This generated reference lists stable setup facts from the shared card contract.
 | Climate | climate | climate | Yes | Own picker item | Label Display: label, status, actual, target; Icon & Temperatures: icon, actual, target; Large Temperature Numbers | Visible |
 | Cover | cover | cover | Yes | Own picker item | Type: default, tilt, toggle, open, close, stop, set_position; Position: 0-100 | Visible |
 | Doors & Windows | door_window | binary_sensor, sensor | Yes | Own picker item | None | Visible |
+| Presence | presence | binary_sensor, sensor, text_sensor | Yes | Own picker item | None | Visible |
 | Fans | fan_direction | fan | Yes | Fans (fan_speed) | None | Experimental |
 | Fans | fan_oscillate | fan | Yes | Fans (fan_speed) | None | Experimental |
 | Fans | fan_preset | fan | Yes | Fans (fan_speed) | None | Experimental |

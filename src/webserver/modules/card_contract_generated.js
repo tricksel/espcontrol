@@ -438,6 +438,26 @@ var CARD_CONTRACT_CARDS = {
       "options": "active_color"
     }
   },
+  "presence": {
+    "label": "Presence",
+    "allowInSubpage": true,
+    "domains": [
+      "binary_sensor",
+      "sensor",
+      "text_sensor"
+    ],
+    "default": {
+      "entity": "",
+      "label": "",
+      "icon": "Motion Sensor Off",
+      "icon_on": "Motion Sensor",
+      "sensor": "",
+      "unit": "",
+      "type": "presence",
+      "precision": "",
+      "options": "active_color"
+    }
+  },
   "fan_direction": {
     "label": "Fans",
     "allowInSubpage": true,
@@ -1135,6 +1155,7 @@ var CARD_CONTRACT_SUBPAGE_TYPE_CODES = {
   "timezone": "T",
   "sensor": "S",
   "door_window": "X",
+  "presence": "PR",
   "weather": "W",
   "weather_forecast": "F",
   "option_select": "U",
@@ -1167,6 +1188,7 @@ var CARD_CONTRACT_SUBPAGE_TYPES_BY_CODE = {
   "T": "timezone",
   "S": "sensor",
   "X": "door_window",
+  "PR": "presence",
   "W": "weather",
   "F": "weather_forecast",
   "U": "option_select",

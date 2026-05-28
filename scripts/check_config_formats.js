@@ -59,6 +59,7 @@ function subpageTypeFromCode(code) {
     T: "timezone",
     S: "sensor",
     X: "door_window",
+    PR: "presence",
     W: "weather",
     F: "weather_forecast",
     B: "fan_switch",
@@ -704,6 +705,35 @@ assertButtonMigration(
     sensor: "binary_sensor.kitchen_window",
     type: "door_window",
     precision: "door",
+    options: "active_color",
+  }
+);
+
+assertButtonRoundTrip(hooks, "presence card", {
+  entity: "",
+  label: "Living Room",
+  icon: "Motion Sensor Off",
+  icon_on: "Motion Sensor",
+  sensor: "binary_sensor.living_room_presence",
+  unit: "",
+  type: "presence",
+  precision: "",
+  options: "active_color",
+}, false);
+assert.strictEqual(
+  hooks.presenceActiveColorEnabled(hooks.parseButtonConfig(";;Motion Sensor Off;Motion Sensor;binary_sensor.living_room_presence;;presence;;active_color")),
+  true,
+  "presence active colour enabled");
+assertButtonMigration(
+  hooks,
+  "presence defaults icons",
+  ";;Auto;Auto;text_sensor.mmwave_presence;;presence;;large_numbers,active_color",
+  {
+    icon: "Motion Sensor Off",
+    icon_on: "Motion Sensor",
+    sensor: "text_sensor.mmwave_presence",
+    type: "presence",
+    precision: "",
     options: "active_color",
   }
 );

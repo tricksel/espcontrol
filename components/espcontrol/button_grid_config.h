@@ -273,6 +273,10 @@ inline std::string door_window_card_options_normalized(const std::string &option
   return cfg_option_token_present(options, "active_color") ? "active_color" : "";
 }
 
+inline std::string presence_card_options_normalized(const std::string &options) {
+  return cfg_option_token_present(options, "active_color") ? "active_color" : "";
+}
+
 inline std::string normalize_todo_count_display(const std::string &value) {
   return value == "icon" ? "icon" : "count";
 }
@@ -575,7 +579,15 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = door_window_open_icon_name(p.precision);
     p.options = door_window_card_options_normalized(p.options);
   }
-  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "media" && p.type != "subpage" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
+  if (p.type == "presence") {
+    p.entity.clear();
+    p.unit.clear();
+    p.precision.clear();
+    if (p.icon.empty() || p.icon == "Auto") p.icon = "Motion Sensor Off";
+    if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Motion Sensor";
+    p.options = presence_card_options_normalized(p.options);
+  }
+  if (!p.type.empty() && p.type != "action" && p.type != "alarm" && p.type != "alarm_action" && p.type != "climate" && p.type != "garage" && p.type != "webhook" && p.type != "todo" && p.type != "sensor" && p.type != "door_window" && p.type != "presence" && p.type != "media" && p.type != "subpage" && !fan_card_type(p.type) && !card_large_numbers_supported(p)) {
     p.options.clear();
   }
   if (p.type == "sensor") {
@@ -669,6 +681,10 @@ inline bool sensor_active_color_enabled(const ParsedCfg &p) {
 
 inline bool door_window_active_color_enabled(const ParsedCfg &p) {
   return p.type == "door_window" && cfg_option_enabled(p.options, "active_color");
+}
+
+inline bool presence_active_color_enabled(const ParsedCfg &p) {
+  return p.type == "presence" && cfg_option_enabled(p.options, "active_color");
 }
 
 inline bool switch_confirmation_enabled(const ParsedCfg &p) {
@@ -830,6 +846,11 @@ inline bool is_entity_on_ref(esphome::StringRef state) {
          value == "open" || value == "opened" ||
          value == "opening" || value == "closing" ||
          value == "unlocked" || value == "unlocking" || value == "jammed";
+}
+
+inline bool presence_detected_ref(esphome::StringRef state) {
+  std::string value = normalized_state_text(state);
+  return value == "detected" || is_entity_on_ref(state);
 }
 
 inline bool ha_state_unavailable_ref(esphome::StringRef state) {
