@@ -89,9 +89,11 @@ registerButtonType("timezone", {
   renderPreview: function (b, helpers) {
     var tz = b.entity || (typeof state !== "undefined" && state.timezone) || "UTC (GMT+0)";
     var time = timezoneCardTimeParts(tz);
+    var hideLabel = cardLargeNumbersHidePreviewLabel(b, helpers, DATE_TIME_CARD_METADATA);
     return {
+      buttonClass: hideLabel ? "sp-date-time-wide-large" : undefined,
       iconHtml: cardSensorPreviewHtml(b, helpers, time.value, time.unit),
-      labelHtml: cardBadgeLabelHtml(helpers, timezoneCardCityLabel(tz), DATE_TIME_CARD_METADATA.preview.timezoneBadge),
+      labelHtml: hideLabel ? "" : cardBadgeLabelHtml(helpers, timezoneCardCityLabel(tz), DATE_TIME_CARD_METADATA.preview.timezoneBadge),
     };
   },
 });

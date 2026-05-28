@@ -117,6 +117,39 @@ function cardMetadataValue(value, b, helpers) {
   return typeof value === "function" ? value(b, helpers) : value;
 }
 
+function cardLargeNumbersSupportsCardSize(b, helpers, metadata) {
+  helpers = helpers || {};
+  metadata = metadata || {};
+  var large = metadata.largeNumbers || {};
+  var cardSize = helpers.cardSize || 1;
+  if (large.supportedCardSizes) {
+    return large.supportedCardSizes.indexOf(cardSize) !== -1;
+  }
+  if (large.supportedCardSize) {
+    return !!cardMetadataValue(large.supportedCardSize, b, helpers);
+  }
+  return cardSize === 4;
+}
+
+function cardLargeNumbersMetadata(b) {
+  var typeDef = BUTTON_TYPES[(b && b.type) || ""] || null;
+  return typeDef && typeDef.cardMetadata ? typeDef.cardMetadata : {};
+}
+
+function cardLargeNumbersActiveForCardSize(b, helpers, metadata) {
+  return cardLargeNumbersEnabled(b) && cardLargeNumbersSupportsCardSize(b, helpers, metadata || cardLargeNumbersMetadata(b));
+}
+
+function cardLargeNumbersHidePreviewLabel(b, helpers, metadata) {
+  if (!cardLargeNumbersActiveForCardSize(b, helpers, metadata)) return false;
+  metadata = metadata || cardLargeNumbersMetadata(b);
+  var large = metadata.largeNumbers || {};
+  var cardSize = (helpers && helpers.cardSize) || 1;
+  if (large.hideLabelCardSizes) return large.hideLabelCardSizes.indexOf(cardSize) !== -1;
+  if (large.hideLabel) return !!cardMetadataValue(large.hideLabel, b, helpers || {});
+  return false;
+}
+
 function applyCardMetadataFields(b, helpers, fields) {
   fields = fields || {};
   for (var key in fields) {
@@ -145,7 +178,7 @@ function renderCardModeSelector(panel, b, helpers, metadata) {
 function renderCardLargeNumbersToggle(panel, b, helpers, metadata) {
   metadata = metadata || {};
   var large = metadata.largeNumbers || {};
-  if (helpers.cardSize !== 4) return null;
+  if (!cardLargeNumbersSupportsCardSize(b, helpers, metadata)) return null;
   if (large.isVisible && !large.isVisible(b, helpers)) return null;
   var toggle = helpers.toggleRow(
     large.label || "Large Numbers",
@@ -282,7 +315,7 @@ function renderCardSegmentControl(panel, b, helpers, metadata) {
 
 function cardSensorPreviewHtml(b, helpers, value, unit, extraClass, valueClass) {
   var className = "sp-sensor-preview" + (extraClass ? " " + extraClass : "") +
-    (helpers.cardSize === 4 && cardLargeNumbersEnabled(b) ? " sp-sensor-preview-large" : "");
+    (cardLargeNumbersActiveForCardSize(b, helpers) ? " sp-sensor-preview-large" : "");
   return '<span class="' + className + '">' +
     '<span class="sp-sensor-value' + (valueClass ? " " + valueClass : "") + '">' + helpers.escHtml(value) + '</span>' +
     (unit != null ? '<span class="sp-sensor-unit">' + helpers.escHtml(unit) + '</span>' : "") +

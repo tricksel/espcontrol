@@ -18,6 +18,8 @@ var DATE_TIME_CARD_METADATA = {
   largeNumbers: {
     label: "Large Date / Time Numbers",
     idSuffix: "large-date-time-numbers",
+    supportedCardSizes: [3, 4],
+    hideLabelCardSizes: [3],
   },
   preview: {
     dateBadge: "calendar-month",
@@ -109,6 +111,8 @@ registerButtonType("calendar", {
   renderPreview: function (b, helpers) {
     var now = new Date();
     var isDateTime = b.precision === "datetime";
+    var hideLabel = cardLargeNumbersHidePreviewLabel(b, helpers, DATE_TIME_CARD_METADATA);
+    var buttonClass = hideLabel ? "sp-date-time-wide-large" : undefined;
     var day = String(now.getDate());
     var month = typeof monthNameForIndex === "function"
       ? monthNameForIndex(now.getMonth())
@@ -129,14 +133,16 @@ registerButtonType("calendar", {
       }
 
       return {
+        buttonClass: buttonClass,
         iconHtml: cardSensorPreviewHtml(b, helpers, timeValue, null),
-        labelHtml: cardBadgeLabelHtml(helpers, day + " " + month, DATE_TIME_CARD_METADATA.preview.dateBadge),
+        labelHtml: hideLabel ? "" : cardBadgeLabelHtml(helpers, day + " " + month, DATE_TIME_CARD_METADATA.preview.dateBadge),
       };
     }
 
     return {
+      buttonClass: buttonClass,
       iconHtml: cardSensorPreviewHtml(b, helpers, day, null),
-      labelHtml: cardBadgeLabelHtml(helpers, month, DATE_TIME_CARD_METADATA.preview.dateBadge),
+      labelHtml: hideLabel ? "" : cardBadgeLabelHtml(helpers, month, DATE_TIME_CARD_METADATA.preview.dateBadge),
     };
   },
 });

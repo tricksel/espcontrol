@@ -258,6 +258,17 @@ const dateTimePreview = hooks.buttonTypePreviewFor("calendar", {
 assert(dateTimePreview.iconHtml.includes("sp-sensor-preview-large"), "date/time preview supports large numbers");
 assert(previewSensorValue(dateTimePreview).includes(":"), "date/time preview renders a time value");
 
+const wideDateTimePreview = hooks.buttonTypePreviewFor("calendar", {
+  type: "calendar",
+  precision: "datetime",
+  options: "large_numbers",
+}, {
+  cardSize: 3,
+  clockFormat: "24h",
+});
+assert(wideDateTimePreview.iconHtml.includes("sp-sensor-preview-large"), "date/time wide preview supports large numbers");
+assert.strictEqual(wideDateTimePreview.labelHtml, "", "date/time wide large preview hides the date label");
+
 const timezonePreview = hooks.buttonTypePreviewFor("timezone", {
   entity: "America/New_York (GMT-5)",
   type: "timezone",
@@ -267,6 +278,17 @@ const timezonePreview = hooks.buttonTypePreviewFor("timezone", {
 });
 assert(timezonePreview.labelHtml.includes("New York"), "world clock preview uses the city label");
 assert(timezonePreview.labelHtml.includes("mdi-map-clock"), "world clock preview uses the map clock badge");
+
+const wideTimezonePreview = hooks.buttonTypePreviewFor("timezone", {
+  entity: "America/New_York (GMT-5)",
+  type: "timezone",
+  options: "large_numbers",
+}, {
+  cardSize: 3,
+  clockFormat: "24h",
+});
+assert(wideTimezonePreview.iconHtml.includes("sp-sensor-preview-large"), "world clock wide preview supports large numbers");
+assert.strictEqual(wideTimezonePreview.labelHtml, "", "world clock wide large preview hides the city label");
 
 const timezoneSamples = [
   "UTC (GMT+0)",
@@ -315,6 +337,16 @@ const sensorNumericPreview = hooks.buttonTypePreviewFor("sensor", {
 assert(sensorNumericPreview.iconHtml.includes("sp-sensor-preview-large"), "sensor numeric preview supports large numbers");
 assert(sensorNumericPreview.labelHtml.includes("mdi-gauge"), "sensor numeric preview uses the gauge badge");
 assert(sensorNumericPreview.iconHtml.includes("\u00b0C"), "sensor numeric preview includes the unit");
+
+const wideSensorNumericPreview = hooks.buttonTypePreviewFor("sensor", {
+  sensor: "sensor.office_temperature",
+  label: "Office",
+  unit: "\u00b0C",
+  type: "sensor",
+  precision: "1",
+  options: "large_numbers",
+}, { cardSize: 3 });
+assert(!wideSensorNumericPreview.iconHtml.includes("sp-sensor-preview-large"), "sensor wide preview keeps large numbers limited to 2x2");
 
 const sensorTextPreview = hooks.buttonTypePreviewFor("sensor", {
   sensor: "sensor.washer_state",

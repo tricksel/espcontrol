@@ -118,6 +118,24 @@ inline void apply_large_sensor_number_style(const BtnSlot &s, const lv_font_t *l
   }
 }
 
+inline bool large_number_square_card_layout(int row_span, int col_span) {
+  return row_span == 2 && col_span == 2;
+}
+
+inline bool large_date_time_card_layout(int row_span, int col_span) {
+  return large_number_square_card_layout(row_span, col_span) ||
+         (row_span == 1 && col_span == 2);
+}
+
+inline bool wide_large_date_time_card_layout(int row_span, int col_span) {
+  return row_span == 1 && col_span == 2;
+}
+
+inline void apply_wide_large_date_time_card_layout(const BtnSlot &s) {
+  if (s.text_lbl) lv_obj_add_flag(s.text_lbl, LV_OBJ_FLAG_HIDDEN);
+  if (s.sensor_container) lv_obj_align(s.sensor_container, LV_ALIGN_CENTER, 0, 0);
+}
+
 inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
                               const GridConfig &cfg,
                               const CardPalette &palette,
@@ -127,6 +145,8 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   apply_button_colors(s.btn, palette.has_on, palette.on_val,
     palette.has_off, palette.off_val);
   if (s.unit_lbl) lv_obj_set_style_translate_y(s.unit_lbl, 0, LV_PART_MAIN);
+  if (s.text_lbl) lv_obj_clear_flag(s.text_lbl, LV_OBJ_FLAG_HIDDEN);
+  if (s.sensor_container) lv_obj_align(s.sensor_container, LV_ALIGN_TOP_LEFT, 0, 0);
 
   if (is_text_sensor_card(p)) {
     setup_text_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
@@ -135,7 +155,7 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   if (p.type == "sensor") {
     if (p.sensor.empty()) return;
     setup_sensor_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (row_span == 2 && col_span == 2 &&
+    if (large_number_square_card_layout(row_span, col_span) &&
         sensor_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
@@ -149,26 +169,32 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
   }
   if (p.type == "calendar") {
     setup_calendar_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (row_span == 2 && col_span == 2 &&
+    if (large_date_time_card_layout(row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
+      if (wide_large_date_time_card_layout(row_span, col_span)) {
+        apply_wide_large_date_time_card_layout(s);
+      }
     }
     return;
   }
   if (p.type == "timezone") {
     setup_timezone_card(s, p, palette.has_sensor_color, palette.sensor_val);
-    if (row_span == 2 && col_span == 2 &&
+    if (large_date_time_card_layout(row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
+      if (wide_large_date_time_card_layout(row_span, col_span)) {
+        apply_wide_large_date_time_card_layout(s);
+      }
     }
     return;
   }
   if (weather_card_shows_forecast(p)) {
     setup_weather_forecast_card(s, p, palette.has_sensor_color, palette.sensor_val,
       display_main_width_percent(display));
-    if (row_span == 2 && col_span == 2 &&
+    if (large_number_square_card_layout(row_span, col_span) &&
         card_large_numbers_enabled(p) && display_large_sensor_font(display)) {
       apply_large_sensor_number_style(
         s, display_large_sensor_font(display), display_large_sensor_unit_offset_percent(display));
