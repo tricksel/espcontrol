@@ -1073,7 +1073,7 @@ inline uint32_t next_weather_forecast_call_id() {
 
 inline void request_weather_forecast_entity(const std::string &entity_id,
                                             const std::string &day) {
-  if (!weather_forecast_entity_id_safe(entity_id) || !ha_api_available()) {
+  if (!weather_forecast_entity_id_safe(entity_id) || !ha_api_state_connected()) {
     apply_weather_forecast_to_entity(entity_id, day, false, 0, 0, "");
     return;
   }
@@ -1090,7 +1090,7 @@ inline void request_weather_forecast_entity(const std::string &entity_id,
   ha_action_add_entity(req, entity_id);
   ha_action_add_data(req, "type", "daily");
 
-  ha_register_action_response_callback(
+  if (!ha_register_action_response_callback(
     req.call_id,
     [entity_id, day](const esphome::api::ActionResponse &response) {
       if (!response.is_success()) {
@@ -1113,8 +1113,13 @@ inline void request_weather_forecast_entity(const std::string &entity_id,
         ESP_LOGW("weather_forecast", "No usable forecast temperatures for %s", entity_id.c_str());
       }
       apply_weather_forecast_to_entity(entity_id, day, valid, high, low, unit);
-    });
-  ha_action_send(req);
+    })) {
+    apply_weather_forecast_to_entity(entity_id, day, false, 0, 0, "");
+    return;
+  }
+  if (!ha_action_send(req)) {
+    ha_cancel_action_response_callback(req.call_id, "send failed");
+  }
 }
 
 inline void refresh_weather_forecast_cards() {
