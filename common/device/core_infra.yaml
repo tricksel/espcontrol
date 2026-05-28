@@ -46,6 +46,11 @@ api:
         todo_cancel_pending_request("api disconnected");
 
 interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          todo_retry_waiting_modal();
+
   - interval: 1h
     then:
       - lambda: |-

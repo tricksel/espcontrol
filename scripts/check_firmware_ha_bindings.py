@@ -135,10 +135,14 @@ def firmware_todo_disconnect_errors(firmware_dir: Path, core_infra_path: Path, r
         errors.append(f"{todo_rel}: expose a helper to cancel pending todo requests")
     if "todo_reload_active_modal" not in todo_text:
         errors.append(f"{todo_rel}: expose a helper to reload an open todo modal after HA reconnects")
+    if "waiting_for_ha" not in todo_text or "todo_retry_waiting_modal" not in todo_text:
+        errors.append(f"{todo_rel}: retry open todo modals that are waiting for Home Assistant")
     if "on_client_disconnected:" not in core_text or "todo_cancel_pending_request" not in core_text:
         errors.append(f"{core_rel}: cancel pending todo requests when the HA API disconnects")
     if "on_client_connected:" not in core_text or "todo_reload_active_modal" not in core_text:
         errors.append(f"{core_rel}: retry open todo modals when the HA API reconnects")
+    if "todo_retry_waiting_modal" not in core_text:
+        errors.append(f"{core_rel}: periodically retry todo modals waiting for Home Assistant")
     return errors
 
 
@@ -538,20 +542,41 @@ def run_self_test() -> int:
     expect_todo_disconnect_errors(
         "missing disconnect cleanup",
         "inline void todo_cancel_pending_request(const char *reason) {}\n"
-        "inline void todo_reload_active_modal() {}\n",
+        "inline void todo_reload_active_modal() {}\n"
+        "inline void todo_retry_waiting_modal() { waiting_for_ha = true; }\n",
         "api:\n"
         "  on_client_connected:\n"
-        "    - lambda: todo_reload_active_modal();\n",
+        "    - lambda: todo_reload_active_modal();\n"
+        "interval:\n"
+        "  - interval: 5s\n"
+        "    then:\n"
+        "      - lambda: todo_retry_waiting_modal();\n",
         ("cancel pending todo requests when the HA API disconnects",),
     )
     expect_todo_disconnect_errors(
         "missing reconnect retry",
         "inline void todo_cancel_pending_request(const char *reason) {}\n"
-        "inline void todo_reload_active_modal() {}\n",
+        "inline void todo_reload_active_modal() {}\n"
+        "inline void todo_retry_waiting_modal() { waiting_for_ha = true; }\n",
         "api:\n"
         "  on_client_disconnected:\n"
-        "    - lambda: todo_cancel_pending_request(\"api disconnected\");\n",
+        "    - lambda: todo_cancel_pending_request(\"api disconnected\");\n"
+        "interval:\n"
+        "  - interval: 5s\n"
+        "    then:\n"
+        "      - lambda: todo_retry_waiting_modal();\n",
         ("retry open todo modals when the HA API reconnects",),
+    )
+    expect_todo_disconnect_errors(
+        "missing waiting modal retry",
+        "inline void todo_cancel_pending_request(const char *reason) {}\n"
+        "inline void todo_reload_active_modal() {}\n",
+        "api:\n"
+        "  on_client_connected:\n"
+        "    - lambda: todo_reload_active_modal();\n"
+        "  on_client_disconnected:\n"
+        "    - lambda: todo_cancel_pending_request(\"api disconnected\");\n",
+        ("retry open todo modals that are waiting for Home Assistant",),
     )
     expect_weather_request_errors(
         "weather request during reconnect",
