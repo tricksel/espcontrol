@@ -84,7 +84,7 @@ inline void todo_cancel_request(uint32_t call_id, const char *reason) {
 inline void todo_cancel_stale_request() {
   TodoRequestState &state = todo_request_state();
   if (state.call_id == 0) return;
-  if (millis() - state.started_ms >= TODO_REQUEST_TIMEOUT_MS) {
+  if (esphome::millis() - state.started_ms >= TODO_REQUEST_TIMEOUT_MS) {
     uint32_t call_id = state.call_id;
     todo_cancel_request(call_id, "timeout");
   }
@@ -508,7 +508,7 @@ inline void request_todo_items(TodoCardCtx *ctx) {
 
   TodoRequestState &state = todo_request_state();
   state.call_id = req.call_id;
-  state.started_ms = millis();
+  state.started_ms = esphome::millis();
   if (!ha_action_send(req)) {
     todo_cancel_request(req.call_id, "send failed");
     todo_modal_set_status("Could not load");
