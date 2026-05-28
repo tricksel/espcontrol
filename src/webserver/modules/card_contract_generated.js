@@ -884,44 +884,6 @@ var CARD_CONTRACT_CARDS = {
     "domains": [
       "todo"
     ],
-    "options": [
-      {
-        "name": "count_display",
-        "label": "Status",
-        "kind": "choice",
-        "values": [
-          "icon",
-          "count",
-          "top_task"
-        ],
-        "defaultValue": "count"
-      },
-      {
-        "name": "label_display",
-        "label": "Card Label",
-        "kind": "choice",
-        "values": [
-          "label",
-          "count"
-        ],
-        "defaultValue": "label"
-      },
-      {
-        "name": "completed_display",
-        "label": "Show Completed Items",
-        "kind": "choice",
-        "values": [
-          "show",
-          "hide"
-        ],
-        "defaultValue": "show"
-      },
-      {
-        "name": "large_numbers",
-        "label": "Large Item Count",
-        "kind": "flag"
-      }
-    ],
     "default": {
       "entity": "",
       "label": "",

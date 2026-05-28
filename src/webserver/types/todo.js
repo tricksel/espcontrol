@@ -22,52 +22,6 @@ var TODO_CARD_METADATA = {
     field: "icon",
     fallback: "Check",
   },
-  countDisplay: {
-    label: "Status",
-    options: [
-      ["icon", "Icon"],
-      ["count", "Item Counter"],
-      ["top_task", "Top Task"],
-    ],
-    value: function (b) {
-      return todoCardStatusMode(b);
-    },
-    onSelect: function (button, cardHelpers, value) {
-      setTodoCardStatusMode(button, value);
-      cardHelpers.saveField("options", button.options);
-    },
-  },
-  labelDisplay: {
-    label: "Card Label",
-    options: [
-      ["label", "List Name"],
-      ["count", "Item Count"],
-    ],
-    value: function (b) {
-      return todoCardLabelShowsCount(b) ? "count" : "label";
-    },
-    onSelect: function (button, cardHelpers, value) {
-      setTodoCardLabelShowsCount(button, value === "count");
-      cardHelpers.saveField("options", button.options);
-    },
-  },
-  completedDisplay: {
-    label: "Show Completed Items",
-    idSuffix: "todo-show-completed",
-    checked: function (b) { return todoCardShowsCompletedItems(b); },
-    onChange: function (button, cardHelpers, checked) {
-      setTodoCardShowsCompletedItems(button, checked);
-      cardHelpers.saveField("options", button.options);
-    },
-  },
-  largeNumbers: {
-    label: "Large Item Count",
-    idSuffix: "large-item-count",
-    showSettingForAnyCardSize: true,
-    supported: function (b) {
-      return todoCardStatusMode(b) === "count";
-    },
-  },
   preview: {
     badge: "check",
   },
@@ -78,7 +32,7 @@ function normalizeTodoConfig(b) {
   b.sensor = "";
   b.unit = "";
   b.precision = "";
-  b.options = normalizeTodoOptions(b.options);
+  b.options = "";
   b.icon_on = "Auto";
   if (!b.icon || b.icon === "Auto") b.icon = "Check";
 }
@@ -103,49 +57,12 @@ registerButtonType("todo", {
     normalizeTodoConfig(b);
     helpers.renderCardEntityField(panel, b, helpers, TODO_CARD_METADATA);
     helpers.renderCardTextField(panel, b, helpers, TODO_CARD_METADATA.labelField);
-
-    helpers.renderCardSegmentControl(panel, b, helpers, Object.assign({}, TODO_CARD_METADATA.labelDisplay, {
-      onSelect: function (button, cardHelpers, value) {
-        setTodoCardLabelShowsCount(button, value === "count");
-        cardHelpers.saveField("options", button.options);
-        scheduleRender();
-      },
-    }));
-
-    helpers.renderCardSegmentControl(panel, b, helpers, Object.assign({}, TODO_CARD_METADATA.countDisplay, {
-      onSelect: function (button, cardHelpers, value) {
-        setTodoCardStatusMode(button, value);
-        cardHelpers.saveField("options", button.options);
-        syncIconPicker();
-        syncLargeItemCount();
-        scheduleRender();
-      },
-    }));
-    var largeNumbersToggle = helpers.renderCardLargeNumbersToggle(panel, b, helpers, TODO_CARD_METADATA);
-    var iconSection = condField();
-    iconSection.classList.add("sp-climate-settings-gap");
-    helpers.renderCardIconPicker(iconSection, b, helpers, TODO_CARD_METADATA.icon);
-    panel.appendChild(iconSection);
-
-    helpers.renderCardOptionToggle(panel, b, helpers, TODO_CARD_METADATA.completedDisplay);
-    function syncIconPicker() {
-      iconSection.classList.toggle("sp-visible", !todoCardShowCount(b));
-    }
-    function syncLargeItemCount() {
-      helpers.syncCardLargeNumbersToggle(largeNumbersToggle, b, helpers, todoCardStatusMode(b) === "count");
-    }
-    syncIconPicker();
-    syncLargeItemCount();
+    helpers.renderCardIconPicker(panel, b, helpers, TODO_CARD_METADATA.icon);
   },
   renderPreview: function (b, helpers) {
-    var label = todoCardLabelShowsCount(b) ? "3" : (b.label || b.entity || "Todo");
-    var statusMode = todoCardStatusMode(b);
+    var label = b.label || b.entity || "Todo";
     return {
-      iconHtml: statusMode === "icon"
-        ? '<span class="sp-btn-icon mdi mdi-' + iconSlug(b.icon || "Check") + '"></span>'
-        : statusMode === "top_task"
-        ? cardSensorPreviewHtml(b, helpers, "Buy milk", null, "sp-todo-task-preview", "sp-media-now-title")
-        : cardSensorPreviewHtml(b, helpers, "3", ""),
+      iconHtml: cardSensorPreviewHtml(b, helpers, "3", ""),
       labelHtml: cardBadgeLabelHtml(helpers, label, TODO_CARD_METADATA.preview.badge),
     };
   },

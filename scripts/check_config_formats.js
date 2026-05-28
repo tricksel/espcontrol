@@ -1529,52 +1529,19 @@ assertButtonRoundTrip(hooks, "todo button", {
   precision: "",
   options: "",
 }, false);
-assertButtonRoundTrip(hooks, "todo button icon display", {
-  entity: "todo.shopping",
-  label: "Shopping",
-  icon: "Check",
-  icon_on: "Auto",
-  sensor: "",
-  unit: "",
-  type: "todo",
-  precision: "",
-  options: "count_display=icon",
-}, false);
-assertButtonRoundTrip(hooks, "todo button label count display", {
-  entity: "todo.shopping",
-  label: "Shopping",
-  icon: "Check",
-  icon_on: "Auto",
-  sensor: "",
-  unit: "",
-  type: "todo",
-  precision: "",
-  options: "label_display=count",
-}, false);
-assertButtonRoundTrip(hooks, "todo button hide completed items", {
-  entity: "todo.shopping",
-  label: "Shopping",
-  icon: "Check",
-  icon_on: "Auto",
-  sensor: "",
-  unit: "",
-  type: "todo",
-  precision: "",
-  options: "completed_display=hide",
-}, false);
 assert.deepStrictEqual(Array.from(hooks.cardContractDomains("todo")), ["todo"], "todo card only accepts todo entities");
 assert.deepStrictEqual(
   Array.from(hooks.cardContractOptions("todo"), (option) => option.name),
-  ["count_display", "label_display", "completed_display", "large_numbers"],
-  "todo card exposes display options"
+  [],
+  "todo card exposes no advanced display options"
 );
 assert.strictEqual(hooks.todoCardShowCount({ type: "todo", options: "" }), true, "todo shows item count by default");
-assert.strictEqual(hooks.todoCardShowCount({ type: "todo", options: "count_display=icon" }), false, "todo can show the icon instead of the count");
-assert.strictEqual(hooks.todoCardStatusMode({ type: "todo", options: "count_display=top_task" }), "top_task", "todo can show the top task");
-assert.strictEqual(hooks.todoCardShowsTopTask({ type: "todo", options: "count_display=top_task" }), true, "todo detects top task status mode");
+assert.strictEqual(hooks.todoCardShowCount({ type: "todo", options: "count_display=icon" }), true, "todo ignores legacy icon display options");
+assert.strictEqual(hooks.todoCardStatusMode({ type: "todo", options: "count_display=top_task" }), "count", "todo ignores legacy top task options");
+assert.strictEqual(hooks.todoCardShowsTopTask({ type: "todo", options: "count_display=top_task" }), false, "todo does not use top task mode");
 assert.strictEqual(hooks.todoCardLabelShowsCount({ type: "todo", options: "" }), false, "todo label is static by default");
-assert.strictEqual(hooks.todoCardLabelShowsCount({ type: "todo", options: "label_display=count" }), true, "todo label can show item count");
-assert.strictEqual(hooks.todoCardShowsCompletedItems({ type: "todo", options: "" }), true, "todo shows completed items by default");
+assert.strictEqual(hooks.todoCardLabelShowsCount({ type: "todo", options: "label_display=count" }), false, "todo ignores legacy count label options");
+assert.strictEqual(hooks.todoCardShowsCompletedItems({ type: "todo", options: "" }), false, "todo hides completed items");
 assert.strictEqual(hooks.todoCardShowsCompletedItems({ type: "todo", options: "completed_display=hide" }), false, "todo can hide completed items");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("todo", false, false), true, "todo picker visible without developer flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("todo", true, false), true, "todo picker remains visible with developer flag");

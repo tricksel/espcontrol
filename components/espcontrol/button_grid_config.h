@@ -256,53 +256,43 @@ inline std::string door_window_card_options_normalized(const std::string &option
 }
 
 inline std::string normalize_todo_count_display(const std::string &value) {
-  if (value == "top_task") return "top_task";
-  return value == "icon" ? "icon" : "count";
+  (void) value;
+  return "count";
 }
 
 inline std::string normalize_todo_label_display(const std::string &value) {
-  return value == "count" ? "count" : "label";
+  (void) value;
+  return "label";
 }
 
 inline std::string normalize_todo_completed_display(const std::string &value) {
-  return value == "hide" ? "hide" : "show";
+  (void) value;
+  return "hide";
 }
 
 inline std::string todo_card_options_normalized(const std::string &options) {
-  std::string out;
-  std::string count_display = normalize_todo_count_display(cfg_option_value(options, "count_display"));
-  if (count_display != "count") {
-    out = "count_display=" + count_display;
-  }
-  if (normalize_todo_label_display(cfg_option_value(options, "label_display")) == "count") {
-    if (!out.empty()) out += ",";
-    out += "label_display=count";
-  }
-  if (normalize_todo_completed_display(cfg_option_value(options, "completed_display")) == "hide") {
-    if (!out.empty()) out += ",";
-    out += "completed_display=hide";
-  }
-  if (count_display == "count" && cfg_option_token_present(options, "large_numbers")) {
-    if (!out.empty()) out += ",";
-    out += "large_numbers";
-  }
-  return out;
+  (void) options;
+  return "";
 }
 
 inline bool todo_card_show_count(const ParsedCfg &p) {
-  return normalize_todo_count_display(cfg_option_value(p.options, "count_display")) != "icon";
+  (void) p;
+  return true;
 }
 
 inline bool todo_card_shows_top_task(const ParsedCfg &p) {
-  return normalize_todo_count_display(cfg_option_value(p.options, "count_display")) == "top_task";
+  (void) p;
+  return false;
 }
 
 inline bool todo_card_label_shows_count(const ParsedCfg &p) {
-  return normalize_todo_label_display(cfg_option_value(p.options, "label_display")) == "count";
+  (void) p;
+  return false;
 }
 
 inline bool todo_card_shows_completed_items(const ParsedCfg &p) {
-  return normalize_todo_completed_display(cfg_option_value(p.options, "completed_display")) != "hide";
+  (void) p;
+  return false;
 }
 
 inline std::string normalize_climate_label_display(const std::string &value) {

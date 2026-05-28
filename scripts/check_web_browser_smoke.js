@@ -58,7 +58,7 @@ const BUTTON_FIXTURES = [
   "sensor.energy;Energy;Gauge;Auto;sensor.energy;W;sensor;0",
   "climate.hall;Hall;Thermostat;Auto;;;climate;;",
   "media_player.living;Media;Auto;Auto;play_pause;;media;;",
-  "todo.shopping;Shopping;Check;Auto;;;todo;;count_display=top_task",
+  "todo.shopping;Shopping;Check;Auto;;;todo;;",
 ];
 
 function htmlFor(slug) {
@@ -294,25 +294,6 @@ async function assertEmptyCellSettings(page, label) {
     modalLayout.documentScrollWidth <= modalLayout.windowWidth + 1,
     `${label}: card settings modal introduced horizontal overflow`
   );
-  await page.locator(".sp-settings-close").click();
-  await page.waitForFunction(() => {
-    var overlay = document.querySelector(".sp-settings-overlay");
-    return overlay && !overlay.classList.contains("sp-visible");
-  });
-}
-
-async function assertTodoLargeItemCountVisibility(page, label) {
-  await page.getByRole("tab", { name: "Screen" }).click();
-  await page.waitForSelector("#sp-screen.sp-page.active");
-  await page.locator(".sp-main .sp-btn").filter({ hasText: "Shopping" }).first().click();
-  await page.getByRole("button", { name: /Edit/ }).click();
-
-  const largeItemCount = page.getByText("Large Item Count", { exact: true });
-  assert(!(await largeItemCount.isVisible()), `${label}: todo top-task status hides large item count setting`);
-
-  await page.getByRole("button", { name: "Item Counter" }).click();
-  assert(await largeItemCount.isVisible(), `${label}: todo item-counter status shows large item count setting`);
-
   await page.locator(".sp-settings-close").click();
   await page.waitForFunction(() => {
     var overlay = document.querySelector(".sp-settings-overlay");
@@ -592,7 +573,6 @@ async function runCase(browser, testCase) {
     assertNoLayoutBreaks(await measureCoreLayout(page), `${testCase.name} after settings`);
     await assertEmptyCellSettings(page, testCase.name);
     if (testCase.exerciseInteractions) {
-      await assertTodoLargeItemCountVisibility(page, testCase.name);
       await assertBackupImportSmoke(page, posts, testCase.slug);
       await assertEditAndApplySmoke(page, posts, errors);
     }

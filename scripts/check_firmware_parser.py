@@ -143,29 +143,13 @@ int main() {
   assert(todo.icon_on == "Auto");
   assert(todo.type == "todo");
   assert(todo.options == "");
-  auto todo_large = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;large_numbers");
-  assert(todo_large.options == "large_numbers");
-  assert(card_large_numbers_enabled(todo_large));
-
-  auto todo_icon = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;count_display=icon");
-  assert(todo_icon.options == "count_display=icon");
-  assert(!todo_card_show_count(todo_icon));
-
-  auto todo_top_task = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;count_display=top_task");
-  assert(todo_top_task.options == "count_display=top_task");
-  assert(todo_card_show_count(todo_top_task));
-  assert(todo_card_shows_top_task(todo_top_task));
-  auto todo_top_task_large = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;count_display=top_task,large_numbers");
-  assert(todo_top_task_large.options == "count_display=top_task");
-  assert(!card_large_numbers_enabled(todo_top_task_large));
-
-  auto todo_label_count = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;label_display=count");
-  assert(todo_label_count.options == "label_display=count");
-  assert(todo_card_label_shows_count(todo_label_count));
-
-  auto todo_hide_completed = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;completed_display=hide");
-  assert(todo_hide_completed.options == "completed_display=hide");
-  assert(!todo_card_shows_completed_items(todo_hide_completed));
+  auto todo_legacy_options = parse_cfg("todo.shopping;Shopping;Check;Auto;;;todo;;count_display=top_task,label_display=count,completed_display=hide,large_numbers");
+  assert(todo_legacy_options.options == "");
+  assert(todo_card_show_count(todo_legacy_options));
+  assert(!todo_card_shows_top_task(todo_legacy_options));
+  assert(!todo_card_label_shows_count(todo_legacy_options));
+  assert(!todo_card_shows_completed_items(todo_legacy_options));
+  assert(!card_large_numbers_enabled(todo_legacy_options));
 
   assert(cfg_option_token_present("large_numbers,active_color", "active_color"));
   assert(cfg_option_value("state_entity=sensor.room%2Ctemp,state_unit=%25", "state_entity") == "sensor.room,temp");
