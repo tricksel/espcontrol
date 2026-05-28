@@ -178,7 +178,7 @@ function renderCardModeSelector(panel, b, helpers, metadata) {
 function renderCardLargeNumbersToggle(panel, b, helpers, metadata) {
   metadata = metadata || {};
   var large = metadata.largeNumbers || {};
-  if (!cardLargeNumbersSupportsCardSize(b, helpers, metadata)) return null;
+  if (!large.showSettingForAnyCardSize && !cardLargeNumbersSupportsCardSize(b, helpers, metadata)) return null;
   if (large.isVisible && !large.isVisible(b, helpers)) return null;
   var toggle = helpers.toggleRow(
     large.label || "Large Numbers",

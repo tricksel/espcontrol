@@ -63,6 +63,7 @@ var TODO_CARD_METADATA = {
   largeNumbers: {
     label: "Large Item Count",
     idSuffix: "large-item-count",
+    showSettingForAnyCardSize: true,
     supported: function (b) {
       return todoCardStatusMode(b) === "count";
     },

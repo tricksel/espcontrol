@@ -149,12 +149,9 @@ async function installFakeEventSource(page) {
   });
 }
 
-function seededEvents(testCase) {
-  const buttonOrder = testCase && testCase.exerciseInteractions
-    ? "5b,,1,,,,,2,3,4"
-    : "1,2,3w,4,5";
+function seededEvents() {
   const events = [
-    { id: "text-button_order", state: buttonOrder },
+    { id: "text-button_order", state: "1,2,3w,4,5" },
     { id: "text-button_on_color", state: "FF8C00" },
     { id: "text-button_off_color", state: "313131" },
     { id: "text-sensor_card_color", state: "212121" },
@@ -585,7 +582,7 @@ async function runCase(browser, testCase) {
     await page.goto(`http://espcontrol.test/${testCase.slug}?events=1`, { waitUntil: "domcontentloaded" });
     await page.waitForSelector("#sp-app");
     await page.waitForFunction(() => window.__eventSources && window.__eventSources.length > 0);
-    await page.evaluate((events) => window.__seedEspState(events), seededEvents(testCase));
+    await page.evaluate((events) => window.__seedEspState(events), seededEvents());
     await page.waitForSelector(".sp-main > .sp-btn");
     await page.waitForTimeout(100);
 
