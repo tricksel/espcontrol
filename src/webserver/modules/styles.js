@@ -75,6 +75,7 @@ var CSS =
   ".sp-btn-big .sp-sensor-preview-large .sp-sensor-unit,.sp-btn-wide .sp-sensor-preview-large .sp-sensor-unit{transform:translateY(var(--large-sensor-unit-offset-y,-20px))}" +
   ".sp-date-time-wide-large{justify-content:center;align-items:center}" +
   ".sp-clock-wide-large{justify-content:center;align-items:flex-start}" +
+  ".sp-clock-wide-large .sp-sensor-value{font-family:Roboto,sans-serif;font-weight:100}" +
   ".sp-forecast-preview{white-space:nowrap;gap:0}" +
   ".sp-sensor-value{font-size:var(--btn-icon);line-height:1;font-weight:300}" +
   ".sp-todo-task-preview{display:block;width:100%;min-width:0}" +
