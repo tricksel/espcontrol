@@ -114,8 +114,6 @@ registerButtonType("climate", {
         },
       }),
     });
-    helpers.renderCardLargeNumbersToggle(panel, b, helpers, CLIMATE_CARD_METADATA);
-
     var iconFields = condField();
     iconFields.classList.add("sp-climate-settings-gap");
     helpers.renderCardIconPicker(iconFields, b, helpers, {
@@ -152,6 +150,7 @@ registerButtonType("climate", {
     }
     precision.addEventListener("change", saveClimateAdvancedSettings);
     panel.appendChild(precisionField.field);
+    helpers.renderCardLargeNumbersToggle(panel, b, helpers, CLIMATE_CARD_METADATA);
 
     var hasRange = !!(climateConfig.min || climateConfig.max);
     var advancedToggleSection = helpers.toggleSection(
