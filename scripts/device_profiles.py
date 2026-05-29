@@ -354,6 +354,11 @@ def validate_web(slug: str, device: dict[str, Any], errors: list[str]) -> None:
         errors.append(device_error(slug, "web.dragMode must be swap or displace"))
     if not isinstance(web.get("dragAnimation"), bool):
         errors.append(device_error(slug, "web.dragAnimation must be true or false"))
+    disabled_card_types = web.get("disabledCardTypes", [])
+    if not isinstance(disabled_card_types, list) or not all(
+        isinstance(value, str) and value for value in disabled_card_types
+    ):
+        errors.append(device_error(slug, "web.disabledCardTypes must be a list of non-empty strings"))
 
     validate_screen_box(slug, errors, web.get("screen"), "web.screen")
 

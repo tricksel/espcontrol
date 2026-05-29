@@ -16,6 +16,7 @@ API_NAVIGATE_PATH = ROOT / "common" / "device" / "api_navigate.yaml"
 TIME_ADDON_PATH = ROOT / "common" / "addon" / "time.yaml"
 S3_DEVICE_PATH = ROOT / "devices" / "guition-esp32-s3-4848s040" / "device" / "device.yaml"
 S3_PACKAGES_PATH = ROOT / "devices" / "guition-esp32-s3-4848s040" / "packages.yaml"
+DEVICE_DEVICE_PATHS = tuple(sorted((ROOT / "devices").glob("*/device/device.yaml")))
 DEVICE_PACKAGE_PATHS = tuple(sorted((ROOT / "devices").glob("*/packages.yaml")))
 CONNECTIVITY_PATHS = (
     ROOT / "common" / "addon" / "connectivity.yaml",
@@ -353,6 +354,18 @@ def firmware_s3_api_errors(
     return errors
 
 
+def firmware_todo_disabled_errors(device_paths: tuple[Path, ...], root: Path) -> list[str]:
+    errors: list[str] = []
+    for path in device_paths:
+        if not path.exists():
+            continue
+        rel = path.relative_to(root)
+        text = path.read_text(encoding="utf-8")
+        if "ESPCONTROL_DISABLE_TODO=1" not in text:
+            errors.append(f"{rel}: keep the todo list disabled on every device")
+    return errors
+
+
 def firmware_connectivity_api_errors(paths: tuple[Path, ...], root: Path) -> list[str]:
     errors: list[str] = []
     for path in paths:
@@ -387,6 +400,7 @@ def run_scan() -> int:
             ROOT,
         )
     )
+    errors.extend(firmware_todo_disabled_errors(DEVICE_DEVICE_PATHS, ROOT))
     errors.extend(firmware_connectivity_api_errors(CONNECTIVITY_PATHS, ROOT))
     if errors:
         print("Firmware Home Assistant binding check failed:")
@@ -457,6 +471,23 @@ def expect_todo_disconnect_errors(
         core_path.write_text(core_text, encoding="utf-8")
 
         errors = firmware_todo_disconnect_errors(firmware_dir, core_path, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_todo_disabled_errors(name: str, files: dict[str, str], expected: tuple[str, ...]) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        paths = []
+        for filename, text in files.items():
+            path = root / filename
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+            paths.append(path)
+
+        errors = firmware_todo_disabled_errors(tuple(paths), root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -1117,6 +1148,26 @@ def run_self_test() -> int:
         "      - \"-DESPCONTROL_TODO_LITE=1\"\n"
         "api:\n  max_connections: 2\n  max_send_queue: 12\n",
         ("keep the S3 todo list disabled",),
+    )
+    expect_todo_disabled_errors(
+        "todo enabled on one device",
+        {
+            "devices/a/device/device.yaml": "esphome:\n  platformio_options:\n    build_flags:\n"
+            "      - \"-DESPCONTROL_DISABLE_TODO=1\"\n",
+            "devices/b/device/device.yaml": "esphome:\n  platformio_options:\n    build_flags:\n"
+            "      - \"-DESPCONTROL_TODO_LITE=1\"\n",
+        },
+        ("keep the todo list disabled",),
+    )
+    expect_todo_disabled_errors(
+        "todo disabled on all devices",
+        {
+            "devices/a/device/device.yaml": "esphome:\n  platformio_options:\n    build_flags:\n"
+            "      - \"-DESPCONTROL_DISABLE_TODO=1\"\n",
+            "devices/b/device/device.yaml": "esphome:\n  platformio_options:\n    build_flags:\n"
+            "      - \"-DESPCONTROL_DISABLE_TODO=1\"\n",
+        },
+        (),
     )
     expect_s3_api_errors(
         "S3 includes navigate API package",
