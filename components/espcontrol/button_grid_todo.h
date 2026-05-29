@@ -28,6 +28,7 @@ struct TodoCardCtx {
   lv_obj_t *value_lbl = nullptr;
   lv_obj_t *unit_lbl = nullptr;
   lv_obj_t *label_lbl = nullptr;
+  const lv_font_t *value_font = nullptr;
   const lv_font_t *label_font = nullptr;
   const lv_font_t *list_font = nullptr;
   const lv_font_t *icon_font = nullptr;
@@ -128,10 +129,19 @@ inline std::string todo_card_label(TodoCardCtx *ctx) {
   return "Todo";
 }
 
+inline void todo_apply_value_font(TodoCardCtx *ctx) {
+  if (ctx && ctx->value_lbl && ctx->value_font) {
+    lv_obj_set_style_text_font(ctx->value_lbl, ctx->value_font, LV_PART_MAIN);
+  }
+}
+
 inline void todo_apply_card_text(TodoCardCtx *ctx) {
   if (!ctx) return;
   if (ctx->label_lbl) lv_label_set_text(ctx->label_lbl, todo_card_label(ctx).c_str());
-  if (ctx->value_lbl) lv_label_set_text(ctx->value_lbl, ctx->available ? ctx->count_text.c_str() : "--");
+  if (ctx->value_lbl) {
+    todo_apply_value_font(ctx);
+    lv_label_set_text(ctx->value_lbl, ctx->available ? ctx->count_text.c_str() : "--");
+  }
   if (ctx->unit_lbl) lv_label_set_text(ctx->unit_lbl, "");
 }
 
@@ -647,6 +657,7 @@ inline void todo_card_open_modal(TodoCardCtx *ctx) {
 inline TodoCardCtx *create_todo_card_context(
     BtnSlot &s, const ParsedCfg &p,
     uint32_t accent_color, uint32_t secondary_color,
+    const lv_font_t *value_font,
     const lv_font_t *label_font,
     const lv_font_t *list_font,
     const lv_font_t *icon_font,
@@ -663,6 +674,7 @@ inline TodoCardCtx *create_todo_card_context(
   ctx->unit_lbl = s.unit_lbl;
   ctx->label_lbl = s.text_lbl;
   ctx->secondary_color = secondary_color;
+  ctx->value_font = value_font;
   ctx->label_font = label_font;
   ctx->list_font = list_font ? list_font : label_font;
   ctx->icon_font = icon_font;

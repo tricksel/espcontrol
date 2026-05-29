@@ -714,7 +714,9 @@ inline void grid_phase2(
     std::string scfg = s.config->state;
 
     ParsedCfg p = parse_cfg(scfg);
-    bool is_1x1_card = parsed.row_span[idx - 1] == 1 && parsed.col_span[idx - 1] == 1;
+    int row_span = parsed.row_span[idx - 1] > 0 ? parsed.row_span[idx - 1] : 1;
+    int col_span = parsed.col_span[idx - 1] > 0 ? parsed.col_span[idx - 1] : 1;
+    bool is_1x1_card = row_span == 1 && col_span == 1;
     if (bind_basic_sensor_card(s, p, palette)) continue;
     if (bind_passive_card_sources(s, p)) continue;
     if (p.type == "garage") {
@@ -907,6 +909,9 @@ inline void grid_phase2(
           s, p,
           has_on ? on_val : DEFAULT_SLIDER_COLOR,
           has_off ? off_val : DEFAULT_OFF_COLOR,
+          large_number_square_card_layout(row_span, col_span) &&
+              card_large_numbers_enabled(p) && display_large_sensor_font(display)
+            ? display_large_sensor_font(display) : display_sensor_font(display),
           lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
           display_media_title_font_or(
             display, lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN)),
@@ -1431,6 +1436,9 @@ inline void grid_phase2(
             sub_slot, sb_cfg,
             has_on ? on_val : DEFAULT_SLIDER_COLOR,
             has_off ? off_val : DEFAULT_OFF_COLOR,
+            large_number_square_card_layout(rs, cs) &&
+                card_large_numbers_enabled(sb_cfg) && display_large_sensor_font(display)
+              ? display_large_sensor_font(display) : display_sensor_font(display),
             lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
             display_media_title_font_or(
               display, lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN)),
