@@ -112,7 +112,7 @@ registerButtonType("sensor", {
     );
     var advancedToggle = advancedToggleSection.toggle;
     var advanced = advancedToggleSection.section;
-    textSection.appendChild(advancedToggle.row);
+    panel.appendChild(advancedToggle.row);
     if (hasStateLabels) advanced.classList.add("sp-visible");
 
     var lowLabelField = helpers.textField(
@@ -142,6 +142,7 @@ registerButtonType("sensor", {
     highLabelInp.addEventListener("change", saveStateLabels);
     advancedToggle.input.addEventListener("change", function () {
       if (this.checked) {
+        if (!isTextMode) setMode("text", true);
         advanced.classList.add("sp-visible");
       } else {
         advanced.classList.remove("sp-visible");
@@ -150,7 +151,7 @@ registerButtonType("sensor", {
       }
       saveStateLabels();
     });
-    textSection.appendChild(advanced);
+    panel.appendChild(advanced);
 
     function setMode(mode, persist) {
       isTextMode = mode === "text";
