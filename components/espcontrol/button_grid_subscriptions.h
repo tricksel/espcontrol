@@ -338,13 +338,18 @@ inline void subscribe_control_availability(lv_obj_t *visual_obj, lv_obj_t *input
 
 struct ActionCardStateCtx {
   lv_obj_t *btn = nullptr;
+  lv_obj_t *icon_lbl = nullptr;
   lv_obj_t *text_lbl = nullptr;
   lv_obj_t *sensor_lbl = nullptr;
   lv_obj_t *unit_lbl = nullptr;
   bool state_available = true;
   bool has_state_entity = false;
+  bool show_icon_state = false;
   bool show_text_state = false;
   bool show_numeric_state = false;
+  bool has_icon_on = false;
+  const char *icon_off = nullptr;
+  const char *icon_on = nullptr;
   int precision = 0;
   std::string unit;
 };
@@ -353,11 +358,16 @@ inline ActionCardStateCtx *create_action_card_state_context(const BtnSlot &s,
                                                             const ParsedCfg &p) {
   ActionCardStateCtx *ctx = new ActionCardStateCtx();
   ctx->btn = s.btn;
+  ctx->icon_lbl = s.icon_lbl;
   ctx->text_lbl = s.text_lbl;
   ctx->sensor_lbl = s.sensor_lbl;
   ctx->unit_lbl = s.unit_lbl;
+  ctx->show_icon_state = action_card_state_icon_mode(p);
   ctx->show_text_state = action_card_state_text_mode(p);
   ctx->show_numeric_state = action_card_state_numeric_mode(p);
+  ctx->has_icon_on = !p.icon_on.empty() && p.icon_on != "Auto";
+  ctx->icon_off = (p.icon.empty() || p.icon == "Auto") ? find_icon("Flash") : find_icon(p.icon.c_str());
+  ctx->icon_on = ctx->has_icon_on ? find_icon(p.icon_on.c_str()) : ctx->icon_off;
   ctx->precision = parse_precision(action_card_state_precision(p));
   ctx->unit = trim_display_unit(action_card_state_unit(p));
   return ctx;
@@ -373,6 +383,10 @@ inline void apply_action_card_display_value(ActionCardStateCtx *ctx,
                                             esphome::StringRef state,
                                             bool unavailable) {
   if (!ctx) return;
+  if (ctx->show_icon_state && ctx->icon_lbl) {
+    lv_label_set_text(ctx->icon_lbl, (!unavailable && is_entity_on_ref(state)) ? ctx->icon_on : ctx->icon_off);
+    return;
+  }
   if (ctx->show_text_state && ctx->text_lbl) {
     set_wrapped_button_label_text(ctx->text_lbl, text_sensor_display_text(state, HA_STATE_TEXT_MAX_LEN));
     return;

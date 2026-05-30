@@ -29,8 +29,8 @@ function normalizeActionCardConfig(b) {
   if (b && b.sensor === "select.select_option") b.sensor = ACTION_CARD_OPTION_SELECT_ACTION;
   if (!b.sensor) b.sensor = "scene.turn_on";
   if (!actionCardInfo(b.sensor)) b.sensor = "scene.turn_on";
-  b.icon_on = "Auto";
   b.precision = "";
+  if (actionCardStateDisplayMode(b) !== "icon") b.icon_on = "Auto";
   if (actionCardIsOptionSelect(b)) {
     b.unit = "";
     b.options = "";
@@ -52,12 +52,14 @@ function actionCardStateUnit(b) {
 
 function actionCardStatePrecision(b) {
   var value = configOptionValue(b && b.options, ACTION_CARD_STATE_PRECISION_OPTION);
+  if (value === "icon") return "icon";
   if (value === "text") return "text";
   return value === "1" || value === "2" ? value : "0";
 }
 
 function actionCardStateDisplayMode(b) {
   var rawPrecision = configOptionValue(b && b.options, ACTION_CARD_STATE_PRECISION_OPTION);
+  if (rawPrecision === "icon") return "icon";
   if (rawPrecision === "text") return "text";
   if (rawPrecision === "0" || rawPrecision === "1" || rawPrecision === "2" || actionCardStateUnit(b)) {
     return "numeric";
@@ -77,7 +79,10 @@ function setActionCardStateOptions(b, entity, mode, unit, precision) {
     return b.options;
   }
   options = setConfigOptionValue(options, ACTION_CARD_STATE_ENTITY_OPTION, entity);
-  if (mode === "text") {
+  if (mode === "icon") {
+    options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, "");
+    options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, "icon");
+  } else if (mode === "text") {
     options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, "");
     options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, "text");
   } else {
@@ -110,6 +115,7 @@ var ACTION_CARD_METADATA = {
   stateMode: {
     label: "Type",
     options: [
+      ["icon", "Icon"],
       ["numeric", "Numeric"],
       ["text", "Text"],
     ],
@@ -229,6 +235,7 @@ registerButtonType("action", {
         },
       }),
     });
+    var iconBtn = mode.buttons.icon;
     var numericBtn = mode.buttons.numeric;
     var textBtn = mode.buttons.text;
 
@@ -244,6 +251,14 @@ registerButtonType("action", {
       },
     });
     var stateEntityInp = stateEntityField.input;
+
+    var iconOnSection = helpers.renderCardIconPicker(panel, b, helpers, {
+      pickerIdSuffix: "icon-on-picker",
+      idSuffix: "icon-on",
+      field: "icon_on",
+      fallback: "Auto",
+      label: "On Icon",
+    });
 
     var numericSection = condField();
     var stateUnitField = helpers.renderCardTextField(numericSection, b, helpers, Object.assign({}, ACTION_CARD_METADATA.stateUnitField, {
@@ -272,16 +287,22 @@ registerButtonType("action", {
     }
 
     function setStateMode(modeValue, persist) {
-      stateMode = modeValue === "text" ? "text" : "numeric";
+      stateMode = modeValue === "icon" || modeValue === "text" ? modeValue : "numeric";
+      iconBtn.classList.toggle("active", stateMode === "icon");
       numericBtn.classList.toggle("active", stateMode === "numeric");
       textBtn.classList.toggle("active", stateMode === "text");
+      iconOnSection.style.display = stateMode === "icon" ? "" : "none";
       numericSection.classList.toggle("sp-visible", stateMode === "numeric");
       if (!persist) return;
-      if (stateMode === "text") {
+      if (stateMode === "icon" || stateMode === "text") {
         stateUnit = "";
         stateUnitInp.value = "";
         statePrecision = "0";
         statePrecisionSelect.value = "0";
+      }
+      if (stateMode !== "icon") {
+        b.icon_on = "Auto";
+        helpers.saveField("icon_on", "Auto");
       }
       saveStateOptions();
     }
@@ -324,7 +345,8 @@ registerButtonType("action", {
     }
     var stateBadge = actionCardStateEntity(b)
       ? '<span class="sp-sensor-badge mdi mdi-' +
-        (actionCardStateDisplayMode(b) === "text" ? "format-text" : "gauge") +
+        (actionCardStateDisplayMode(b) === "icon" ? "toggle-switch" :
+          (actionCardStateDisplayMode(b) === "text" ? "format-text" : "gauge")) +
         '"></span>'
       : "";
     return {

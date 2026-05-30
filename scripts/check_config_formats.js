@@ -1793,6 +1793,22 @@ const parsedActionTextState = hooks.parseButtonConfig(hooks.serializeButtonConfi
 assert.strictEqual(hooks.actionCardStateDisplayMode(parsedActionTextState), "text", "action card text state mode");
 assert.strictEqual(hooks.actionCardStatePrecision(parsedActionTextState), "text", "action card text state precision");
 
+const scriptActionIconStateCard = {
+  entity: "script.goodnight",
+  label: "Goodnight",
+  icon: "Flash",
+  icon_on: "Check Circle",
+  sensor: "script.turn_on",
+  unit: "",
+  type: "action",
+  precision: "",
+  options: "state_entity=input_boolean.goodnight_ready,state_precision=icon",
+};
+assertButtonRoundTrip(hooks, "script action card with icon state display", scriptActionIconStateCard, false);
+const parsedActionIconState = hooks.parseButtonConfig(hooks.serializeButtonConfig(scriptActionIconStateCard));
+assert.strictEqual(hooks.actionCardStateDisplayMode(parsedActionIconState), "icon", "action card icon state mode");
+assert.strictEqual(hooks.actionCardStatePrecision(parsedActionIconState), "icon", "action card icon state precision");
+
 assertButtonRoundTrip(hooks, "automation action card", {
   entity: "automation.goodnight",
   label: "Goodnight Automation",

@@ -679,9 +679,14 @@ inline std::string action_card_state_precision(const ParsedCfg &p) {
 inline bool action_card_state_display_enabled(const ParsedCfg &p) {
   if (action_card_state_entity(p).empty()) return false;
   std::string precision = action_card_state_precision(p);
-  return precision == "text" || precision == "0" ||
+  return precision == "icon" || precision == "text" || precision == "0" ||
          precision == "1" || precision == "2" ||
          !action_card_state_unit(p).empty();
+}
+
+inline bool action_card_state_icon_mode(const ParsedCfg &p) {
+  return action_card_state_display_enabled(p) &&
+         action_card_state_precision(p) == "icon";
 }
 
 inline bool action_card_state_text_mode(const ParsedCfg &p) {
@@ -695,6 +700,7 @@ inline std::string webhook_card_headers(const ParsedCfg &p) {
 
 inline bool action_card_state_numeric_mode(const ParsedCfg &p) {
   return action_card_state_display_enabled(p) &&
+         action_card_state_precision(p) != "icon" &&
          action_card_state_precision(p) != "text";
 }
 

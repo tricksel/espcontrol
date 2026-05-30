@@ -468,6 +468,17 @@ const actionLargePreview = hooks.buttonTypePreviewFor("action", {
 }, { cardSize: 4 });
 assert(actionLargePreview.iconHtml.includes("sp-sensor-preview-large"), "action numeric state preview supports large numbers");
 
+const actionIconStatePreview = hooks.buttonTypePreviewFor("action", {
+  entity: "script.goodnight",
+  label: "Goodnight",
+  icon: "Flash",
+  icon_on: "Check Circle",
+  sensor: "script.turn_on",
+  type: "action",
+  options: "state_entity=input_boolean.goodnight_ready,state_precision=icon",
+});
+assert(actionIconStatePreview.iconHtml.includes("mdi-toggle-switch"), "action icon state preview uses the icon-state badge");
+
 const actionOptionPreview = hooks.buttonTypePreviewFor("action", {
   entity: "select.wled_preset",
   label: "Preset",
