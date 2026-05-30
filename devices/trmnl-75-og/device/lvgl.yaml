@@ -22,16 +22,6 @@ lvgl:
           y: 8
           text_align: center
           text_color: 0x000000
-      - label:
-          id: trmnl_page_label
-          text: ""
-          text_font: font_trmnl_label_14
-          text_color: 0x000000
-          align: top_right
-          x: -50
-          y: 11
-          text_align: right
-          hidden: true
       - obj:
           id: network_status_button
           align: top_right

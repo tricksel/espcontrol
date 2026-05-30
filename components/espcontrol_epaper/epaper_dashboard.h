@@ -204,15 +204,6 @@ inline std::array<EpaperDashboardLvglSlot, EPAPER_DASHBOARD_PAGE_SLOTS> &epaper_
   return slots;
 }
 
-inline lv_obj_t *&epaper_dashboard_lvgl_page_label() {
-  static lv_obj_t *label = nullptr;
-  return label;
-}
-
-inline void epaper_dashboard_bind_lvgl_page_label(lv_obj_t *label) {
-  epaper_dashboard_lvgl_page_label() = label;
-}
-
 inline void epaper_dashboard_bind_lvgl_slot(int slot, lv_obj_t *tile, lv_obj_t *icon,
                                            lv_obj_t *sensor_container, lv_obj_t *label,
                                            lv_obj_t *value, lv_obj_t *unit = nullptr) {
@@ -269,12 +260,6 @@ inline void epaper_dashboard_update_lvgl_page(int page) {
   auto &tiles = epaper_dashboard_tiles();
   auto &slots = epaper_dashboard_lvgl_slots();
   int start = page * EPAPER_DASHBOARD_PAGE_SLOTS;
-
-  if (auto *page_label = epaper_dashboard_lvgl_page_label()) {
-    char page_text[20];
-    std::snprintf(page_text, sizeof(page_text), "Page %d/%d", page + 1, EPAPER_DASHBOARD_PAGES);
-    lv_label_set_text(page_label, page_text);
-  }
 
   for (int i = 0; i < EPAPER_DASHBOARD_PAGE_SLOTS; i++) {
     const auto &tile = tiles[start + i];

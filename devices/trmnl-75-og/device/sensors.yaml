@@ -6,7 +6,6 @@ script:
   - id: trmnl_bind_lvgl_widgets
     then:
       - lambda: |-
-          espcontrol::epaper_dashboard_bind_lvgl_page_label(id(trmnl_page_label));
           lv_label_set_text(id(trmnl_wifi_setup_ssid), wifi::global_wifi_component->get_ap().get_ssid().c_str());
           espcontrol::epaper_dashboard_bind_lvgl_slot(0, id(trmnl_tile_1), id(trmnl_tile_1_icon_label), id(trmnl_tile_1_sensor_container), id(trmnl_tile_1_label), id(trmnl_tile_1_value), id(trmnl_tile_1_unit));
           espcontrol::epaper_dashboard_bind_lvgl_slot(1, id(trmnl_tile_2), id(trmnl_tile_2_icon_label), id(trmnl_tile_2_sensor_container), id(trmnl_tile_2_label), id(trmnl_tile_2_value), id(trmnl_tile_2_unit));
