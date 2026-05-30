@@ -154,7 +154,7 @@ jobs:
       - name: Verify firmware assets
         run: |
           MISSING=false
-          OPTIONAL_FIRMWARE_SLUGS="guition-esp32-p4-jc8012p4a1 esp32-p4-86"
+          OPTIONAL_FIRMWARE_SLUGS="guition-esp32-p4-jc8012p4a1 esp32-p4-86 trmnl-75-og"
           for SLUG in $DEVICE_SLUGS; do
             MANIFEST="firmware/${SLUG}/manifest.json"
             if [ ! -f "$MANIFEST" ]; then
