@@ -1324,6 +1324,21 @@ inline void apply_weather_forecast_unavailable_for_entity(const std::string &ent
   }
 }
 
+inline void apply_weather_forecast_unavailable_all() {
+  ESP_LOGW("weather_forecast", "Marking all forecast cards unavailable");
+  WeatherForecastCardRef *refs = weather_forecast_card_refs();
+  int count = weather_forecast_card_count();
+  for (int i = 0; i < count; i++) {
+    refs[i].valid = false;
+    refs[i].high = 0;
+    refs[i].low = 0;
+    refs[i].source_unit = "";
+    refs[i].status_label = "";
+    apply_weather_forecast_card_text(refs[i], false, 0, 0, "");
+  }
+  if (count > 0) notify_dashboard_content_changed();
+}
+
 inline void apply_weather_forecast_actions_required_for_entity(const std::string &entity_id) {
   ESP_LOGW("weather_forecast",
     "Forecast request timed out for %s; check that this ESPHome device is allowed to perform Home Assistant actions",

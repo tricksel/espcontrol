@@ -108,6 +108,7 @@ api:
           return;
         }
         weather_forecast_cancel_pending_requests();
+        apply_weather_forecast_unavailable_all();
         apply_registered_ha_control_availability(false);
 
 ota:

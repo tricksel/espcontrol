@@ -265,6 +265,11 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                 assert "weather_forecast_cancel_pending_requests();" in device, (
                     f"{slug}: pending forecast callbacks must be cancelled on Home Assistant disconnect"
                 )
+                assert (
+                    "apply_weather_forecast_unavailable_all();" in device
+                    and "inline void apply_weather_forecast_unavailable_all()" in config
+                    and "if (count > 0) notify_dashboard_content_changed();" in config
+                ), f"{slug}: Home Assistant disconnect must clear visible forecast weather cards"
         else:
             assert f"cfg.num_slots = {profile['slots']};" in sensors, f"{slug}: sensors.yaml missing slot count"
 
