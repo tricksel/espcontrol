@@ -1103,11 +1103,13 @@ inline std::string normalize_weather_state(std::string state) {
       normalized == "mostly-cloudy" || normalized == "scattered-clouds") return "cloudy";
   if (normalized == "foggy") return "fog";
   if (normalized == "night") return "clear-night";
+  if (normalized == "mostly-clear-night" || normalized == "night-clear") return "clear-night";
   if (normalized == "partly-cloudy") return "partlycloudy";
   if (normalized == "partly-sunny" || normalized == "few-clouds") return "partlycloudy";
   if (normalized == "partly-cloudy-day") return "partlycloudy";
   if (normalized == "partly-cloudy-night" || normalized == "mostly-cloudy-night" ||
-      normalized == "cloudy-night" || normalized == "night-cloudy") return "night-partly-cloudy";
+      normalized == "cloudy-night" || normalized == "few-clouds-night" ||
+      normalized == "night-cloudy") return "night-partly-cloudy";
   if (normalized == "drizzle" || normalized == "light-rain" ||
       normalized == "rain" || normalized == "showers") return "rainy";
   if (normalized == "heavy-rain" || normalized == "heavy-showers") return "pouring";
