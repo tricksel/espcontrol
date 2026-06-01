@@ -116,6 +116,9 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                 assert "set_dashboard_content_changed_callback" in sensors, (
                     f"{slug}: shared weather/card updates must be wired to e-paper refreshes"
                 )
+                assert "lv_obj_set_style_bg_color(lv_scr_act(), page_bg, LV_PART_MAIN);" in sensors, (
+                    f"{slug}: TRMNL theme must paint the full e-paper screen background"
+                )
                 assert (
                     "align: top_left\n      x: 10\n      y: 68" in lvgl
                     and "pad_row: 6\n        pad_column: 6" in lvgl

@@ -128,6 +128,8 @@ script:
           #undef BTN_SLOT
           lv_color_t page_bg = lv_color_hex(0xFFFFFF);
           lv_color_t border = lv_color_hex(0x000000);
+          lv_obj_set_style_bg_color(lv_scr_act(), page_bg, LV_PART_MAIN);
+          lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
           lv_obj_set_style_bg_color(id(main_page)->obj, page_bg, LV_PART_MAIN);
           lv_obj_set_style_bg_opa(id(main_page)->obj, LV_OPA_COVER, LV_PART_MAIN);
           for (auto &slot : slots) {
