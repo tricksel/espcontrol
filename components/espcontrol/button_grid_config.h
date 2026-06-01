@@ -1123,7 +1123,7 @@ inline std::string normalize_weather_state(std::string state) {
   if (normalized == "snow") return "snowy";
   if (normalized == "storm" || normalized == "stormy" ||
       normalized == "thunderstorm" || normalized == "thunderstorms") return "lightning";
-  if (normalized == "sunny-off") return "unavailable";
+  if (normalized == "sunny-off" || normalized == "unknown") return "unavailable";
   return normalized;
 }
 

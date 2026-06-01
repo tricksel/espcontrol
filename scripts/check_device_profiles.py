@@ -369,8 +369,11 @@ def test_weather_card_visual_matches_preview() -> None:
     assert 'normalized == "night-cloudy"' in config and 'return "night-partly-cloudy";' in config, (
         "current weather device cards should accept night cloudy aliases for the web weather icon"
     )
-    assert 'if (normalized == "sunny-off") return "unavailable";' in config, (
+    assert 'normalized == "sunny-off"' in config and 'return "unavailable";' in config, (
         "current weather device cards should map the web unavailable weather icon name"
+    )
+    assert 'normalized == "unknown"' in config and 'return "unavailable";' in config, (
+        "current weather device cards should render unknown states with the unavailable weather icon"
     )
     assert 'if (b.type == "weather" && !card_runtime_weather_forecast_precision(b.precision))' in subpages, (
         "subpage weather cards must normalize invalid weather modes like main grid cards"
