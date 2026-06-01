@@ -21,6 +21,8 @@ struct GridConfig {
   bool subpage_chevrons_enabled = true;
   int width_compensation_percent = 100;
   int volume_width_compensation_percent = 100;
+  int label_lines = 0;
+  int label_lines_tall = 0;
   int color_correction_red_percent = COLOR_CORRECTION_RED_PERCENT;
   int color_correction_green_percent = COLOR_CORRECTION_GREEN_PERCENT;
   int color_correction_blue_percent = COLOR_CORRECTION_BLUE_PERCENT;
@@ -151,6 +153,20 @@ inline lv_align_t wide_large_date_time_card_align(const ParsedCfg &p) {
   return (p.type == "clock" || (p.type == "calendar" && calendar_card_shows_time(p)))
     ? LV_ALIGN_LEFT_MID
     : LV_ALIGN_CENTER;
+}
+
+inline void apply_card_label_line_clamp(lv_obj_t *label, const GridConfig &cfg,
+                                        int row_span = 1) {
+  if (!label || cfg.label_lines <= 0) return;
+  int lines = (row_span > 1 && cfg.label_lines_tall > 0)
+    ? cfg.label_lines_tall
+    : cfg.label_lines;
+  if (lines <= 0) return;
+  lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+  lv_obj_set_width(label, lv_pct(100));
+  const lv_font_t *font = lv_obj_get_style_text_font(label, LV_PART_MAIN);
+  lv_coord_t line_height = font && font->line_height > 0 ? font->line_height : 16;
+  lv_obj_set_height(label, line_height * lines);
 }
 
 inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
@@ -494,7 +510,9 @@ inline void refresh_card_layout(BtnSlot &s, const ParsedCfg &p,
                                 const GridConfig &cfg,
                                 int row_span = 1) {
   const DisplayProfile display = display_profile_from_grid_config(cfg);
-  if (cfg.wrap_tall_labels && row_span > 1) {
+  if (cfg.label_lines > 0) {
+    apply_card_label_line_clamp(s.text_lbl, cfg, row_span);
+  } else if (cfg.wrap_tall_labels && row_span > 1) {
     lv_label_set_long_mode(s.text_lbl, LV_LABEL_LONG_WRAP);
     lv_obj_set_width(s.text_lbl, lv_pct(100));
   }

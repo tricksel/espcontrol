@@ -146,6 +146,9 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
                 assert "id(font_trmnl_value_large_80)->get_lv_font()" in sensors, (
                     f"{slug}: weather large-number cards must use the TRMNL web preview large-number font"
                 )
+                assert "cfg.label_lines = 2;" in sensors and "cfg.label_lines_tall = 3;" in sensors, (
+                    f"{slug}: TRMNL card labels must clamp to the generated web preview line counts"
+                )
                 assert "id(font_trmnl_value_32)->get_lv_font()" in sensors, (
                     f"{slug}: normal weather cards must use the TRMNL web preview value font"
                 )

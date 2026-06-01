@@ -86,6 +86,8 @@ script:
           cfg.cols = 4;
           cfg.subpage_chevrons_enabled = false;
           cfg.wrap_tall_labels = true;
+          cfg.label_lines = 2;
+          cfg.label_lines_tall = 3;
           cfg.icon_font = id(font_trmnl_mdi_26_icons)->get_lv_font();
           cfg.sp_sensor_font = id(font_trmnl_value_32)->get_lv_font();
           cfg.sp_large_sensor_font = id(font_trmnl_value_large_80)->get_lv_font();
