@@ -455,8 +455,12 @@ script:
   - id: trmnl_dashboard_content_changed
     mode: restart
     then:
-      - delay: 2s
-      - script.execute: trmnl_refresh_display_when_ready
+      - if:
+          condition:
+            lambda: 'return lv_scr_act() == id(main_page)->obj;'
+          then:
+            - delay: 2s
+            - script.execute: trmnl_refresh_display_when_ready
 
   - id: trmnl_refresh_display_when_ready
     mode: restart
