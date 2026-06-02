@@ -307,7 +307,7 @@ inline void subscribe_friendly_name(lv_obj_t *text_lbl, const std::string &entit
   ha_subscribe_attribute(
     entity_id, std::string("friendly_name"),
     std::function<void(esphome::StringRef)>([text_lbl](esphome::StringRef name) {
-      lv_label_set_text_limited(text_lbl, name, HA_FRIENDLY_NAME_MAX_LEN);
+      set_wrapped_button_label_text(text_lbl, string_ref_limited(name, HA_FRIENDLY_NAME_MAX_LEN));
     })
   );
 }
