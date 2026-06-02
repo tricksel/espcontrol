@@ -115,6 +115,26 @@ select:
         - script.execute: time_update
         - script.execute: trmnl_dashboard_content_changed
 
+  - platform: template
+    name: "Screen: Dithering"
+    internal: true
+    id: display_dithering_select
+    entity_category: config
+    icon: "mdi:checkerboard"
+    optimistic: true
+    restore_value: true
+    initial_option: "Off"
+    options:
+      - "Off"
+      - "Ordered"
+    web_server:
+      sorting_group_id: sg_display
+    on_value:
+      then:
+        - lambda: |-
+            id(epaper).set_ordered_dither_enabled(x == "Ordered");
+        - script.execute: trmnl_dashboard_content_changed
+
 text:
   - platform: template
     name: "${entity_indoor_temp_entity}"

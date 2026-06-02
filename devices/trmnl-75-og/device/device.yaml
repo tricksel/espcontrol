@@ -11,6 +11,7 @@ substitutions:
 
 esp32:
   board: seeed_xiao_esp32s3
+  flash_size: 16MB
   framework:
     type: arduino
 
@@ -24,8 +25,8 @@ external_components:
       url: ${espcontrol_component_url}
       ref: ${espcontrol_component_ref}
       path: components
-    components: [espcontrol]
     refresh: 1s
+    components: [espcontrol, trmnl_epaper]
 
 espcontrol:
 
@@ -120,9 +121,8 @@ spi:
   mosi_pin: GPIO9
 
 display:
-  - platform: waveshare_epaper
+  - platform: trmnl_epaper
     id: epaper
-    model: 7.50inv2
     cs_pin: GPIO44
     dc_pin: GPIO10
     reset_pin: GPIO38
