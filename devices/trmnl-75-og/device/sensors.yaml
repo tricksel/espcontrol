@@ -422,7 +422,7 @@ script:
           cfg.sp_sensor_font = id(font_number_value)->get_lv_font();
           cfg.sp_large_sensor_font = id(font_number_value)->get_lv_font();
           cfg.large_sensor_unit_offset_percent = -10;
-          cfg.media_title_font = id(font_text_body)->get_lv_font();
+          cfg.media_title_font = id(font_text_media_title)->get_lv_font();
           cfg.option_select_value_font = id(font_number_value)->get_lv_font();
           cfg.volume_number_font = id(font_number_value)->get_lv_font();
           cfg.volume_label_font = id(font_text_body)->get_lv_font();

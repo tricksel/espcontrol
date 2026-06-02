@@ -21,7 +21,7 @@ substitutions:
   icon_font: font_icon_card
   subpage_chevron_font: font_text_body
   label_font: font_text_card_label
-  media_title_font: font_text_body
+  media_title_font: font_text_media_title
   unit_font: font_text_card_unit
   sensor_value_font: font_number_value
   button_on_color: "0x000000"
