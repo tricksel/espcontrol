@@ -37,6 +37,9 @@ globals:
   - id: screensaver_wake_touch_guard_active
     type: bool
     initial_value: 'false'
+  - id: screensaver_wake_touch_guard_skip_once
+    type: bool
+    initial_value: 'false'
   - id: home_screen_idle_suspended
     type: bool
     initial_value: 'false'
@@ -466,10 +469,22 @@ script:
             lambda: 'return id(display_asleep) || id(screen_schedule_asleep) || id(screensaver_display_off_active) || id(screensaver_dimmed_active) || id(cover_art_screensaver_active);'
           then:
             - script.stop: screensaver_idle_check
-            - globals.set:
-                id: screensaver_wake_touch_guard_active
-                value: 'true'
-            - script.execute: screensaver_wake_touch_guard_clear
+            - if:
+                condition:
+                  lambda: |-
+                    if (!id(screensaver_wake_touch_guard_skip_once)) return true;
+                    id(screensaver_wake_touch_guard_skip_once) = false;
+                    return false;
+                then:
+                  - globals.set:
+                      id: screensaver_wake_touch_guard_active
+                      value: 'true'
+                  - script.execute: screensaver_wake_touch_guard_clear
+                else:
+                  - script.stop: screensaver_wake_touch_guard_clear
+                  - globals.set:
+                      id: screensaver_wake_touch_guard_active
+                      value: 'false'
             - globals.set:
                 id: screensaver_display_off_active
                 value: 'false'
