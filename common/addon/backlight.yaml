@@ -34,6 +34,9 @@ globals:
   - id: screensaver_dimmed_active
     type: bool
     initial_value: 'false'
+  - id: screensaver_wake_touch_guard_active
+    type: bool
+    initial_value: 'false'
   - id: home_screen_idle_suspended
     type: bool
     initial_value: 'false'
@@ -464,6 +467,10 @@ script:
           then:
             - script.stop: screensaver_idle_check
             - globals.set:
+                id: screensaver_wake_touch_guard_active
+                value: 'true'
+            - script.execute: screensaver_wake_touch_guard_clear
+            - globals.set:
                 id: screensaver_display_off_active
                 value: 'false'
             - globals.set:
@@ -513,6 +520,14 @@ script:
             lambda: 'return id(cover_art_media_playing) && id(cover_art_screensaver_enabled).state;'
           then:
             - script.execute: cover_art_delay_timer
+
+  - id: screensaver_wake_touch_guard_clear
+    mode: restart
+    then:
+      - delay: 700ms
+      - globals.set:
+          id: screensaver_wake_touch_guard_active
+          value: 'false'
 
   # Choose and apply the brightness for the dimmed-screen screensaver.
   - id: screensaver_dimmed_refresh_brightness
