@@ -99,19 +99,34 @@ lvgl:
                 src: cover_art_downloaded_image
                 opa: 100%
             - obj:
+                id: cover_art_accent_overlay
+                x: ${cover_art_accent_x}
+                y: ${cover_art_accent_y}
+                width: ${cover_art_accent_width}px
+                height: ${cover_art_accent_height}px
+                bg_color: 0x000000
+                bg_opa: ${cover_art_accent_bg_opa}
+                opa: ${cover_art_accent_opa}
+                radius: 0
+                border_width: 0
+                pad_all: 0
+                scrollable: false
+                scrollbar_mode: "off"
+                clickable: false
+                hidden: true
+            - obj:
                 id: cover_art_track_panel
                 x: ${cover_art_panel_x}
                 y: ${cover_art_panel_y}
                 width: ${cover_art_panel_width}px
                 height: ${cover_art_panel_height}px
-                bg_color: 0x000000
-                bg_opa: ${cover_art_panel_opa}
+                bg_opa: 0%
                 radius: 0
                 border_width: 0
-                pad_top: 24
-                pad_bottom: 24
-                pad_left: 28
-                pad_right: 28
+                pad_top: ${cover_art_panel_pad_top}
+                pad_bottom: ${cover_art_panel_pad_bottom}
+                pad_left: ${cover_art_panel_pad_left}
+                pad_right: ${cover_art_panel_pad_right}
                 scrollable: false
                 scrollbar_mode: "off"
                 clickable: false
@@ -119,23 +134,26 @@ lvgl:
                 layout:
                   type: flex
                   flex_flow: COLUMN
-                  pad_row: 10
+                  pad_row: ${cover_art_panel_pad_row}
                 widgets:
                   - label:
                       id: cover_art_title_label
-                      text: "--"
+                      text: "—"
                       width: 100%
+                      max_height: ${cover_art_title_max_height}px
                       long_mode: wrap
                       text_font: ${cover_art_title_font}
-                      text_color: 0xFFFFFF
+                      text_color: ${cover_art_text_color}
                       text_align: left
+                      text_line_space: 0
                   - label:
                       id: cover_art_artist_label
                       text: ""
+                      pad_top: ${cover_art_artist_pad_top}
                       width: 100%
-                      long_mode: dot
+                      long_mode: ${cover_art_artist_long_mode}
                       text_font: ${cover_art_artist_font}
-                      text_color: 0xFFFFFF
+                      text_color: ${cover_art_text_color}
                       text_opa: 80%
                       text_align: left
                       hidden: true
@@ -187,7 +205,7 @@ script:
       - lvgl.label.update:
           id: cover_art_title_label
           text: !lambda |-
-            if (id(cover_art_title).empty()) return std::string("--");
+            if (id(cover_art_title).empty()) return std::string("—");
             return id(cover_art_title);
       - if:
           condition:
@@ -204,6 +222,9 @@ script:
     mode: restart
     then:
       - script.execute: cover_art_sync_track_text
+      - lambda: |-
+          lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
+      - lvgl.widget.show: cover_art_accent_overlay
       - lvgl.widget.show: cover_art_track_panel
       - if:
           condition:
@@ -214,6 +235,7 @@ script:
                 condition:
                   lambda: 'return id(cover_art_screensaver_active) && ${cover_art_square_overlay};'
                 then:
+                  - lvgl.widget.hide: cover_art_accent_overlay
                   - lvgl.widget.hide: cover_art_track_panel
 
   - id: show_cover_art_view
@@ -245,6 +267,9 @@ script:
           then:
             - script.execute: cover_art_show_track_overlay
           else:
+            - lambda: |-
+                lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
+            - lvgl.widget.show: cover_art_accent_overlay
             - lvgl.widget.show: cover_art_track_panel
       - script.execute: backlight_apply_brightness
 
@@ -257,6 +282,7 @@ script:
           id: cover_art_screensaver_active
           value: 'false'
       - lvgl.widget.hide: cover_art_screensaver
+      - lvgl.widget.hide: cover_art_accent_overlay
       - lvgl.widget.hide: cover_art_track_panel
       - lvgl.widget.hide: cover_art_error_label
       - script.execute: clock_bar_apply
