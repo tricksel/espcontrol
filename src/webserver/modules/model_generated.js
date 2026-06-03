@@ -56,6 +56,7 @@ var EspControlModel = (() => {
     normalizeClockBrightness: () => normalizeClockBrightness,
     normalizeHexColor: () => normalizeHexColor,
     normalizeHour: () => normalizeHour,
+    normalizeLanguage: () => normalizeLanguage,
     normalizeMonthNames: () => normalizeMonthNames,
     normalizeNtpServer: () => normalizeNtpServer,
     normalizeScheduleClockBrightness: () => normalizeScheduleClockBrightness,
@@ -708,6 +709,10 @@ var EspControlModel = (() => {
     if (unit === "c" || unit === "\xB0c" || unit === "celsius" || unit === "centigrade") return "\xB0C";
     return "Auto";
   }
+  function normalizeLanguage(value) {
+    const language = String(value == null ? "" : value).trim().toLowerCase();
+    return language || "en";
+  }
   function normalizeHour(value, fallback) {
     const n = parseInt(String(value), 10);
     if (!Number.isFinite(n)) return fallback;
@@ -872,6 +877,7 @@ var EspControlModel = (() => {
       subpageChevron: objectValue(settings, "subpage_chevron") != null ? !!settings.subpage_chevron : true,
       timezone: String(settings.timezone || current.timezone),
       temperatureUnit: normalizeTemperatureUnit(settings.temperature_unit),
+      language: normalizeLanguage(settings.language || current.language),
       clockFormat,
       hasNtpServer1,
       hasNtpServer2,

@@ -156,6 +156,7 @@ assert.deepStrictEqual(
 
 const panelSettings = model.normalizeBackupPanelSettings({
   temperature_unit: "centigrade",
+  language: "it",
   clock_format: "24h",
   ntp_server_1: "pool.ntp.org",
   month_names: "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
@@ -166,6 +167,7 @@ const panelSettings = model.normalizeBackupPanelSettings({
   screen_rotation: "90",
 }, {
   timezone: "UTC (GMT+0)",
+  language: "en",
   clockFormat: "12h",
   clockFormatOptions: ["12h", "24h"],
   developerExperimentalFeatures: false,
@@ -177,6 +179,7 @@ const panelSettings = model.normalizeBackupPanelSettings({
   screenRotationOptions: ["0", "90", "180", "270"],
 });
 assert.strictEqual(panelSettings.temperatureUnit, "\u00B0C", "panel temperature unit normalizes");
+assert.strictEqual(panelSettings.language, "it", "panel language imports");
 assert.strictEqual(panelSettings.clockFormat, "24h", "panel clock format validates against options");
 assert.strictEqual(panelSettings.ntpServer1, "pool.ntp.org", "panel NTP server imports");
 assert.strictEqual(panelSettings.monthNames[0], "Jan", "panel month names import");

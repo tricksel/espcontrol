@@ -25,6 +25,7 @@ function exportConfig() {
       temperature_degree_symbol: state.temperatureDegreeSymbolOn,
       subpage_chevron: state.subpageChevronsOn,
       timezone: state.timezone,
+      language: normalizeLanguage(state.language),
       clock_format: state.clockFormat,
       ntp_server_1: state.ntpServer1,
       ntp_server_2: state.ntpServer2,
@@ -159,6 +160,7 @@ function importConfig() {
         var s = backupPlan.settings;
         var importedSettings = EspControlModel.normalizeBackupPanelSettings(s, {
           timezone: state.timezone,
+          language: state.language,
           clockFormat: state.clockFormat,
           clockFormatOptions: state.clockFormatOptions,
           developerExperimentalFeatures: state.developerExperimentalFeatures,
@@ -181,6 +183,7 @@ function importConfig() {
         var importedTimezone = importedSettings.timezone;
         var importedTheme = normalizeTheme(s.theme || state.theme);
         var importedTemperatureUnit = importedSettings.temperatureUnit;
+        var importedLanguage = importedSettings.language;
         var importedClockFormat = importedSettings.clockFormat;
         var hasNtpServer1 = importedSettings.hasNtpServer1;
         var hasNtpServer2 = importedSettings.hasNtpServer2;
@@ -193,6 +196,7 @@ function importConfig() {
         var importedNtpServer3 = importedSettings.ntpServer3;
         var importedMonthNames = importedSettings.monthNames;
         if (s.timezone) postSelect(entityName("screen_timezone"), importedTimezone);
+        if (s.language) postSelect(entityName("screen_language"), importedLanguage);
         if (s.theme) postSelect(entityName("screen_theme"), importedTheme);
         postSelect(entityName("screen_temperature_unit"), importedTemperatureUnit);
         if (s.clock_format) postSelect(entityName("screen_clock_format"), importedClockFormat);
@@ -247,6 +251,7 @@ function importConfig() {
         state.temperatureDegreeSymbolOn = importedSettings.temperatureDegreeSymbol;
         state.subpageChevronsOn = importedSettings.subpageChevron;
         state.timezone = importedTimezone;
+        state.language = importedLanguage;
         state.theme = importedTheme;
         state.clockFormat = importedClockFormat;
         state.ntpServer1 = importedNtpServer1;
@@ -294,6 +299,7 @@ function importConfig() {
         syncCoverArtScreensaverUi();
         syncThemeUi();
         if (els.setTimezone) els.setTimezone.value = state.timezone;
+        syncLanguageSelect();
         if (els.setClockFormat) els.setClockFormat.value = state.clockFormat;
         syncNtpServerUi();
         syncMonthNameUi();

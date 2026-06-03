@@ -63,6 +63,7 @@ export {
   normalizeClockBrightness,
   normalizeHexColor,
   normalizeHour,
+  normalizeLanguage,
   normalizeMonthNames,
   normalizeNtpServer,
   normalizeScheduleClockBrightness,

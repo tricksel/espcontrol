@@ -5,6 +5,9 @@ var MONTH_NAME_DEFAULTS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
+var LANGUAGE_LABELS = {
+  en: "English"
+};
 var THEME_PRESETS = {
   Light: { on: "0073FF", off: "CECECE", sensor: "DEDEDE" },
   Dark: { on: "FF8C00", off: "313131", sensor: "212121" },
@@ -96,6 +99,8 @@ var state = {
   scheduleClockTextColor: "FFFFFF",
   timezone: "UTC (GMT+0)",
   timezoneOptions: defaultTimezoneOptions(),
+  language: "en",
+  languageOptions: ["en"],
   clockFormat: "24h",
   clockFormatOptions: ["12h", "24h"],
   customNtpServers: false,
@@ -211,6 +216,40 @@ function sortScreenRotationOptions(options) {
 
 function normalizeTemperatureUnit(value) {
   return EspControlModel.normalizeTemperatureUnit(value);
+}
+
+function normalizeLanguage(value) {
+  var language = String(value == null ? "" : value).trim().toLowerCase();
+  return language || "en";
+}
+
+function languageLabel(value) {
+  value = normalizeLanguage(value);
+  return LANGUAGE_LABELS[value] || value;
+}
+
+function languageOptionsWithFallback(options, selected) {
+  var list = uniqueOptions((options && options.length ? options : ["en"]).map(normalizeLanguage));
+  selected = normalizeLanguage(selected);
+  if (list.indexOf(selected) === -1) list.unshift(selected);
+  return list;
+}
+
+function appendLanguageOption(select, opt) {
+  var o = document.createElement("option");
+  o.value = normalizeLanguage(opt);
+  o.textContent = languageLabel(opt);
+  select.appendChild(o);
+}
+
+function syncLanguageSelect() {
+  if (!els.setLanguage) return;
+  state.languageOptions = languageOptionsWithFallback(state.languageOptions, state.language);
+  els.setLanguage.innerHTML = "";
+  state.languageOptions.forEach(function (opt) {
+    appendLanguageOption(els.setLanguage, opt);
+  });
+  els.setLanguage.value = normalizeLanguage(state.language);
 }
 
 function timezonePrefersFahrenheit(timezone) {

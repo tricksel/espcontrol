@@ -54,6 +54,28 @@ function buildSettingsPage(parent) {
   }
 
   config.appendChild(makeCollapsibleCard("Appearance", appearBody, true));
+
+  var languageBody = document.createElement("div");
+  var languageField = document.createElement("div");
+  languageField.className = "sp-field";
+  languageField.appendChild(fieldLabel("Language", "sp-set-language"));
+  var languageSelect = document.createElement("select");
+  languageSelect.className = "sp-select";
+  languageSelect.id = "sp-set-language";
+  state.languageOptions = languageOptionsWithFallback(state.languageOptions, state.language);
+  state.languageOptions.forEach(function (opt) {
+    appendLanguageOption(languageSelect, opt);
+  });
+  languageSelect.value = normalizeLanguage(state.language);
+  languageSelect.addEventListener("change", function () {
+    state.language = normalizeLanguage(this.value);
+    postSelect(entityName("screen_language"), state.language);
+  });
+  languageField.appendChild(languageSelect);
+  languageBody.appendChild(languageField);
+  config.appendChild(makeCollapsibleCard("Language", languageBody, true));
+  els.setLanguage = languageSelect;
+
   var blBody = document.createElement("div");
 
   var daySlider = createRangeSlider("Daytime Brightness", state.brightnessDayVal, entityName("screen_daytime_brightness"));

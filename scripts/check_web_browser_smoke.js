@@ -158,6 +158,7 @@ function seededEvents() {
     { id: "switch-screen__clock_bar", state: "ON", value: true },
     { id: "switch-screen__network_status_icon", state: "ON", value: true },
     { id: "select-screen__timezone", state: "Europe/London (GMT+0)", value: "Europe/London (GMT+0)", option: ["Europe/London (GMT+0)", "America/New_York (GMT-5)"] },
+    { id: "select-screen__language", state: "en", value: "en", option: ["en"] },
     { id: "select-screen__clock_format", state: "24h", value: "24h", option: ["12h", "24h"] },
     { id: "select-screen__rotation", state: "0", value: "0", option: ["0", "90", "180", "270"] },
     { id: "number-screensaver_timeout", state: "300", value: 300, min: 10, max: 3600 },
@@ -363,6 +364,7 @@ function backupFixture(device, slots) {
       network_status_icon: true,
       temperature_degree_symbol: true,
       timezone: "Europe/London (GMT+0)",
+      language: "en",
       clock_format: "24h",
       ntp_server_1: "pool.ntp.org",
       ntp_server_2: "time.nist.gov",
@@ -461,12 +463,13 @@ async function assertBackupImportSmoke(page, posts, slug) {
   await importBackup(page, backupFixture(slug, 20), "same-device-backup");
   await page.waitForSelector(".sp-banner.sp-success");
   assert((await page.locator(".sp-banner").textContent()).includes("Configuration imported successfully"), "same-device import succeeds");
-  await waitForPost(posts, { domain: "text", name: "Button On Color", action: "set", value: "AA5500" }, "backup color import", before);
-  await waitForPost(posts, { domain: "text", name: "Button 3 Config", action: "set" }, "backup subpage button config", before);
+  await waitForPost(posts, { domain: "text", name: "button_on_color", action: "set", value: "AA5500" }, "backup color import", before);
+  await waitForPost(posts, { domain: "text", name: "button_3_config", action: "set" }, "backup subpage button config", before);
   await waitForPost(posts, { domain: "text", name: "Subpage 3 Config", action: "set" }, "backup subpage config", before);
-  await waitForPost(posts, { domain: "select", name: "Screen: Timezone", action: "set", option: "Europe/London (GMT+0)" }, "backup timezone import", before);
+  await waitForPost(posts, { domain: "select", name: "screen__timezone", action: "set", option: "Europe/London (GMT+0)" }, "backup timezone import", before);
+  await waitForPost(posts, { domain: "select", name: "screen__language", action: "set", option: "en" }, "backup language import", before);
   await waitForPost(posts, { domain: "number", name: "Screen: Daytime Brightness", action: "set", value: "88" }, "backup brightness import", before);
-  await waitForPost(posts, { domain: "select", name: "Screen: Rotation", action: "set", option: "90" }, "backup rotation import", before);
+  await waitForPost(posts, { domain: "select", name: "screen__rotation", action: "set", option: "90" }, "backup rotation import", before);
 
   await importBackup(page, "{", "invalid-backup");
   await page.waitForSelector(".sp-banner.sp-error");
@@ -507,7 +510,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "Button 1 Config",
+    name: "button_1_config",
     action: "set",
     value: "switch.kitchen_main;Kitchen Main;Lightbulb;Lightbulb",
   }, "switch card edit", before);
@@ -518,7 +521,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "Button 2 Config",
+    name: "button_2_config",
     action: "set",
     value: "sensor.energy;Energy Usage;Gauge;Auto;sensor.energy;W;sensor;0",
   }, "sensor card edit", before);
@@ -529,7 +532,7 @@ async function assertEditAndApplySmoke(page, posts, errors) {
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(posts, {
     domain: "text",
-    name: "Button 4 Config",
+    name: "button_4_config",
     action: "set",
   }, "media card edit", before);
 

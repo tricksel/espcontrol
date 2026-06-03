@@ -10,6 +10,11 @@ export function normalizeTemperatureUnit(value: unknown): string {
   return "Auto";
 }
 
+export function normalizeLanguage(value: unknown): string {
+  const language = String(value == null ? "" : value).trim().toLowerCase();
+  return language || "en";
+}
+
 export function normalizeHour(value: unknown, fallback: number): number {
   const n = parseInt(String(value), 10);
   if (!Number.isFinite(n)) return fallback;
@@ -187,6 +192,7 @@ export function normalizeBackupScreenSettings(
 
 export interface BackupPanelSettingsCurrent {
   timezone: string;
+  language: string;
   clockFormat: string;
   clockFormatOptions: readonly string[];
   developerExperimentalFeatures: boolean;
@@ -209,6 +215,7 @@ export interface BackupPanelSettingsState {
   subpageChevron: boolean;
   timezone: string;
   temperatureUnit: string;
+  language: string;
   clockFormat: string;
   hasNtpServer1: boolean;
   hasNtpServer2: boolean;
@@ -292,6 +299,7 @@ export function normalizeBackupPanelSettings(
       : true,
     timezone: String(settings.timezone || current.timezone),
     temperatureUnit: normalizeTemperatureUnit(settings.temperature_unit),
+    language: normalizeLanguage(settings.language || current.language),
     clockFormat,
     hasNtpServer1,
     hasNtpServer2,
