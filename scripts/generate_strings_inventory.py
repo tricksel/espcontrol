@@ -13,13 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "common" / "config" / "strings.en.json"
 
 SOURCE_GLOBS = (
-    "src/webserver/**/*.js",
     "components/espcontrol/**/*.h",
 )
 
-JSON_SOURCES = (
-    ROOT / "common" / "config" / "card_contract.json",
-)
+JSON_SOURCES: tuple[Path, ...] = ()
 
 SKIP_FILES = {
     "entry.js",
@@ -52,11 +49,13 @@ IGNORED_EXACT = {
     "input",
     "json",
     "label",
+    "modal closed",
     "none",
     "null",
     "options",
     "precision",
     "sensor",
+    "send failed",
     "source",
     "state",
     "status",
@@ -322,9 +321,9 @@ def build_inventory(strings: dict[str, set[str]]) -> dict[str, object]:
         "language": "en",
         "description": (
             "English source-string inventory for hard-coded text rendered on screen by "
-            "EspControl. Entity names, service identifiers, icon names, and raw Home "
-            "Assistant API values are excluded. This file is generated for translation "
-            "review and is not yet used at runtime."
+            "EspControl firmware. Webserver-only text, entity names, service identifiers, "
+            "icon names, and raw Home Assistant API values are excluded. This file is "
+            "generated for translation review and is not yet used at runtime."
         ),
         "generatedBy": "scripts/generate_strings_inventory.py",
         "strings": entries,
