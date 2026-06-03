@@ -115,8 +115,9 @@ esphome:
       then:
         - lambda: 'id(screen_rotation_ready) = true;'
         - script.execute: apply_screen_rotation
-    - priority: -110
+    - priority: -200
       then:
+        - delay: 5s
         - lambda: |-
             if (id(button_on_color).state == "000000" &&
                 id(button_off_color).state == "FFFFFF" &&
