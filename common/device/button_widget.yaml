@@ -66,7 +66,11 @@ button:
         condition:
           lambda: 'return id(screensaver_wake_touch_guard_active);'
         then:
-          - lambda: 'ESP_LOGD("screensaver", "Ignored button click during screensaver wake guard");'
+          - script.stop: screensaver_wake_touch_guard_clear
+          - globals.set:
+              id: screensaver_wake_touch_guard_active
+              value: 'false'
+          - lambda: 'ESP_LOGD("screensaver", "Ignored button click after screensaver wake");'
         else:
           - if:
               condition:
@@ -76,4 +80,14 @@ button:
               else:
                 - lambda: 'handle_button_click(id(button_${num}_config).state, ${num}, id(button_${num}));'
   on_long_press:
-    - script.execute: screen_schedule_manual_sleep
+    - if:
+        condition:
+          lambda: 'return id(screensaver_wake_touch_guard_active);'
+        then:
+          - script.stop: screensaver_wake_touch_guard_clear
+          - globals.set:
+              id: screensaver_wake_touch_guard_active
+              value: 'false'
+          - lambda: 'ESP_LOGD("screensaver", "Ignored button long press after screensaver wake");'
+        else:
+          - script.execute: screen_schedule_manual_sleep
