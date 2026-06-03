@@ -484,6 +484,7 @@ script:
       - script.stop: cover_art_delay_timer
       - script.stop: cover_art_show_track_overlay
       - script.stop: cover_art_download
+      - script.stop: cover_art_deferred_download
       - script.stop: cover_art_prepare_download
       - script.stop: cover_art_retry_download
       - globals.set:
@@ -525,7 +526,11 @@ script:
               return id(cover_art_screensaver_enabled).state &&
                      !id(cover_art_url).empty();
           then:
-            - script.execute: cover_art_show_black_screen
+            - if:
+                condition:
+                  lambda: 'return !id(cover_art_image_available);'
+                then:
+                  - script.execute: cover_art_show_black_screen
             - lambda: |-
                 if (id(cover_art_url) != id(cover_art_retry_url)) {
                   id(cover_art_retry_url) = id(cover_art_url);
@@ -535,6 +540,21 @@ script:
             - artwork_image.set_url:
                 id: cover_art_downloaded_image
                 url: !lambda 'return id(cover_art_url);'
+
+  - id: cover_art_deferred_download
+    mode: restart
+    then:
+      - delay: 1200ms
+      - if:
+          condition:
+            lambda: |-
+              return id(cover_art_screensaver_active) &&
+                     id(cover_art_screensaver_enabled).state &&
+                     !id(cover_art_url).empty() &&
+                     (!id(cover_art_image_available) ||
+                      id(cover_art_url) != id(cover_art_loaded_url));
+          then:
+            - script.execute: cover_art_download
 
   - id: cover_art_prepare_download
     mode: restart
@@ -547,7 +567,13 @@ script:
                      (!id(cover_art_image_available) ||
                       id(cover_art_url) != id(cover_art_loaded_url));
           then:
-            - script.execute: cover_art_download
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_screensaver_active) && id(cover_art_image_available);'
+                then:
+                  - script.execute: cover_art_deferred_download
+                else:
+                  - script.execute: cover_art_download
           else:
             - if:
                 condition:
@@ -941,7 +967,7 @@ script:
               if (url == id(cover_art_url)) return;
               id(cover_art_url) = url;
               if (id(cover_art_screensaver_active)) {
-                id(cover_art_download).execute();
+                id(cover_art_deferred_download).execute();
                 id(cover_art_show_track_overlay).execute();
               }
             };
@@ -972,7 +998,7 @@ script:
               if (url == id(cover_art_url)) return;
               id(cover_art_url) = url;
               if (id(cover_art_screensaver_active)) {
-                id(cover_art_download).execute();
+                id(cover_art_deferred_download).execute();
                 id(cover_art_show_track_overlay).execute();
               }
             };
