@@ -70,6 +70,7 @@ class ArtworkImage : public PollingComponent,
   }
   /** Set the URL and start an update, queuing the latest request if a download/decode is already active. */
   void request_update_url(const std::string &url);
+  const std::string &get_url() const { return this->url_; }
 
   /** Add the request header */
   template<typename V> void add_request_header(const std::string &header, V value) {

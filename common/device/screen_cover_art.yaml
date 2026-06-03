@@ -18,6 +18,9 @@ globals:
   - id: cover_art_url
     type: std::string
     initial_value: '""'
+  - id: cover_art_loaded_url
+    type: std::string
+    initial_value: '""'
   - id: cover_art_retry_url
     type: std::string
     initial_value: '""'
@@ -299,23 +302,32 @@ script:
   - id: cover_art_apply_downloaded_image
     mode: restart
     then:
-      - script.stop: cover_art_retry_download
-      - globals.set:
-          id: cover_art_image_available
-          value: 'true'
-      - lambda: |-
-          id(cover_art_retry_url) = id(cover_art_url);
-          id(cover_art_retry_count) = 0;
-      - lvgl.image.update:
-          id: cover_art_image_widget
-          src: cover_art_downloaded_image
-      - lvgl.widget.show: cover_art_image_widget
-      - lvgl.widget.hide: cover_art_error_label
       - if:
           condition:
-            lambda: 'return id(cover_art_screensaver_active);'
+            lambda: 'return id(cover_art_downloaded_image)->get_url() == id(cover_art_url);'
           then:
-            - script.execute: cover_art_show_track_overlay
+            - script.stop: cover_art_retry_download
+            - globals.set:
+                id: cover_art_image_available
+                value: 'true'
+            - lambda: |-
+                id(cover_art_loaded_url) = id(cover_art_downloaded_image)->get_url();
+                id(cover_art_retry_url) = id(cover_art_url);
+                id(cover_art_retry_count) = 0;
+            - lvgl.image.update:
+                id: cover_art_image_widget
+                src: cover_art_downloaded_image
+            - lvgl.widget.show: cover_art_image_widget
+            - lvgl.widget.hide: cover_art_error_label
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_screensaver_active);'
+                then:
+                  - script.execute: cover_art_show_track_overlay
+          else:
+            - globals.set:
+                id: cover_art_image_available
+                value: 'false'
 
   - id: cover_art_show_black_screen
     mode: restart
@@ -360,6 +372,24 @@ script:
             - artwork_image.set_url:
                 id: cover_art_downloaded_image
                 url: !lambda 'return id(cover_art_url);'
+
+  - id: cover_art_prepare_download
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return !id(cover_art_url).empty() &&
+                     (!id(cover_art_image_available) ||
+                      id(cover_art_url) != id(cover_art_loaded_url));
+          then:
+            - script.execute: cover_art_download
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(cover_art_url).empty();'
+                then:
+                  - script.execute: cover_art_show_black_screen
 
   - id: cover_art_retry_download
     mode: restart
@@ -503,6 +533,11 @@ script:
     then:
       - script.stop: cover_art_delay_timer
       - script.execute: cover_art_sync_track_text
+      - lambda: |-
+          if (id(cover_art_url).empty() || id(cover_art_url) != id(cover_art_loaded_url)) {
+            id(cover_art_image_available) = false;
+          }
+      - script.execute: cover_art_prepare_download
       - globals.set:
           id: display_asleep
           value: 'true'
@@ -698,10 +733,14 @@ script:
               if (path.empty() || path == "unknown" || path == "unavailable") {
                 ESP_LOGI("cover_art", "Artwork entity_picture unavailable");
                 id(cover_art_url).clear();
+                id(cover_art_loaded_url).clear();
                 id(cover_art_retry_url).clear();
                 id(cover_art_retry_count) = 0;
+                id(cover_art_image_available) = false;
                 id(cover_art_retry_download).stop();
-                id(cover_art_show_black_screen).execute();
+                if (id(cover_art_screensaver_active)) {
+                  id(cover_art_show_black_screen).execute();
+                }
                 return;
               }
               std::string url = path;
@@ -723,8 +762,8 @@ script:
               }
               if (url == id(cover_art_url)) return;
               id(cover_art_url) = url;
-              id(cover_art_download).execute();
               if (id(cover_art_screensaver_active)) {
+                id(cover_art_download).execute();
                 id(cover_art_show_track_overlay).execute();
               }
             };
@@ -753,8 +792,8 @@ script:
               }
               if (url == id(cover_art_url)) return;
               id(cover_art_url) = url;
-              id(cover_art_download).execute();
               if (id(cover_art_screensaver_active)) {
+                id(cover_art_download).execute();
                 id(cover_art_show_track_overlay).execute();
               }
             };
