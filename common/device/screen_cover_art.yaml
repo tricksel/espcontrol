@@ -1050,6 +1050,14 @@ script:
             if (chosen.empty()) {
               chosen = id(cover_art_pending_remote_url);
             }
+            if (!chosen.empty()) {
+              std::string capped = esphome::artwork_image::cap_artwork_url(chosen, ${cover_art_size});
+              if (capped != chosen) {
+                ESP_LOGI("cover_art", "Using capped JPEG artwork URL (%u chars)",
+                         (unsigned) capped.size());
+                chosen = capped;
+              }
+            }
 
             if (chosen.empty()) {
               if (!waiting_for_pair) {
