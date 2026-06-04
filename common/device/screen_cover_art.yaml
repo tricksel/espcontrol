@@ -426,6 +426,7 @@ script:
                      id(cover_art_downloaded_image)->get_url() == id(cover_art_url);
           then:
             - script.stop: cover_art_retry_download
+            - script.stop: cover_art_deferred_download
             - globals.set:
                 id: cover_art_image_available
                 value: 'true'
@@ -433,12 +434,19 @@ script:
                 id(cover_art_loaded_url) = id(cover_art_downloaded_image)->get_url();
                 id(cover_art_retry_url) = id(cover_art_url);
                 id(cover_art_retry_count) = 0;
+                auto *img = id(cover_art_downloaded_image);
+                ESP_LOGI("cover_art", "Applying artwork image=%dx%d content=%dx%d offset=%d,%d",
+                         img->get_width(), img->get_height(), img->get_content_width(), img->get_content_height(),
+                         img->get_content_offset_x(), img->get_content_offset_y());
+            - script.execute: cover_art_apply_responsive_layout
+            - lvgl.widget.update:
+                id: cover_art_image_widget
+                opa: 100%
             - lvgl.image.update:
                 id: cover_art_image_widget
                 src: cover_art_downloaded_image
             - script.execute: cover_art_extract_accent_color
             - script.wait: cover_art_extract_accent_color
-            - script.execute: cover_art_apply_responsive_layout
             - lvgl.widget.show: cover_art_image_widget
             - lvgl.widget.hide: cover_art_error_label
             - if:
@@ -542,7 +550,11 @@ script:
           lv_color_t black = lv_color_make(0, 0, 0);
           lv_obj_set_style_bg_color(id(cover_art_backdrop), black, 0);
           lv_obj_set_style_bg_color(id(cover_art_accent_overlay), black, 0);
-      - lvgl.widget.hide: cover_art_image_widget
+      - if:
+          condition:
+            lambda: 'return id(cover_art_loaded_url).empty();'
+          then:
+            - lvgl.widget.hide: cover_art_image_widget
       - script.execute: cover_art_sync_track_text
       - lambda: |-
           lv_obj_set_style_text_line_space(id(cover_art_title_label), ${cover_art_title_line_space}, 0);
@@ -572,7 +584,7 @@ script:
               return id(cover_art_screensaver_active) &&
                      id(cover_art_media_playing) &&
                      !id(cover_art_url).empty() &&
-                     id(cover_art_retry_count) >= 4;
+                     id(cover_art_retry_count) >= 5;
           then:
             - lvgl.widget.show: cover_art_error_label
           else:
@@ -607,8 +619,8 @@ script:
                   - script.execute: cover_art_deferred_download
                 else:
                   - lambda: |-
-                      if (id(cover_art_retry_count) < 4) {
-                        ESP_LOGW("cover_art", "Artwork download failed, scheduling retry %d/4 (url %u chars)",
+                      if (id(cover_art_retry_count) < 5) {
+                        ESP_LOGW("cover_art", "Artwork download failed, scheduling retry %d/5 (url %u chars)",
                                  id(cover_art_retry_count) + 1, (unsigned) id(cover_art_url).size());
                       } else {
                         ESP_LOGW("cover_art", "Artwork download failed, retries exhausted (url %u chars)",
@@ -674,7 +686,7 @@ script:
           then:
             - if:
                 condition:
-                  lambda: 'return !id(cover_art_image_available);'
+                  lambda: 'return id(cover_art_screensaver_active) && !id(cover_art_image_available);'
                 then:
                   - script.execute: cover_art_show_black_screen
             - lambda: |-
@@ -690,7 +702,7 @@ script:
   - id: cover_art_deferred_download
     mode: restart
     then:
-      - delay: 1200ms
+      - delay: 100ms
       - if:
           condition:
             lambda: |-
@@ -714,7 +726,7 @@ script:
                      id(cover_art_media_playing) &&
                      (id(cover_art_url).empty() ||
                       (!id(cover_art_image_available) &&
-                       id(cover_art_retry_count) < 4));
+                       id(cover_art_retry_count) < 5));
           then:
             - script.execute: cover_art_request_artwork
 
@@ -752,13 +764,13 @@ script:
               return !id(cover_art_url).empty() &&
                      id(cover_art_screensaver_enabled).state &&
                      id(cover_art_url) == id(cover_art_retry_url) &&
-                     id(cover_art_retry_count) < 4;
+                     id(cover_art_retry_count) < 5;
           then:
             - delay: !lambda |-
-                static const uint32_t delays[] = {1000, 2000, 5000, 10000};
+                static const uint32_t delays[] = {500, 1500, 3000, 6000, 10000};
                 int attempt = id(cover_art_retry_count);
                 if (attempt < 0) attempt = 0;
-                if (attempt > 3) attempt = 3;
+                if (attempt > 4) attempt = 4;
                 return delays[attempt];
             - if:
                 condition:
@@ -766,11 +778,11 @@ script:
                     return !id(cover_art_url).empty() &&
                            id(cover_art_screensaver_enabled).state &&
                            id(cover_art_url) == id(cover_art_retry_url) &&
-                           id(cover_art_retry_count) < 4;
+                           id(cover_art_retry_count) < 5;
                 then:
                   - lambda: |-
                       id(cover_art_retry_count)++;
-                      ESP_LOGI("cover_art", "Retrying artwork download %d/4", id(cover_art_retry_count));
+                      ESP_LOGI("cover_art", "Retrying artwork download %d/5", id(cover_art_retry_count));
                   - artwork_image.set_url:
                       id: cover_art_downloaded_image
                       url: !lambda 'return id(cover_art_url);'
@@ -913,6 +925,7 @@ script:
       - lvgl.widget.hide: cover_art_error_label
       - lvgl.widget.show: cover_art_screensaver
       - script.execute: cover_art_apply_responsive_layout
+      - script.execute: cover_art_show_track_overlay
       - script.execute: cover_art_request_artwork
       - script.execute: cover_art_prepare_download
       - script.execute: cover_art_deferred_request_artwork
@@ -936,7 +949,10 @@ script:
                   - script.execute: cover_art_show_black_screen
       - if:
           condition:
-            lambda: 'return id(cover_art_image_available) && id(cover_art_progress_bar_enabled).state;'
+            lambda: |-
+              return id(cover_art_screensaver_active) &&
+                     id(cover_art_media_playing) &&
+                     id(cover_art_progress_bar_enabled).state;
           then:
             - lvgl.widget.show: cover_art_progress_bar
           else:
@@ -1237,6 +1253,20 @@ script:
             };
           if (!already_subscribed) ha_subscribe_attribute(cover_entity, std::string("media_artist"), handle_media_artist);
           ha_get_attribute(cover_entity, std::string("media_artist"), handle_media_artist);
+
+          std::function<void(esphome::StringRef)> handle_picture_change =
+            [cover_entity](esphome::StringRef picture) {
+              if (!id(cover_art_screensaver_enabled).state ||
+                  cover_entity != id(cover_art_media_player_entity).state ||
+                  !id(cover_art_screensaver_active)) return;
+              ESP_LOGD("cover_art", "Artwork attribute changed while active (%u chars)",
+                       (unsigned) picture.size());
+              id(cover_art_request_artwork).execute();
+            };
+          if (!already_subscribed) {
+            ha_subscribe_attribute(cover_entity, std::string("entity_picture"), handle_picture_change);
+            ha_subscribe_attribute(cover_entity, std::string("entity_picture_local"), handle_picture_change);
+          }
 
           std::function<void(esphome::StringRef)> handle_media_duration =
             [cover_entity](esphome::StringRef duration) {
