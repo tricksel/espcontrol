@@ -211,17 +211,22 @@ size_t ArtworkImage::resize_(int width_in, int height_in) {
 }
 
 void ArtworkImage::request_update_url(const std::string &url) {
-  if (!this->validate_url_(url)) {
+  int max_dim = this->fixed_width_ > 0 ? this->fixed_width_ : 600;
+  std::string effective_url = cap_artwork_url(url, max_dim);
+  if (effective_url != url) {
+    ESP_LOGI(TAG, "Rewrote artwork URL to a capped JPEG (%dpx)", max_dim);
+  }
+  if (!this->validate_url_(effective_url)) {
     return;
   }
   if (this->is_busy_()) {
-    this->queue_pending_update_(url);
+    this->queue_pending_update_(effective_url);
     ESP_LOGI(TAG, "Cancelling in-flight artwork update for newer URL");
     this->end_connection_();
     this->start_pending_update_();
     return;
   }
-  this->url_ = url;
+  this->url_ = effective_url;
   this->update();
 }
 
