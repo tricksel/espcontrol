@@ -57,6 +57,9 @@ globals:
   - id: cover_art_empty_entity_logged
     type: bool
     initial_value: 'false'
+  - id: cover_art_api_wait_logged
+    type: bool
+    initial_value: 'false'
   - id: cover_art_media_duration
     type: float
     initial_value: '0.0'
@@ -104,6 +107,8 @@ api:
           host = "[" + host + "]";
         }
         id(cover_art_home_assistant_base_url) = "http://" + host + ":8123";
+        id(cover_art_subscribed_entity).clear();
+        id(cover_art_api_wait_logged) = false;
         ESP_LOGI("cover_art", "Using Home Assistant artwork base URL: %s",
                  id(cover_art_home_assistant_base_url).c_str());
     - delay: 2s
@@ -337,6 +342,76 @@ script:
           value: 'false'
       - lvgl.widget.hide: cover_art_wake_touch_guard
 
+  - id: cover_art_apply_responsive_layout
+    mode: restart
+    then:
+      - lambda: |-
+          int screen_w = lv_obj_get_width(id(cover_art_screensaver));
+          int screen_h = lv_obj_get_height(id(cover_art_screensaver));
+          if (screen_w <= 0) screen_w = ${screen_width};
+          if (screen_h <= 0) screen_h = ${screen_height};
+
+          const int art_x = ${cover_art_x};
+          const int art_y = ${cover_art_y};
+          const int art_size = ${cover_art_size};
+          const int accent_x = ${cover_art_accent_x};
+          const int accent_y = ${cover_art_accent_y};
+          const int accent_w = ${cover_art_accent_width};
+          const int accent_h = ${cover_art_accent_height};
+          const int panel_x = ${cover_art_panel_x};
+          const int panel_y = ${cover_art_panel_y};
+          const int panel_w = ${cover_art_panel_width};
+          const int panel_h = ${cover_art_panel_height};
+
+          const bool configured_layout_fits =
+              art_x + art_size <= screen_w &&
+              art_y + art_size <= screen_h &&
+              accent_x + accent_w <= screen_w &&
+              accent_y + accent_h <= screen_h &&
+              panel_x + panel_w <= screen_w &&
+              panel_y + panel_h <= screen_h;
+
+          if (configured_layout_fits) {
+            lv_obj_set_pos(id(cover_art_backdrop), art_x, art_y);
+            lv_obj_set_size(id(cover_art_backdrop), art_size, art_size);
+            lv_obj_set_pos(id(cover_art_image_widget), art_x, art_y);
+            lv_obj_set_size(id(cover_art_image_widget), art_size, art_size);
+            lv_obj_set_pos(id(cover_art_accent_overlay), accent_x, accent_y);
+            lv_obj_set_size(id(cover_art_accent_overlay), accent_w, accent_h);
+            lv_obj_set_pos(id(cover_art_track_panel), panel_x, panel_y);
+            lv_obj_set_size(id(cover_art_track_panel), panel_w, panel_h);
+            lv_obj_set_style_pad_top(id(cover_art_track_panel), ${cover_art_panel_pad_top}, LV_PART_MAIN);
+            lv_obj_set_style_pad_bottom(id(cover_art_track_panel), ${cover_art_panel_pad_bottom}, LV_PART_MAIN);
+            lv_obj_set_style_pad_left(id(cover_art_track_panel), ${cover_art_panel_pad_left}, LV_PART_MAIN);
+            lv_obj_set_style_pad_right(id(cover_art_track_panel), ${cover_art_panel_pad_right}, LV_PART_MAIN);
+            return;
+          }
+
+          int fallback_size = art_size;
+          if (fallback_size > screen_w) fallback_size = screen_w;
+          if (fallback_size > screen_h) fallback_size = screen_h;
+          if (fallback_size < 1) fallback_size = 1;
+          int fallback_x = (screen_w - fallback_size) / 2;
+          int fallback_y = (screen_h - fallback_size) / 2;
+          if (fallback_x < 0) fallback_x = 0;
+          if (fallback_y < 0) fallback_y = 0;
+
+          lv_obj_set_pos(id(cover_art_backdrop), fallback_x, fallback_y);
+          lv_obj_set_size(id(cover_art_backdrop), fallback_size, fallback_size);
+          lv_obj_set_pos(id(cover_art_image_widget), fallback_x, fallback_y);
+          lv_obj_set_size(id(cover_art_image_widget), fallback_size, fallback_size);
+          lv_obj_set_pos(id(cover_art_accent_overlay), fallback_x, fallback_y);
+          lv_obj_set_size(id(cover_art_accent_overlay), fallback_size, fallback_size);
+          lv_obj_set_pos(id(cover_art_track_panel), fallback_x, fallback_y);
+          lv_obj_set_size(id(cover_art_track_panel), fallback_size, fallback_size);
+          lv_obj_set_style_bg_opa(id(cover_art_accent_overlay), LV_OPA_80, LV_PART_MAIN);
+          lv_obj_set_style_opa(id(cover_art_accent_overlay), LV_OPA_80, LV_PART_MAIN);
+          int pad = fallback_size >= 700 ? 36 : 24;
+          lv_obj_set_style_pad_top(id(cover_art_track_panel), pad, LV_PART_MAIN);
+          lv_obj_set_style_pad_bottom(id(cover_art_track_panel), pad, LV_PART_MAIN);
+          lv_obj_set_style_pad_left(id(cover_art_track_panel), pad, LV_PART_MAIN);
+          lv_obj_set_style_pad_right(id(cover_art_track_panel), pad, LV_PART_MAIN);
+
   - id: cover_art_apply_downloaded_image
     mode: restart
     then:
@@ -360,6 +435,7 @@ script:
                 src: cover_art_downloaded_image
             - script.execute: cover_art_extract_accent_color
             - script.wait: cover_art_extract_accent_color
+            - script.execute: cover_art_apply_responsive_layout
             - lvgl.widget.show: cover_art_image_widget
             - lvgl.widget.hide: cover_art_error_label
             - if:
@@ -455,6 +531,7 @@ script:
     mode: restart
     then:
       - script.stop: cover_art_show_track_overlay
+      - script.execute: cover_art_apply_responsive_layout
       - globals.set:
           id: cover_art_image_available
           value: 'false'
@@ -543,6 +620,7 @@ script:
           id(cover_art_retry_count) = 0;
           id(cover_art_title).clear();
           id(cover_art_artist).clear();
+          id(cover_art_api_wait_logged) = false;
           id(cover_art_media_position) = 0.0f;
           id(cover_art_position_anchor) = 0.0f;
           id(cover_art_media_duration) = 0.0f;
@@ -803,6 +881,7 @@ script:
       - lvgl.widget.hide: dim_screensaver_touch_guard
       - lvgl.widget.hide: cover_art_error_label
       - lvgl.widget.show: cover_art_screensaver
+      - script.execute: cover_art_apply_responsive_layout
       - script.execute: cover_art_request_artwork
       - script.execute: cover_art_prepare_download
       - script.execute: cover_art_deferred_request_artwork
@@ -1018,6 +1097,15 @@ script:
             }
             return;
           }
+          if (!ha_api_state_connected()) {
+            id(cover_art_subscribed_entity).clear();
+            if (!id(cover_art_api_wait_logged)) {
+              ESP_LOGI("cover_art", "Waiting for Home Assistant state connection before subscribing");
+              id(cover_art_api_wait_logged) = true;
+            }
+            return;
+          }
+          id(cover_art_api_wait_logged) = false;
           id(cover_art_empty_entity_logged) = false;
           const bool already_subscribed = cover_entity == id(cover_art_subscribed_entity);
           if (!already_subscribed) {
