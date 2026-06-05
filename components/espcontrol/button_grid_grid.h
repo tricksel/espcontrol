@@ -1892,7 +1892,8 @@ inline uint32_t &clock_bar_temperature_subscription_generation() {
 inline bool configure_clock_bar_temperature_entities(
     const std::string &temperature_entities,
     lv_obj_t **temperature_labels,
-    size_t temperature_label_count) {
+    size_t temperature_label_count,
+    lv_obj_t *main_page_obj) {
   set_clock_bar_temperature_labels(temperature_labels, temperature_label_count);
 
   std::vector<std::string> clock_bar_entities =
@@ -1905,19 +1906,19 @@ inline bool configure_clock_bar_temperature_entities(
   }
 
   set_clock_bar_temperature_value_count(clock_bar_entities.size());
-  refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
+  refresh_clock_bar_temperature_label_values(main_page_obj, true, false, false, NAN, NAN);
 
   for (size_t i = 0; i < clock_bar_entities.size(); i++) {
     ha_subscribe_state(
       clock_bar_entities[i],
       std::function<void(esphome::StringRef)>(
-        [i, generation](esphome::StringRef state) {
+        [i, generation, main_page_obj](esphome::StringRef state) {
           if (generation != clock_bar_temperature_subscription_generation()) return;
           float val = 0.0f;
           if (parse_float_ref(state, val)) {
             std::vector<float> &values = clock_bar_temperature_values();
             if (i < values.size()) values[i] = val;
-            refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
+            refresh_clock_bar_temperature_label_values(main_page_obj, true, false, false, NAN, NAN);
           }
         })
     );
@@ -1933,6 +1934,7 @@ inline void grid_phase3(
     float *indoor_temp_ptr, float *outdoor_temp_ptr,
     lv_obj_t **temperature_labels,
     size_t temperature_label_count,
+    lv_obj_t *main_page_obj,
     const std::string &presence_entity,
     bool *presence_detected_ptr,
     const std::string &media_player_entity,
@@ -1941,13 +1943,13 @@ inline void grid_phase3(
     std::function<void()> sleep_callback) {
   ESP_LOGI("sensors", "Phase 3: temp/presence/media subscriptions start (%lu ms)", esphome::millis());
   bool has_clock_bar_entities = configure_clock_bar_temperature_entities(
-      temperature_entities, temperature_labels, temperature_label_count);
+      temperature_entities, temperature_labels, temperature_label_count, main_page_obj);
   if (has_clock_bar_entities) {
     indoor_on = false;
     outdoor_on = false;
   }
 
-  refresh_clock_bar_temperature_label_values(nullptr, true, indoor_on, outdoor_on,
+  refresh_clock_bar_temperature_label_values(main_page_obj, true, indoor_on, outdoor_on,
                                              indoor_temp_ptr ? *indoor_temp_ptr : NAN,
                                              outdoor_temp_ptr ? *outdoor_temp_ptr : NAN);
 
@@ -1955,11 +1957,11 @@ inline void grid_phase3(
     ha_subscribe_state(
       indoor_entity,
       std::function<void(esphome::StringRef)>(
-        [indoor_on, outdoor_on, indoor_temp_ptr, outdoor_temp_ptr](esphome::StringRef state) {
+        [indoor_on, outdoor_on, indoor_temp_ptr, outdoor_temp_ptr, main_page_obj](esphome::StringRef state) {
           float val = 0.0f;
           if (parse_float_ref(state, val)) {
             *indoor_temp_ptr = val;
-            refresh_clock_bar_temperature_label_values(nullptr, true, indoor_on, outdoor_on,
+            refresh_clock_bar_temperature_label_values(main_page_obj, true, indoor_on, outdoor_on,
                                                        *indoor_temp_ptr, *outdoor_temp_ptr);
           }
         })
@@ -1970,11 +1972,11 @@ inline void grid_phase3(
     ha_subscribe_state(
       outdoor_entity,
       std::function<void(esphome::StringRef)>(
-        [indoor_on, outdoor_on, indoor_temp_ptr, outdoor_temp_ptr](esphome::StringRef state) {
+        [indoor_on, outdoor_on, indoor_temp_ptr, outdoor_temp_ptr, main_page_obj](esphome::StringRef state) {
           float val = 0.0f;
           if (parse_float_ref(state, val)) {
             *outdoor_temp_ptr = val;
-            refresh_clock_bar_temperature_label_values(nullptr, true, indoor_on, outdoor_on,
+            refresh_clock_bar_temperature_label_values(main_page_obj, true, indoor_on, outdoor_on,
                                                        *indoor_temp_ptr, *outdoor_temp_ptr);
           }
         })

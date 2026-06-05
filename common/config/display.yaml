@@ -511,7 +511,8 @@ text:
             configure_clock_bar_temperature_entities(
               id(clock_bar_temperature_entities).state,
               temperature_labels,
-              6);
+              6,
+              id(main_page)->obj);
         - script.execute: clock_bar_apply
 
   - platform: template
