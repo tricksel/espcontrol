@@ -427,6 +427,30 @@ inline void align_clock_bar_widget(lv_obj_t *obj, int section, int order, int co
   }
 }
 
+inline bool clock_bar_item_is_temperature(int item) {
+  return item >= CLOCK_BAR_ITEM_TEMPERATURE &&
+         item < CLOCK_BAR_ITEM_TEMPERATURE + CLOCK_BAR_TEMPERATURE_SLOT_COUNT;
+}
+
+inline bool clock_bar_section_is_temperature_only(const ClockBarParsedLayout &layout,
+                                                  int section) {
+  if (section < 0 || section >= CLOCK_BAR_SECTION_COUNT || layout.count[section] <= 0) {
+    return false;
+  }
+  for (int item = 0; item < CLOCK_BAR_ITEM_COUNT; item++) {
+    if (layout.section[item] == section && !clock_bar_item_is_temperature(item)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+inline int clock_bar_temperature_item_gap(int item_gap) {
+  int gap = item_gap - 24;
+  if (gap < 52) gap = 52;
+  return gap;
+}
+
 inline void align_clock_bar_layout_item(lv_obj_t *obj,
                                         const ClockBarParsedLayout &layout,
                                         int item,
@@ -437,19 +461,22 @@ inline void align_clock_bar_layout_item(lv_obj_t *obj,
   if (item < 0 || item >= CLOCK_BAR_ITEM_COUNT) return;
   int section = layout.section[item];
   if (section < 0 || section >= CLOCK_BAR_SECTION_COUNT) return;
+  int gap = item_gap;
+  if (clock_bar_section_is_temperature_only(layout, section)) {
+    gap = clock_bar_temperature_item_gap(item_gap);
+  }
   align_clock_bar_widget(obj,
                          section,
                          layout.order[item],
                          layout.count[section],
-                         left_x, y, right_x, item_gap);
+                         left_x, y, right_x, gap);
 }
 
 inline bool clock_bar_layout_item_visible(int item, size_t temperature_count,
                                           bool time_visible,
                                           bool network_visible,
                                           bool weather_visible) {
-  if (item >= CLOCK_BAR_ITEM_TEMPERATURE &&
-      item < CLOCK_BAR_ITEM_TEMPERATURE + CLOCK_BAR_TEMPERATURE_SLOT_COUNT) {
+  if (clock_bar_item_is_temperature(item)) {
     return (size_t) (item - CLOCK_BAR_ITEM_TEMPERATURE) < temperature_count;
   }
   if (item == CLOCK_BAR_ITEM_TIME) return time_visible;
