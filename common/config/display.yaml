@@ -20,9 +20,31 @@ esphome:
           set_display_temperature_unit(id(temperature_unit_select).current_option(),
                                        id(timezone_select).current_option());
           set_display_temperature_degree_symbol(id(temperature_degree_symbol_enabled).state);
+      - script.execute: clock_bar_hide
       - script.execute: clock_bar_apply
 
 script:
+  - id: clock_bar_hide
+    mode: restart
+    then:
+      - lambda: |-
+          lv_obj_t *temperature_labels[] = {
+            id(temperatures),
+            id(temperature_2),
+            id(temperature_3),
+            id(temperature_4),
+            id(temperature_5),
+            id(temperature_6),
+          };
+          set_clock_bar_temperature_labels(temperature_labels, 6);
+          for (lv_obj_t *label : temperature_labels) {
+            lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+          }
+          lv_obj_add_flag(id(display_time), LV_OBJ_FLAG_HIDDEN);
+          lv_obj_add_flag(id(clock_bar_weather_icon_label), LV_OBJ_FLAG_HIDDEN);
+          lv_obj_add_flag(id(network_status_button), LV_OBJ_FLAG_HIDDEN);
+          network_status_hide_modal();
+
   - id: clock_bar_apply
     mode: restart
     then:
@@ -70,12 +92,7 @@ script:
           lv_obj_update_layout(id(main_page)->obj);
 
           if (!visible) {
-            lv_obj_add_flag(id(display_time), LV_OBJ_FLAG_HIDDEN);
-            for (lv_obj_t *label : temperature_labels) {
-              lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
-            }
-            lv_obj_add_flag(id(clock_bar_weather_icon_label), LV_OBJ_FLAG_HIDDEN);
-            network_status_hide_modal();
+            id(clock_bar_hide).execute();
           }
 
           if (show_time && lv_scr_act() == id(main_page)->obj) {
