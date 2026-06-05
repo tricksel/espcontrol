@@ -230,18 +230,19 @@ function renderClockBarSettings(forceOpen) {
   var delBtn = document.createElement("button");
   delBtn.type = "button";
   delBtn.className = "sp-action-btn sp-delete-btn";
-  delBtn.innerHTML = '<span class="mdi mdi-delete-outline"></span>Delete';
+  delBtn.setAttribute("aria-label", "Delete");
+  delBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>';
   delBtn.addEventListener("click", function () {
     deleteClockBarItem(item);
     renderButtonSettings();
   });
   row.appendChild(delBtn);
-  var doneBtn = document.createElement("button");
-  doneBtn.type = "button";
-  doneBtn.className = "sp-action-btn sp-save-btn";
-  doneBtn.textContent = "Done";
-  doneBtn.addEventListener("click", closeSettings);
-  row.appendChild(doneBtn);
+  var saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "sp-action-btn sp-save-btn";
+  saveBtn.textContent = "Save";
+  saveBtn.addEventListener("click", closeSettings);
+  row.appendChild(saveBtn);
   panel.appendChild(row);
 
   container.appendChild(panel);
