@@ -1884,6 +1884,48 @@ inline std::vector<std::string> parse_clock_bar_temperature_entities(const std::
   return out;
 }
 
+inline uint32_t &clock_bar_temperature_subscription_generation() {
+  static uint32_t generation = 0;
+  return generation;
+}
+
+inline bool configure_clock_bar_temperature_entities(
+    const std::string &temperature_entities,
+    lv_obj_t **temperature_labels,
+    size_t temperature_label_count) {
+  set_clock_bar_temperature_labels(temperature_labels, temperature_label_count);
+
+  std::vector<std::string> clock_bar_entities =
+      parse_clock_bar_temperature_entities(temperature_entities);
+  uint32_t generation = ++clock_bar_temperature_subscription_generation();
+
+  if (clock_bar_entities.empty()) {
+    set_clock_bar_temperature_value_count(0);
+    return false;
+  }
+
+  set_clock_bar_temperature_value_count(clock_bar_entities.size());
+  refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
+
+  for (size_t i = 0; i < clock_bar_entities.size(); i++) {
+    ha_subscribe_state(
+      clock_bar_entities[i],
+      std::function<void(esphome::StringRef)>(
+        [i, generation](esphome::StringRef state) {
+          if (generation != clock_bar_temperature_subscription_generation()) return;
+          float val = 0.0f;
+          if (parse_float_ref(state, val)) {
+            std::vector<float> &values = clock_bar_temperature_values();
+            if (i < values.size()) values[i] = val;
+            refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
+          }
+        })
+    );
+  }
+
+  return true;
+}
+
 inline void grid_phase3(
     bool indoor_on, bool outdoor_on,
     const std::string &indoor_entity, const std::string &outdoor_entity,
@@ -1898,32 +1940,9 @@ inline void grid_phase3(
     std::function<void()> wake_callback,
     std::function<void()> sleep_callback) {
   ESP_LOGI("sensors", "Phase 3: temp/presence/media subscriptions start (%lu ms)", esphome::millis());
-  set_clock_bar_temperature_labels(temperature_labels, temperature_label_count);
-
-  std::vector<std::string> clock_bar_entities = parse_clock_bar_temperature_entities(temperature_entities);
-  if (!clock_bar_entities.empty()) {
-    set_clock_bar_temperature_value_count(clock_bar_entities.size());
-    refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
-
-    for (size_t i = 0; i < clock_bar_entities.size(); i++) {
-      ha_subscribe_state(
-        clock_bar_entities[i],
-        std::function<void(esphome::StringRef)>(
-          [i](esphome::StringRef state) {
-            float val = 0.0f;
-            if (parse_float_ref(state, val)) {
-              std::vector<float> &values = clock_bar_temperature_values();
-              if (i < values.size()) values[i] = val;
-              refresh_clock_bar_temperature_label_values(nullptr, true, false, false, NAN, NAN);
-            }
-          })
-      );
-    }
-  } else {
-    set_clock_bar_temperature_value_count(0);
-  }
-
-  if (!clock_bar_entities.empty()) {
+  bool has_clock_bar_entities = configure_clock_bar_temperature_entities(
+      temperature_entities, temperature_labels, temperature_label_count);
+  if (has_clock_bar_entities) {
     indoor_on = false;
     outdoor_on = false;
   }

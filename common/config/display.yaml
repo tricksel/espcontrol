@@ -475,6 +475,22 @@ text:
     update_interval: never
     web_server:
       sorting_group_id: sg_display
+    on_value:
+      then:
+        - lambda: |-
+            lv_obj_t *temperature_labels[] = {
+              id(temperatures),
+              id(temperature_2),
+              id(temperature_3),
+              id(temperature_4),
+              id(temperature_5),
+              id(temperature_6),
+            };
+            configure_clock_bar_temperature_entities(
+              id(clock_bar_temperature_entities).state,
+              temperature_labels,
+              6);
+        - script.execute: clock_bar_apply
 
   - platform: template
     name: "${entity_clock_bar_weather_entity}"
