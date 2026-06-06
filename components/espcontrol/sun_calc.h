@@ -12,6 +12,7 @@
 #endif
 
 #include "esphome/core/log.h"
+#include "esphome/components/network/util.h"
 
 // ============================================================================
 // Timezone coordinate and POSIX TZ lookup table
@@ -470,6 +471,11 @@ inline void apply_ntp_servers(const std::string &server_1,
                               const std::string &server_2,
                               const std::string &server_3) {
 #if defined(USE_ESP_IDF)
+  if (esphome::network::get_ip_addresses().empty()) {
+    ESP_LOGI("sntp", "Network not ready; deferring NTP server apply");
+    return;
+  }
+
   static std::string active_servers[3];
   active_servers[0] = trim_ntp_server(server_1);
   active_servers[1] = trim_ntp_server(server_2);

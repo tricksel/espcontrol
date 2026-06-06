@@ -15,6 +15,7 @@ FIRMWARE_DIR = ROOT / "components" / "espcontrol"
 CORE_INFRA_PATH = ROOT / "common" / "device" / "core_infra.yaml"
 API_NAVIGATE_PATH = ROOT / "common" / "device" / "api_navigate.yaml"
 TIME_ADDON_PATH = ROOT / "common" / "addon" / "time.yaml"
+SUN_CALC_PATH = ROOT / "components" / "espcontrol" / "sun_calc.h"
 S3_DEVICE_PATH = ROOT / "devices" / "guition-esp32-s3-4848s040" / "device" / "device.yaml"
 S3_PACKAGES_PATH = ROOT / "devices" / "guition-esp32-s3-4848s040" / "packages.yaml"
 DEVICE_DEVICE_PATHS = tuple(sorted((ROOT / "devices").glob("*/device/device.yaml")))
@@ -67,6 +68,10 @@ TODO_GET_ITEMS_HELPER_PATTERN = re.compile(
 )
 WEATHER_FORECAST_REQUEST_PATTERN = re.compile(
     r"inline\s+void\s+request_weather_forecast_entity\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
+    re.DOTALL,
+)
+CLOCK_BAR_WEATHER_SUBSCRIPTION_PATTERN = re.compile(
+    r"inline\s+void\s+subscribe_clock_bar_weather_icon\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
     re.DOTALL,
 )
 COVER_COMMAND_REQUEST_PATTERN = re.compile(
@@ -305,6 +310,37 @@ def firmware_time_reconnect_errors(time_path: Path, root: Path) -> list[str]:
     return errors
 
 
+def firmware_ntp_startup_errors(
+    time_path: Path,
+    sun_calc_path: Path,
+    connectivity_paths: tuple[Path, ...],
+    root: Path,
+) -> list[str]:
+    errors: list[str] = []
+    if time_path.exists():
+        rel = time_path.relative_to(root)
+        text = time_path.read_text(encoding="utf-8")
+        boot_section = text.split("# Ask Home Assistant", 1)[0]
+        if "- script.execute: ntp_servers_apply" in boot_section:
+            errors.append(f"{rel}: defer custom NTP server apply until networking has an IP address")
+    if sun_calc_path.exists():
+        rel = sun_calc_path.relative_to(root)
+        text = sun_calc_path.read_text(encoding="utf-8")
+        if (
+            "apply_ntp_servers" in text
+            and "get_ip_addresses().empty()" not in text
+        ):
+            errors.append(f"{rel}: skip SNTP reconfiguration until networking has an IP address")
+    for path in connectivity_paths:
+        if not path.exists():
+            continue
+        rel = path.relative_to(root)
+        text = path.read_text(encoding="utf-8")
+        if "on_connect:" in text and "- script.execute: ntp_servers_apply" not in text:
+            errors.append(f"{rel}: apply configured NTP servers after network connect")
+    return errors
+
+
 def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]:
     path = firmware_dir / "button_grid_config.h"
     if not path.exists():
@@ -400,6 +436,26 @@ def firmware_weather_request_errors(firmware_dir: Path, root: Path) -> list[str]
         or "apply_weather_forecast_actions_required_for_entity" not in body
     ):
         errors.append(f"{rel}: detect Home Assistant forecast timeout errors robustly")
+    return errors
+
+
+def firmware_clock_bar_weather_subscription_errors(firmware_dir: Path, root: Path) -> list[str]:
+    path = firmware_dir / "button_grid_subscriptions.h"
+    if not path.exists():
+        return []
+    rel = path.relative_to(root)
+    text = path.read_text(encoding="utf-8")
+    errors: list[str] = []
+
+    subscription = CLOCK_BAR_WEATHER_SUBSCRIPTION_PATTERN.search(text)
+    if not subscription:
+        errors.append(f"{rel}: missing clock bar weather subscription helper")
+        return errors
+    body = subscription.group("body")
+    if "ha_api_state_connected()" not in body:
+        errors.append(f"{rel}: wait for Home Assistant state readiness before clock bar weather subscription")
+    if "if (!ha_subscribe_state(" not in body or "active_entity.clear();" not in body:
+        errors.append(f"{rel}: retry clock bar weather subscription when early subscription fails")
     return errors
 
 
@@ -598,7 +654,9 @@ def run_scan() -> int:
     errors.extend(firmware_todo_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_action_card_availability_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_time_reconnect_errors(TIME_ADDON_PATH, ROOT))
+    errors.extend(firmware_ntp_startup_errors(TIME_ADDON_PATH, SUN_CALC_PATH, CONNECTIVITY_PATHS, ROOT))
     errors.extend(firmware_weather_request_errors(FIRMWARE_DIR, ROOT))
+    errors.extend(firmware_clock_bar_weather_subscription_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_weather_disconnect_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_weather_reconnect_errors(CORE_INFRA_PATH, ROOT))
     errors.extend(firmware_unavailable_retry_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
@@ -736,6 +794,37 @@ def expect_time_reconnect_errors(name: str, text: str, expected: tuple[str, ...]
             assert not errors, f"{name}: expected no errors, got {errors!r}"
 
 
+def expect_ntp_startup_errors(
+    name: str,
+    time_text: str,
+    sun_calc_text: str,
+    connectivity_text: str,
+    expected: tuple[str, ...],
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        time_path = root / "common" / "addon" / "time.yaml"
+        sun_calc_path = root / "components" / "espcontrol" / "sun_calc.h"
+        connectivity_path = root / "common" / "addon" / "connectivity.yaml"
+        time_path.parent.mkdir(parents=True, exist_ok=True)
+        sun_calc_path.parent.mkdir(parents=True, exist_ok=True)
+        connectivity_path.parent.mkdir(parents=True, exist_ok=True)
+        time_path.write_text(time_text, encoding="utf-8")
+        sun_calc_path.write_text(sun_calc_text, encoding="utf-8")
+        connectivity_path.write_text(connectivity_text, encoding="utf-8")
+
+        errors = firmware_ntp_startup_errors(
+            time_path,
+            sun_calc_path,
+            (connectivity_path,),
+            root,
+        )
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
 def expect_weather_request_errors(name: str, text: str, expected: tuple[str, ...]) -> None:
     with TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -744,6 +833,24 @@ def expect_weather_request_errors(name: str, text: str, expected: tuple[str, ...
         (firmware_dir / "button_grid_config.h").write_text(text, encoding="utf-8")
 
         errors = firmware_weather_request_errors(firmware_dir, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_clock_bar_weather_subscription_errors(
+    name: str,
+    text: str,
+    expected: tuple[str, ...],
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        firmware_dir = root / "components" / "espcontrol"
+        firmware_dir.mkdir(parents=True)
+        (firmware_dir / "button_grid_subscriptions.h").write_text(text, encoding="utf-8")
+
+        errors = firmware_clock_bar_weather_subscription_errors(firmware_dir, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -1329,6 +1436,40 @@ def run_self_test() -> int:
         "          if (ha_api_state_connected()) id(homeassistant_time).update();\n",
         (),
     )
+    expect_ntp_startup_errors(
+        "custom ntp apply runs during boot",
+        "esphome:\n"
+        "  on_boot:\n"
+        "    then:\n"
+        "      - script.execute: ntp_servers_apply\n",
+        "inline void apply_ntp_servers() {\n"
+        "  esp_sntp_init();\n"
+        "}\n",
+        "wifi:\n"
+        "  on_connect:\n"
+        "    - script.execute: network_status_refresh\n",
+        (
+            "defer custom NTP server apply",
+            "skip SNTP reconfiguration",
+            "apply configured NTP servers after network connect",
+        ),
+    )
+    expect_ntp_startup_errors(
+        "custom ntp apply waits for network",
+        "esphome:\n"
+        "  on_boot:\n"
+        "    then:\n"
+        "      - lambda: apply_timezone();\n"
+        "# Ask Home Assistant for time once connected\n",
+        "inline void apply_ntp_servers() {\n"
+        "  if (esphome::network::get_ip_addresses().empty()) return;\n"
+        "  esp_sntp_init();\n"
+        "}\n",
+        "wifi:\n"
+        "  on_connect:\n"
+        "    - script.execute: ntp_servers_apply\n",
+        (),
+    )
     expect_weather_request_errors(
         "weather request during reconnect",
         "inline void request_weather_forecast_entity() {\n"
@@ -1342,6 +1483,29 @@ def run_self_test() -> int:
         "  ha_action_send(req);\n"
         "}\n",
         ("wait for Home Assistant state subscription",),
+    )
+    expect_clock_bar_weather_subscription_errors(
+        "clock bar weather subscribes before state readiness",
+        "inline void subscribe_clock_bar_weather_icon() {\n"
+        "  active_entity = next_entity;\n"
+        "  ha_subscribe_state(next_entity, cb);\n"
+        "}\n",
+        (
+            "wait for Home Assistant state readiness",
+            "retry clock bar weather subscription",
+        ),
+    )
+    expect_clock_bar_weather_subscription_errors(
+        "clock bar weather waits for state readiness",
+        "inline void subscribe_clock_bar_weather_icon() {\n"
+        "  if (!ha_api_state_connected()) return;\n"
+        "  active_entity = next_entity;\n"
+        "  if (!ha_subscribe_state(next_entity, cb)) {\n"
+        "    active_entity.clear();\n"
+        "    return;\n"
+        "  }\n"
+        "}\n",
+        (),
     )
     expect_weather_request_errors(
         "weather callback leak on send failure",

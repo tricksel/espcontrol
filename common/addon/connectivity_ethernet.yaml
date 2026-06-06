@@ -16,6 +16,7 @@ ethernet:
     pin: GPIO50
   phy_addr: 1
   on_connect:
+    - script.execute: ntp_servers_apply
     - script.stop: setup_screen_dim
     - lambda: |-
         ESP_LOGI("connectivity", "Ethernet connected (%lu ms)", millis());

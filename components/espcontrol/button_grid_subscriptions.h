@@ -222,10 +222,14 @@ inline void subscribe_clock_bar_weather_icon(lv_obj_t *icon_lbl, const std::stri
     return;
   }
   if (active_entity == next_entity) return;
-  active_entity = next_entity;
   lv_label_set_text(icon_lbl, weather_icon_for_state(""));
+  if (!ha_api_state_connected()) {
+    ESP_LOGI("weather", "Deferring clock bar weather subscription for %s", next_entity.c_str());
+    return;
+  }
   ESP_LOGI("weather", "Subscribing to clock bar weather state for %s", next_entity.c_str());
-  ha_subscribe_state(
+  active_entity = next_entity;
+  if (!ha_subscribe_state(
     next_entity,
     std::function<void(esphome::StringRef)>([icon_lbl, next_entity](esphome::StringRef state) {
       if (active_entity != next_entity) return;
@@ -233,7 +237,11 @@ inline void subscribe_clock_bar_weather_icon(lv_obj_t *icon_lbl, const std::stri
       lv_label_set_text(icon_lbl, weather_icon_for_state(state_text));
       notify_dashboard_content_changed();
     })
-  );
+  )) {
+    ESP_LOGW("weather", "Failed to subscribe to clock bar weather state for %s", next_entity.c_str());
+    active_entity.clear();
+    return;
+  }
 }
 
 inline void subscribe_garage_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
