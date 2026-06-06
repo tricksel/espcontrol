@@ -4,8 +4,8 @@
 # =============================================================================
 
 substitutions:
-  name: "jc4880p443-dev"
-  friendly_name: "EspControl JC4880P443 Dev"
+  name: "espcontrol-43inch-p4"
+  friendly_name: "EspControl 4.3inch P4"
   espcontrol_component_url: "../.."
   espcontrol_component_ref: "HEAD"
 

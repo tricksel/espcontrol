@@ -4,8 +4,8 @@
 # =============================================================================
 
 substitutions:
-  name: "guition-esp32-s3-4848s040-dev"
-  friendly_name: "Guition ESP32-S3-4848S040 Dev"
+  name: "espcontrol-4inch-s3"
+  friendly_name: "EspControl 4inch S3"
   espcontrol_component_url: "../.."
   espcontrol_component_ref: "HEAD"
 
