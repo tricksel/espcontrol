@@ -7,27 +7,27 @@ description: Flash EspControl display firmware from this repository using ESPHom
 
 ## Overview
 
-Use the local development ESPHome configs to flash the known EspControl displays. If the user invokes `/flash-displays` with no additional display name or target, assume they mean all displays. Flash one requested display, or flash all displays in the fixed order below. Use OTA when the user provides a target or the target is available from the environment; use USB only when the user explicitly asks for USB.
+Use the local development ESPHome configs to flash the known EspControl displays. If the user invokes `/flash-displays` with no additional display name or target, assume they mean all displays. Flash one requested display, or flash all displays in the fixed order below. Use OTA with the default hard-coded target unless the user provides a different target; use USB only when the user explicitly asks for USB.
 
 ## Device Map
 
-| Request names | ESPHome config directory | OTA target variable |
+| Request names | ESPHome config directory | Default OTA target |
 |---|---|---|
-| `7inch`, `7-inch`, `7inch P4`, `7-inch P4`, `JC1060P470` | `devices/guition-esp32-p4-jc1060p470` | `ESPCONTROL_7INCH_TARGET` |
-| `10inch`, `10-inch`, `10inch P4`, `10-inch P4`, `JC8012P4A1` | `devices/guition-esp32-p4-jc8012p4a1` | `ESPCONTROL_10INCH_TARGET` |
-| `P4-86`, `86 Panel`, `Waveshare P4-86`, `esp32-p4-86` | `devices/esp32-p4-86` | `ESPCONTROL_P4_86_TARGET` |
-| `4inch P4`, `4-inch P4`, `4.3inch P4`, `4.3-inch P4`, `P4 4.3inch`, `P4 4.3-inch`, `JC4880P443` | `devices/guition-esp32-p4-jc4880p443` | `ESPCONTROL_4INCH_P4_TARGET` |
-| `4inch S3`, `4-inch S3`, `4848S040` | `devices/guition-esp32-s3-4848s040` | `ESPCONTROL_4INCH_S3_TARGET` |
+| `7inch`, `7-inch`, `7inch P4`, `7-inch P4`, `JC1060P470` | `devices/guition-esp32-p4-jc1060p470` | `192.168.6.102` |
+| `10inch`, `10-inch`, `10inch P4`, `10-inch P4`, `JC8012P4A1` | `devices/guition-esp32-p4-jc8012p4a1` | `192.168.6.103` |
+| `4inch P4`, `4-inch P4`, `P4-86`, `86 Panel`, `Waveshare P4-86`, `esp32-p4-86` | `devices/esp32-p4-86` | `192.168.10.52` |
+| `4.3inch P4`, `4.3-inch P4`, `P4 4.3inch`, `P4 4.3-inch`, `JC4880P443` | `devices/guition-esp32-p4-jc4880p443` | `192.168.6.101` |
+| `4inch S3`, `4-inch S3`, `4848S040` | `devices/guition-esp32-s3-4848s040` | `192.168.10.226` |
 
 All screens can also be flashed over USB when explicitly requested. Use the selected screen's config directory and the local serial target, normally `/dev/cu.usbmodem201301`.
 
-If the user says only `4inch` or `4-inch`, ask whether they mean the P4 screen or the S3 screen.
+If the user says only `4inch` or `4-inch`, ask whether they mean the 4-inch P4 screen or the 4-inch S3 screen.
 
-For `/flash-displays` with no extra target, or for `all`, flash in this sequence by default over OTA using the target variables above:
+For `/flash-displays` with no extra target, or for `all`, flash in this sequence by default over OTA using the default targets above:
 
 1. 7-inch P4.
 2. 10-inch P4.
-3. P4-86.
+3. 4-inch P4 / P4-86.
 4. 4.3-inch P4.
 5. 4-inch S3.
 
@@ -39,7 +39,7 @@ For `/flash-displays` with no extra target, or for `all`, flash in this sequence
    - If the worktree is dirty, do not revert or commit unrelated changes. Tell the user the flash will use the current local checkout as-is.
    - If the worktree is clean, run `git pull --ff-only` before flashing.
 2. Resolve the requested display names from the device map. If the user invoked `/flash-displays` without naming a display, resolve it as `all`. If the request is ambiguous, ask one short clarification.
-3. Resolve OTA targets from an explicit user-supplied target first, then from the device's target variable. If a needed OTA target is missing, ask for that target or ask whether to use USB.
+3. Resolve OTA targets from an explicit user-supplied target first, then from the device's default hard-coded target. If a needed OTA target is missing, ask for that target or ask whether to use USB.
 4. If the user says `USB`, `over USB`, `use USB`, `local`, or similar, use USB for the selected display instead of OTA.
    - For a single display, use that display's config directory and the USB target.
    - For `all over USB`, flash the displays in the normal all-display sequence, but ask the user to connect the correct display before each USB flash if the connected device is not clearly identifiable.
@@ -66,7 +66,7 @@ Run from the appropriate config directory:
 ```bash
 # 7-inch P4 over OTA
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc1060p470
-esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device "$ESPCONTROL_7INCH_TARGET" --no-logs
+esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device 192.168.6.102 --no-logs
 
 # 7-inch P4 over USB, only when explicitly requested
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc1060p470
@@ -74,31 +74,31 @@ esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run
 
 # 10-inch P4 over OTA
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc8012p4a1
-esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device "$ESPCONTROL_10INCH_TARGET" --no-logs
+esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device 192.168.6.103 --no-logs
 
 # 10-inch P4 over USB, only when explicitly requested
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc8012p4a1
 esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device /dev/cu.usbmodem201301 --no-logs
 
-# P4-86 over OTA
+# 4-inch P4 / P4-86 over OTA
 cd /Users/jtenniswood/Git/espcontrol/devices/esp32-p4-86
-esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device "$ESPCONTROL_P4_86_TARGET" --no-logs
+esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device 192.168.10.52 --no-logs
 
-# P4-86 over USB, only when explicitly requested
+# 4-inch P4 / P4-86 over USB, only when explicitly requested
 cd /Users/jtenniswood/Git/espcontrol/devices/esp32-p4-86
 esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device /dev/cu.usbmodem201301 --no-logs
 
 # 4.3-inch P4 over OTA
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc4880p443
-esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device "$ESPCONTROL_4INCH_P4_TARGET" --no-logs
+esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device 192.168.6.101 --no-logs
 
-# 4-inch P4 over USB, only when explicitly requested
+# 4.3-inch P4 over USB, only when explicitly requested
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-p4-jc4880p443
 esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device /dev/cu.usbmodem201301 --no-logs
 
 # 4-inch S3 over OTA
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-s3-4848s040
-esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device "$ESPCONTROL_4INCH_S3_TARGET" --no-logs
+esphome -s espcontrol_component_url file:///Users/jtenniswood/Git/espcontrol run dev.yaml --device 192.168.10.226 --no-logs
 
 # 4-inch S3 over USB, only when explicitly requested
 cd /Users/jtenniswood/Git/espcontrol/devices/guition-esp32-s3-4848s040
