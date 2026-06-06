@@ -579,6 +579,8 @@ def firmware_cover_art_stale_image_errors(path: Path, root: Path) -> list[str]:
         errors.append(f"{rel}: hide stale cover art image when the black fallback is shown")
     if "id(cover_art_loaded_url).empty()" in body:
         errors.append(f"{rel}: hide stale cover art image even after previous artwork loaded")
+    if "cover_art_error_label" in text or 'text: "Artwork unavailable"' in text:
+        errors.append(f"{rel}: do not show an unavailable cover art message")
     return errors
 
 
@@ -1806,6 +1808,20 @@ def run_self_test() -> int:
         "    then:\n"
         "      - lvgl.widget.hide: cover_art_image_widget\n",
         (),
+    )
+    expect_cover_art_stale_image_errors(
+        "visible unavailable cover art message",
+        "lvgl:\n"
+        "  top_layer:\n"
+        "    widgets:\n"
+        "      - label:\n"
+        "          id: cover_art_error_label\n"
+        "          text: \"Artwork unavailable\"\n"
+        "script:\n"
+        "  - id: cover_art_show_black_screen\n"
+        "    then:\n"
+        "      - lvgl.widget.hide: cover_art_image_widget\n",
+        ("do not show an unavailable cover art message",),
     )
     expect_climate_step_errors(
         "climate ignores whole-number display step",

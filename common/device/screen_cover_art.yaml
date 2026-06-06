@@ -304,14 +304,6 @@ lvgl:
                 indicator:
                   bg_color: ${cover_art_text_color}
                   radius: 0
-            - label:
-                id: cover_art_error_label
-                text: "Artwork unavailable"
-                align: center
-                text_font: ${cover_art_artist_font}
-                text_color: 0x888888
-                text_align: center
-                hidden: true
       - obj:
           id: cover_art_wake_touch_guard
           x: 0
@@ -470,7 +462,6 @@ script:
             - script.execute: cover_art_extract_accent_color
             - script.wait: cover_art_extract_accent_color
             - lvgl.widget.show: cover_art_image_widget
-            - lvgl.widget.hide: cover_art_error_label
             - if:
                 condition:
                   lambda: 'return id(cover_art_screensaver_active);'
@@ -598,17 +589,6 @@ script:
             - script.execute: cover_art_refresh_progress
           else:
             - lvgl.widget.hide: cover_art_progress_bar
-      - if:
-          condition:
-            lambda: |-
-              return id(cover_art_screensaver_active) &&
-                     id(cover_art_media_playing) &&
-                     !id(cover_art_url).empty() &&
-                     id(cover_art_retry_count) >= 5;
-          then:
-            - lvgl.widget.show: cover_art_error_label
-          else:
-            - lvgl.widget.hide: cover_art_error_label
 
   - id: cover_art_download_failed
     mode: restart
@@ -1023,7 +1003,6 @@ script:
       - script.execute: hide_clock_view
       - script.execute: clock_bar_apply
       - lvgl.widget.hide: dim_screensaver_touch_guard
-      - lvgl.widget.hide: cover_art_error_label
       - lvgl.widget.show: cover_art_screensaver
       - script.execute: cover_art_apply_responsive_layout
       - script.execute: cover_art_show_track_overlay
@@ -1075,7 +1054,6 @@ script:
       - lvgl.widget.hide: cover_art_accent_overlay
       - lvgl.widget.hide: cover_art_track_panel
       - lvgl.widget.hide: cover_art_progress_bar
-      - lvgl.widget.hide: cover_art_error_label
       - script.execute: clock_bar_apply
       - if:
           condition:
