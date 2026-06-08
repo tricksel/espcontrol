@@ -538,7 +538,7 @@ inline void image_card_align_label(lv_obj_t *label, lv_obj_t *btn) {
   if (width > 0) lv_obj_set_width(label, width);
   lv_obj_set_style_pad_left(label, pad_left, LV_PART_MAIN);
   lv_obj_set_style_pad_right(label, pad_right, LV_PART_MAIN);
-  lv_obj_set_style_pad_top(label, pad_top / 2, LV_PART_MAIN);
+  lv_obj_set_style_pad_top(label, pad_top, LV_PART_MAIN);
   lv_obj_set_style_pad_bottom(label, pad_bottom, LV_PART_MAIN);
   lv_obj_align(label, LV_ALIGN_BOTTOM_LEFT, -pad_left, pad_bottom);
   lv_obj_move_foreground(label);
