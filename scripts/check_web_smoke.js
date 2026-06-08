@@ -102,6 +102,14 @@ assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "off"), true, "clock 
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "dim"), true, "clock bar preview stays visible for dimmed screen saver");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(true, "clock"), true, "clock bar preview stays visible when clock screen saver is configured");
 assert.strictEqual(hooks.clockBarVisibleInPreviewFor(false, "off"), false, "clock bar preview is hidden when disabled");
+assert.strictEqual(hooks.clockBarStateAfterEvents([
+  { id: "switch-screen__clock_bar", state: "ON", value: true },
+  { id: "switch-clock_bar_enabled", state: "OFF", value: false },
+]), true, "clock bar preview keeps the enabled state when a stale alias reports off later");
+assert.strictEqual(hooks.clockBarStateAfterEvents([
+  { id: "switch-screen__clock_bar", state: "ON", value: true },
+  { id: "switch-screen__clock_bar", state: "OFF", value: false },
+]), false, "clock bar preview still turns off when the same source reports off");
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
 for (const slug of Object.keys(manifest.devices || {})) {

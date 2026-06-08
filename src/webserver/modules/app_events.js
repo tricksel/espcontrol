@@ -32,6 +32,21 @@ var SSE_ALIAS_GROUPS = {
   developerExperimentalFeatures: ["switch-developer__experimental_features", "switch-developer_experimental_features"],
 };
 
+function applyClockBarStateValue(val, d, matchedKey) {
+  var keys = entityStateKeys(d);
+  uniquePush(keys, matchedKey);
+  var nextOn = d && d.value === true || val === "ON";
+  var sourceKey = matchedKey || keys[0] || "clock_bar";
+  if (!state._clockBarStateValues) state._clockBarStateValues = {};
+  state._clockBarStateValues[sourceKey] = nextOn;
+
+  var previous = state.clockBarOn;
+  state.clockBarOn = Object.keys(state._clockBarStateValues).some(function (key) {
+    return state._clockBarStateValues[key] === true;
+  });
+  return state.clockBarOn !== previous;
+}
+
 function connectEvents() {
   if (_eventSource) { _eventSource.close(); _eventSource = null; }
 
@@ -108,9 +123,8 @@ function connectEvents() {
       syncTemperatureUi();
       updateTempPreview();
     },
-    "switch-screen__clock_bar": function (val, d) {
-      state.clockBarOn = d.value === true || val === "ON";
-      syncClockBarUi();
+    "switch-screen__clock_bar": function (val, d, key) {
+      if (applyClockBarStateValue(val, d, key)) syncClockBarUi();
     },
     "text-screen__clock_bar_layout": function (val) {
       applyClockBarLayoutValue(val);
@@ -573,7 +587,7 @@ function connectEvents() {
     var val = d.state != null ? String(d.state) : "";
 
     for (var ki = 0; ki < keys.length; ki++) {
-      if (sseHandlers[keys[ki]]) { sseHandlers[keys[ki]](val, d); return; }
+      if (sseHandlers[keys[ki]]) { sseHandlers[keys[ki]](val, d, keys[ki]); return; }
     }
     if (isFirmwareVersionEvent(id, d)) {
       setFirmwareVersion(val);

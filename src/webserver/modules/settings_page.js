@@ -403,6 +403,7 @@ function buildSettingsPage(parent) {
   els.setClockBarToggle = clockBar.input;
   clockBar.input.addEventListener("change", function () {
     state.clockBarOn = this.checked;
+    state._clockBarStateValues = { local: state.clockBarOn };
     syncClockBarUi();
     postClockBar(state.clockBarOn);
   });

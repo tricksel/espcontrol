@@ -72,6 +72,7 @@ var state = {
   _clockBarTemperatureEntitiesReceived: false,
   temperatureUnit: "Auto",
   clockBarOn: false,
+  _clockBarStateValues: {},
   clockBarTimeOn: true,
   clockBarWeatherOn: false,
   clockBarWeatherEntity: "",
