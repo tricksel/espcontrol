@@ -155,7 +155,14 @@ registerButtonType("image", {
         '<span class="sp-image-preview" style="background:#' + helpers.escHtml(tertiaryColor) + '">' +
         '<span class="sp-image-preview-text">Image</span>' +
         '</span>',
-      labelHtml: label ? '<span class="sp-image-preview-label">' + helpers.escHtml(label) + '</span>' : "",
+      labelHtml: label
+        ? '<span class="sp-image-label"><span class="sp-image-label-stack">' +
+          '<span class="sp-image-label-text sp-image-label-shadow" aria-hidden="true">' +
+          helpers.escHtml(label) +
+          '</span><span class="sp-image-label-text sp-image-label-main">' +
+          helpers.escHtml(label) +
+          '</span></span></span>'
+        : "",
     };
   },
 });

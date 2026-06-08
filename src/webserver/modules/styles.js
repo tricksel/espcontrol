@@ -110,9 +110,15 @@ var CSS =
   "background:#212121}" +
   ".sp-image-preview-text{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
   "font-size:var(--btn-label);line-height:1;color:#fff;font-weight:400}" +
-  ".sp-image-preview-label{position:absolute;left:0;right:0;bottom:0;box-sizing:border-box;" +
-  "padding:var(--btn-pad);background:rgba(0,0,0,.58);color:#fff;" +
-  "font-size:var(--btn-label);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1}" +
+  ".sp-image-label{position:absolute;left:0;right:0;bottom:0;box-sizing:border-box;" +
+  "padding:var(--btn-pad);z-index:1;pointer-events:none}" +
+  ".sp-image-label-stack{position:relative;display:block}" +
+  ".sp-image-label-text{font-size:var(--btn-label);line-height:1.2;font-weight:var(--btn-label-weight,400);" +
+  "display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--btn-lines);" +
+  "overflow:hidden;word-break:break-word;min-height:0}" +
+  ".sp-image-label-shadow{position:absolute;inset:1px -1px -1px 1px;color:rgba(0,0,0,.5)}" +
+  ".sp-image-label-main{position:relative;color:#fff}" +
+  ".sp-btn-double .sp-image-label-text,.sp-btn-wide .sp-image-label-text,.sp-btn-extra-tall .sp-image-label-text,.sp-btn-extra-wide .sp-image-label-text,.sp-btn-big .sp-image-label-text{-webkit-line-clamp:var(--btn-lines-dbl)}" +
   ".sp-media-h-slider{position:absolute;left:8%;right:8%;bottom:10%;height:7.5%;border-radius:999px;" +
   "background:#212121;overflow:hidden;pointer-events:none}" +
   ".sp-media-h-slider span{display:block;width:62%;height:100%;background:#fff;border-radius:999px}" +
