@@ -337,6 +337,10 @@ inline void setup_image_card(BtnSlot &s) {
   lv_obj_set_style_border_width(loading, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(loading, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(loading, 0, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(loading, 8, LV_PART_MAIN);
+  lv_obj_set_style_flex_flow(loading, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
+  lv_obj_set_style_flex_main_place(loading, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_flex_cross_place(loading, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_set_style_radius(loading, lv_obj_get_style_radius(s.btn, LV_PART_MAIN), LV_PART_MAIN);
   lv_obj_set_style_clip_corner(loading, true, LV_PART_MAIN);
   lv_obj_clear_flag(loading, LV_OBJ_FLAG_CLICKABLE);
@@ -350,7 +354,6 @@ inline void setup_image_card(BtnSlot &s) {
   lv_obj_set_style_text_color(loading_icon, lv_color_hex(DARK_TEXT_PRIMARY), LV_PART_MAIN);
   lv_obj_set_style_text_opa(loading_icon, LV_OPA_70, LV_PART_MAIN);
   lv_label_set_text(loading_icon, IMAGE_CARD_LOADING_ICON);
-  lv_obj_align(loading_icon, LV_ALIGN_CENTER, 0, -16);
 
   lv_obj_t *loading_label = lv_label_create(loading);
   if (s.text_lbl) {
@@ -361,7 +364,6 @@ inline void setup_image_card(BtnSlot &s) {
   lv_obj_set_style_text_opa(loading_label, LV_OPA_80, LV_PART_MAIN);
   lv_obj_set_style_text_align(loading_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
   lv_label_set_text(loading_label, espcontrol_i18n("Loading"));
-  lv_obj_align(loading_label, LV_ALIGN_CENTER, 0, 20);
 
   lv_obj_set_user_data(img, loading);
   lv_obj_set_user_data(s.sensor_container, img);
