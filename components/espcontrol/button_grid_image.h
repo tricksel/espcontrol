@@ -100,8 +100,19 @@ inline lv_obj_t *image_card_loading_label(lv_obj_t *loading_widget) {
   return lv_obj_get_child(loading_widget, 1);
 }
 
+inline void image_card_refresh_loading_layout(lv_obj_t *loading_widget) {
+  if (!loading_widget) return;
+  lv_obj_set_layout(loading_widget, LV_LAYOUT_FLEX);
+  lv_obj_set_style_flex_flow(loading_widget, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
+  lv_obj_set_style_flex_main_place(loading_widget, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_flex_cross_place(loading_widget, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
+  lv_obj_set_style_pad_row(loading_widget, 16, LV_PART_MAIN);
+  lv_obj_update_layout(loading_widget);
+}
+
 inline void image_card_set_loading_state(lv_obj_t *loading_widget, const char *text) {
   if (!loading_widget) return;
+  image_card_refresh_loading_layout(loading_widget);
   lv_obj_t *icon = image_card_loading_icon(loading_widget);
   if (icon) lv_label_set_text(icon, IMAGE_CARD_LOADING_ICON);
   lv_obj_t *label = image_card_loading_label(loading_widget);
@@ -262,7 +273,9 @@ inline void image_card_apply_widget_geometry(lv_obj_t *btn, lv_obj_t *widget,
   lv_coord_t width = 0;
   lv_coord_t height = 0;
   if (!image_card_position_widget(btn, widget, &width, &height)) return;
-  image_card_position_widget(btn, image_card_loading_widget(widget));
+  lv_obj_t *loading = image_card_loading_widget(widget);
+  image_card_position_widget(btn, loading);
+  image_card_refresh_loading_layout(loading);
   image->set_target_size(width, height);
   image->set_resize_mode(esphome::artwork_image::ImageResizeMode::COVER);
 }
@@ -350,6 +363,7 @@ inline void setup_image_card(BtnSlot &s) {
   lv_obj_set_style_shadow_width(loading, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(loading, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_row(loading, 16, LV_PART_MAIN);
+  lv_obj_set_layout(loading, LV_LAYOUT_FLEX);
   lv_obj_set_style_flex_flow(loading, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN);
   lv_obj_set_style_flex_main_place(loading, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
   lv_obj_set_style_flex_cross_place(loading, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN);
@@ -490,7 +504,9 @@ inline void image_card_request_source_url(ImageCardCtx *ctx) {
       : esphome::artwork_image::ImageResizeMode::COVER;
   } else {
     if (!image_card_position_widget(ctx->btn, ctx->widget, &width, &height)) return;
-    image_card_position_widget(ctx->btn, image_card_loading_widget(ctx->widget));
+    lv_obj_t *loading = image_card_loading_widget(ctx->widget);
+    image_card_position_widget(ctx->btn, loading);
+    image_card_refresh_loading_layout(loading);
   }
   ctx->url = image_card_cache_bust_url(ctx->source_url);
   ctx->requested_once = true;
