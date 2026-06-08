@@ -71,8 +71,8 @@ class ArtworkImage : public PollingComponent,
       this->url_ = url;
     }
   }
-  /** Set the URL and start an update, queuing the latest request if a download/decode is already active. */
-  void request_update_url(const std::string &url);
+  /** Set the URL and start an update, returning the effective URL after any downloader rewrite. */
+  std::string request_update_url(const std::string &url);
   /** Stop any in-flight download/decode while keeping the last completed image buffer available. */
   void cancel_update();
   const std::string &get_url() const { return this->url_; }

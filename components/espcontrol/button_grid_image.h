@@ -614,7 +614,10 @@ inline void image_card_request_source_url(ImageCardCtx *ctx) {
   ctx->image->set_target_size(width, height);
   ctx->image->set_resize_mode(resize_mode);
   ESP_LOGI("image_card", "Downloading camera image for %s", ctx->entity_id.c_str());
-  ctx->image->request_update_url(ctx->url);
+  std::string effective_url = ctx->image->request_update_url(ctx->url);
+  if (!effective_url.empty()) {
+    ctx->url = effective_url;
+  }
 }
 
 inline void image_card_schedule_source_refresh(ImageCardCtx *ctx, uint32_t delay_ms,
