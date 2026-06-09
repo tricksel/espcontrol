@@ -583,7 +583,8 @@ inline bool image_card_apply_modal_geometry(ImageCardCtx *ctx,
 }
 
 inline bool image_card_modal_refresh_supported() {
-  return !control_modal_current_is_jc4880p443_size();
+  return !control_modal_current_is_jc4880p443_size() &&
+         !control_modal_current_is_4848_size();
 }
 
 inline void image_card_limit_target_size(lv_coord_t source_width, lv_coord_t source_height,
