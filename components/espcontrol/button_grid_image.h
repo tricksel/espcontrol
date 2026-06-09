@@ -144,6 +144,13 @@ inline void image_card_apply_corner_clip(lv_obj_t *obj, lv_coord_t radius) {
   lv_obj_set_style_clip_corner(obj, true, image_card_pressed_selector());
 }
 
+inline void image_card_apply_tile_image_align(lv_obj_t *widget) {
+  if (!widget) return;
+#if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 4, 0)
+  lv_image_set_inner_align(widget, LV_IMAGE_ALIGN_COVER);
+#endif
+}
+
 inline void image_card_sync_tile_corners(lv_obj_t *btn, lv_obj_t *widget) {
   if (!btn) return;
   lv_coord_t radius = lv_obj_get_style_radius(btn, LV_PART_MAIN);
@@ -489,6 +496,7 @@ inline bool image_card_position_widget(lv_obj_t *btn, lv_obj_t *widget,
   lv_coord_t pad_top = lv_obj_get_style_pad_top(btn, LV_PART_MAIN);
   lv_obj_set_pos(widget, -pad_left, -pad_top);
   lv_obj_set_size(widget, width, height);
+  image_card_apply_tile_image_align(widget);
   image_card_sync_tile_corners(btn, widget);
   if (target_width) *target_width = width;
   if (target_height) *target_height = height;
@@ -628,6 +636,7 @@ inline void setup_image_card(BtnSlot &s) {
   lv_obj_set_style_pad_all(img, 0, LV_PART_MAIN);
   lv_obj_set_style_border_width(img, 0, LV_PART_MAIN);
   lv_obj_set_style_bg_opa(img, LV_OPA_TRANSP, LV_PART_MAIN);
+  image_card_apply_tile_image_align(img);
 
   lv_obj_t *loading = lv_obj_create(s.btn);
   lv_obj_set_size(loading, lv_pct(100), lv_pct(100));
