@@ -1151,7 +1151,7 @@ var CARD_CONTRACT_CARDS = {
     }
   },
   "image": {
-    "label": "Image",
+    "label": "Camera Card",
     "allowInSubpage": true,
     "experimental": "developer",
     "domains": [
