@@ -1,5 +1,25 @@
 // ── Export / Import ────────────────────────────────────────────────────
 
+function backupExportScreenSizeSlug(value) {
+  value = String(value || "").trim().toLowerCase();
+  if (!value) return "screen";
+  value = value.replace(/\binches\b/g, "inch").replace(/\bin\b/g, "inch");
+  value = value.replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
+  return value || "screen";
+}
+
+function backupExportFileDate(value) {
+  return value.getFullYear() + "-" +
+    String(value.getMonth() + 1).padStart(2, "0") + "-" +
+    String(value.getDate()).padStart(2, "0");
+}
+
+function backupExportFileName(value) {
+  var date = value || new Date();
+  return "espcontrol-" + backupExportScreenSizeSlug(CFG.screenSize) + "-" +
+    backupExportFileDate(date) + ".json";
+}
+
 function exportConfig() {
   var data = createBackupConfig({
     device: DEVICE_ID,
@@ -75,11 +95,7 @@ function exportConfig() {
   var json = JSON.stringify(data, null, 2);
   var blob = new Blob([json], { type: "application/json" });
   var url = URL.createObjectURL(blob);
-  var now = new Date();
-  var name = "espcontrol-config-" +
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, "0") + "-" +
-    String(now.getDate()).padStart(2, "0") + ".json";
+  var name = backupExportFileName();
   var a = document.createElement("a");
   a.href = url;
   a.download = name;

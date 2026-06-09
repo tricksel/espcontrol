@@ -522,6 +522,7 @@ def web_config(profile: dict[str, Any]) -> dict[str, Any]:
         "slots": profile["slots"],
         "cols": layout["cols"],
         "rows": layout["rows"],
+        "screenSize": profile["public"]["screenSize"],
         "largeSensorUnitOffsetPercent": profile["settings"]["largeSensorUnitOffsetPercent"],
         "imageCardLimit": display.get("imageCardDownloaders", 4),
     }

@@ -55,6 +55,11 @@ function assertGeneratedRotationOptions(slug, generated, key, options) {
 
 const hooks = loadHooks();
 assert(hooks, "web test hooks were not exported");
+assert.strictEqual(
+  hooks.backupExportFileName(new Date(2026, 5, 9)),
+  "espcontrol-7-inch-2026-06-09.json",
+  "backup export filename includes screen size and date"
+);
 assert.deepStrictEqual(Array.from(hooks.buttonTypesMissingCardMetadata()), [], "all registered card types define card metadata");
 assert.deepStrictEqual(Array.from(hooks.SSE_ALIAS_GROUPS.clockBar), [
   "switch-screen__clock_bar",
@@ -112,7 +117,7 @@ assert.strictEqual(hooks.removedLegacyStateEvent({
 }), false, "current cover art entity events are not treated as removed legacy events");
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
-for (const slug of Object.keys(manifest.devices || {})) {
+for (const [slug, device] of Object.entries(manifest.devices || {})) {
   const webOutput = path.join(WEB_OUTPUT_DIR, slug, "www.js");
   const generated = fs.readFileSync(webOutput, "utf8");
   const sandbox = createWebSandbox();
@@ -123,6 +128,17 @@ for (const slug of Object.keys(manifest.devices || {})) {
     `${slug}: generated web UI must export the same test hooks used by local checks`
   );
   const generatedHooks = sandbox.__ESPCONTROL_TEST_HOOKS__.config;
+  const expectedScreenSize = String(device.public.screenSize)
+    .toLowerCase()
+    .replace(/\binches\b/g, "inch")
+    .replace(/\bin\b/g, "inch")
+    .replace(/[^a-z0-9.]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  assert.strictEqual(
+    generatedHooks.backupExportFileName(new Date(2026, 5, 9)),
+    `espcontrol-${expectedScreenSize}-2026-06-09.json`,
+    `${slug}: backup export filename includes screen size and date`
+  );
   const generatedTimezones = Array.from(generatedHooks.defaultTimezoneOptions());
   assert(
     generatedTimezones.includes("UTC (GMT+0)") && generatedTimezones.includes("Europe/London (GMT+0)"),

@@ -24,6 +24,7 @@ if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
     createBackupConfig: createBackupConfig,
     normalizeBackupConfig: normalizeBackupConfig,
     planBackupImport: planBackupImport,
+    backupExportFileName: backupExportFileName,
     switchConfirmationEnabled: switchConfirmationEnabled,
     switchConfirmationMode: switchConfirmationMode,
     switchConfirmationMessage: switchConfirmationMessage,
