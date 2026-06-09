@@ -103,12 +103,13 @@ function normalizeButtonConfig(b) {
   }
   if (b && b.type === "screen_lock") {
     b.entity = "";
+    b.label = "";
     b.sensor = "";
     b.unit = "";
     b.precision = "";
     b.options = "";
-    if (!b.icon || b.icon === "Auto") b.icon = "Lock";
-    if (!b.icon_on || b.icon_on === "Auto") b.icon_on = "Lock Open";
+    b.icon = "Lock";
+    b.icon_on = "Lock Open";
   }
   if (b && b.type === "image") {
     b.icon_on = "Auto";
@@ -1243,18 +1244,19 @@ function buttonConfigFields(b) {
   var isActionOptionSelect = !!(b && (actionCardIsOptionSelect(b) || isOptionSelectType(type)));
   if (isActionOptionSelect) type = "action";
   var label = b && b.label || "";
+  if (type === "screen_lock") label = "";
   var sensor = isActionOptionSelect ? ACTION_CARD_OPTION_SELECT_ACTION :
     (isBrightnessSliderType(type) || type === "climate" || type === "light_switch" || type === "alarm" || type === "screen_lock" || isFanCardType(type)) ? "" : (b && b.sensor || "");
   var unit = (isActionOptionSelect || type === "climate" || type === "light_switch" || type === "alarm" || type === "alarm_action" || type === "screen_lock" || isFanCardType(type)) ? "" : (b && b.unit || "");
   var icon = b && b.icon || "Auto";
   if (isActionOptionSelect && (!icon || icon === "Auto" || icon === "Chevron Down")) icon = "Flash";
   if (type === "alarm" && (!icon || icon === "Auto")) icon = "Security";
-  if (type === "screen_lock" && (!icon || icon === "Auto")) icon = "Lock";
+  if (type === "screen_lock") icon = "Lock";
   if (type === "alarm_action" && (!icon || icon === "Auto")) icon = (alarmActionInfo(sensor) || alarmActionSpecs()[0]).icon;
   if (isFanCardType(type) && (!icon || icon === "Auto")) icon = fanCardDefaultIcon(type);
   var iconOn = (isActionOptionSelect || type === "alarm" || type === "alarm_action" || (isFanCardType(type) && type !== "fan_switch")) ? "Auto" : (b && b.icon_on || "Auto");
   if (type === "fan_switch" && (!iconOn || iconOn === "Auto")) iconOn = "Fan";
-  if (type === "screen_lock" && (!iconOn || iconOn === "Auto")) iconOn = "Lock Open";
+  if (type === "screen_lock") iconOn = "Lock Open";
   var precision = (isActionOptionSelect || type === "light_switch" || type === "alarm" || type === "alarm_action" || type === "screen_lock" || isFanCardType(type)) ? "" : (b && b.precision || "");
   if (type === "media") {
     sensor = mediaEditorMode(sensor);

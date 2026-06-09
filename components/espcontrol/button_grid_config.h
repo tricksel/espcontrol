@@ -112,7 +112,6 @@ struct ScreenLockCardRef {
   lv_obj_t *text_lbl = nullptr;
   const char *locked_icon = nullptr;
   const char *unlocked_icon = nullptr;
-  std::string label;
 };
 
 inline bool &screen_lock_enabled() {
@@ -130,15 +129,15 @@ inline std::vector<ScreenLockCardRef> &screen_lock_card_refs() {
   return refs;
 }
 
-inline std::vector<lv_obj_t *> &screen_lock_disabled_buttons() {
-  static std::vector<lv_obj_t *> buttons;
-  return buttons;
+inline std::vector<lv_obj_t *> &screen_lock_clickable_objects() {
+  static std::vector<lv_obj_t *> objects;
+  return objects;
 }
 
 inline void screen_lock_reset_registry() {
   screen_lock_controlled_buttons().clear();
   screen_lock_card_refs().clear();
-  screen_lock_disabled_buttons().clear();
+  screen_lock_clickable_objects().clear();
 }
 
 inline bool screen_lock_button_is_lock_card(lv_obj_t *btn) {
@@ -158,6 +157,21 @@ inline void screen_lock_register_controlled_button(lv_obj_t *btn) {
 
 inline void screen_lock_register_card(const BtnSlot &s, const ParsedCfg &p);
 
+inline void screen_lock_clear_clickable_tree(lv_obj_t *obj) {
+  if (!obj) return;
+  auto &clickable = screen_lock_clickable_objects();
+  if (lv_obj_has_flag(obj, LV_OBJ_FLAG_CLICKABLE)) {
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE);
+    if (std::find(clickable.begin(), clickable.end(), obj) == clickable.end()) {
+      clickable.push_back(obj);
+    }
+  }
+  int32_t child_count = static_cast<int32_t>(lv_obj_get_child_cnt(obj));
+  for (int32_t i = 0; i < child_count; i++) {
+    screen_lock_clear_clickable_tree(lv_obj_get_child(obj, i));
+  }
+}
+
 inline void screen_lock_apply() {
   bool locked = screen_lock_enabled();
   if (screen_lock_card_refs().empty()) {
@@ -165,35 +179,31 @@ inline void screen_lock_apply() {
     screen_lock_enabled() = false;
   }
 
-  auto &disabled_by_lock = screen_lock_disabled_buttons();
+  auto &clickable = screen_lock_clickable_objects();
   for (lv_obj_t *btn : screen_lock_controlled_buttons()) {
     if (!btn || screen_lock_button_is_lock_card(btn)) continue;
     if (locked) {
-      if (!lv_obj_has_state(btn, LV_STATE_DISABLED)) {
-        lv_obj_add_state(btn, LV_STATE_DISABLED);
-        if (std::find(disabled_by_lock.begin(), disabled_by_lock.end(), btn) == disabled_by_lock.end()) {
-          disabled_by_lock.push_back(btn);
-        }
-      }
-    } else {
-      if (std::find(disabled_by_lock.begin(), disabled_by_lock.end(), btn) != disabled_by_lock.end()) {
-        lv_obj_clear_state(btn, LV_STATE_DISABLED);
-      }
+      screen_lock_clear_clickable_tree(btn);
     }
   }
-  if (!locked) disabled_by_lock.clear();
+  if (!locked) {
+    for (lv_obj_t *obj : clickable) {
+      if (obj) lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
+    }
+    clickable.clear();
+  }
 
   for (const auto &ref : screen_lock_card_refs()) {
     if (!ref.btn) continue;
-    lv_obj_clear_state(ref.btn, LV_STATE_DISABLED);
     set_card_checked_state(ref.btn, locked);
+    lv_obj_add_flag(ref.btn, LV_OBJ_FLAG_CLICKABLE);
     if (ref.icon_lbl) {
       const char *icon = locked ? ref.locked_icon : ref.unlocked_icon;
       lv_label_set_text(ref.icon_lbl, icon ? icon : "");
     }
     if (ref.text_lbl) {
       lv_label_set_text(ref.text_lbl,
-        ref.label.empty() ? espcontrol_i18n("Screen Lock") : ref.label.c_str());
+        locked ? espcontrol_i18n("Screen Locked") : espcontrol_i18n("Screen Unlocked"));
     }
   }
 }
@@ -845,12 +855,13 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   }
   if (p.type == "screen_lock") {
     p.entity.clear();
+    p.label.clear();
     p.sensor.clear();
     p.unit.clear();
     p.precision.clear();
     p.options.clear();
-    if (p.icon.empty() || p.icon == "Auto") p.icon = "Lock";
-    if (p.icon_on.empty() || p.icon_on == "Auto") p.icon_on = "Lock Open";
+    p.icon = "Lock";
+    p.icon_on = "Lock Open";
   }
   if (p.type == "todo") {
     p.sensor.clear();

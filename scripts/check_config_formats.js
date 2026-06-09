@@ -785,7 +785,7 @@ assertButtonRoundTrip(hooks, "internal relay push button", {
 
 const screenLockCard = {
   entity: "",
-  label: "Screen Lock",
+  label: "",
   icon: "Lock",
   icon_on: "Lock Open",
   sensor: "",

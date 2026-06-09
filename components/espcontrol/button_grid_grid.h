@@ -1338,6 +1338,7 @@ inline void grid_phase2(
     lv_obj_add_event_cb(back_btn, [](lv_event_t *e) {
       lv_scr_load_anim((lv_obj_t *)lv_event_get_user_data(e), LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
     }, LV_EVENT_CLICKED, main_page_obj);
+    screen_lock_register_controlled_button(back_btn);
 
     auto add_parent_indicator = [&](const std::string &entity_id) {
       if (!sp_indicator || entity_id.empty()) return;

@@ -77,6 +77,7 @@ inline void lv_obj_clear_state(lv_obj_t *, int) {}
 inline bool lv_obj_has_state(lv_obj_t *, int) { return false; }
 inline void lv_obj_add_flag(lv_obj_t *, int) {}
 inline void lv_obj_clear_flag(lv_obj_t *, int) {}
+inline bool lv_obj_has_flag(lv_obj_t *, int) { return false; }
 inline uint32_t lv_obj_get_child_cnt(lv_obj_t *) { return 0; }
 inline lv_obj_t *lv_obj_get_child(lv_obj_t *, uint32_t) { return nullptr; }
 inline int lv_obj_get_width(lv_obj_t *) { return 480; }
