@@ -486,13 +486,6 @@ function normalizeImageOptions(options) {
   if (modalMode !== "fill") {
     out = setConfigOptionValue(out, IMAGE_MODAL_MODE_OPTION, modalMode);
   }
-  var interval = normalizeImageRefreshInterval(configOptionValue(options, IMAGE_REFRESH_OPTION));
-  if (interval === "off") return out;
-  out = setConfigOptionValue(out, IMAGE_REFRESH_OPTION, interval);
-  var mode = normalizeImageRefreshMode(configOptionValue(options, IMAGE_REFRESH_MODE_OPTION));
-  if (mode !== "changes_timer") {
-    out = setConfigOptionValue(out, IMAGE_REFRESH_MODE_OPTION, mode);
-  }
   return out;
 }
 

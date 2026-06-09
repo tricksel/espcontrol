@@ -1162,29 +1162,6 @@ var CARD_CONTRACT_CARDS = {
           "fit"
         ],
         "defaultValue": "fill"
-      },
-      {
-        "name": "image_refresh",
-        "label": "Refresh Interval",
-        "kind": "choice",
-        "values": [
-          "off",
-          "10",
-          "30",
-          "60",
-          "300"
-        ],
-        "defaultValue": "off"
-      },
-      {
-        "name": "image_refresh_mode",
-        "label": "Refresh Mode",
-        "kind": "choice",
-        "values": [
-          "changes_timer",
-          "timer"
-        ],
-        "defaultValue": "changes_timer"
       }
     ],
     "default": {

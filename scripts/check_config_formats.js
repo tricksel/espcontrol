@@ -1574,16 +1574,13 @@ assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", false
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", true, false), true, "image picker visible with experimental flag");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("image", true, true), true, "image picker visible in subpages with experimental flag");
 assert.deepStrictEqual(Array.from(hooks.imageModalModeValues()), ["fill", "fit"], "image modal mode values are contract-backed");
-assert.deepStrictEqual(Array.from(hooks.imageRefreshIntervalValues()), ["off", "10", "30", "60", "300"], "image refresh interval values are contract-backed");
-assert.deepStrictEqual(Array.from(hooks.imageRefreshModeValues()), ["changes_timer", "timer"], "image refresh mode values are contract-backed");
 assert.deepStrictEqual(Array.from(hooks.cardContractDomains("image")), ["camera", "image"], "image cards accept camera and image entities");
-assert.strictEqual(hooks.normalizeImageOptions("image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_refresh=30,image_refresh_mode=timer", "image refresh options keep valid values");
-assert.strictEqual(hooks.normalizeImageOptions("image_label,image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_label,image_refresh=30,image_refresh_mode=timer", "image label option is preserved with refresh values");
-assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=fit,image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_modal_mode=fit,image_refresh=30,image_refresh_mode=timer", "image modal fit option is preserved with refresh values");
-assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=fill,image_refresh=30"), "image_refresh=30", "image modal fill is the default and is omitted");
-assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=bad,image_refresh=30"), "image_refresh=30", "invalid image modal mode falls back to fill");
-assert.strictEqual(hooks.normalizeImageOptions("image_refresh=5,image_refresh_mode=bad"), "", "image refresh options drop invalid values");
-assert.strictEqual(hooks.normalizeImageOptions("image_label,image_refresh=5,image_refresh_mode=bad"), "image_label", "image label option survives invalid refresh values");
+assert.strictEqual(hooks.normalizeImageOptions("image_refresh=30,image_refresh_mode=timer,unknown=1"), "", "legacy image refresh options are dropped");
+assert.strictEqual(hooks.normalizeImageOptions("image_label,image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_label", "image label option is preserved while legacy refresh values are dropped");
+assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=fit,image_refresh=30,image_refresh_mode=timer,unknown=1"), "image_modal_mode=fit", "image modal fit option is preserved while legacy refresh values are dropped");
+assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=fill,image_refresh=30"), "", "image modal fill and legacy refresh options are omitted");
+assert.strictEqual(hooks.normalizeImageOptions("image_modal_mode=bad,image_refresh=30"), "", "invalid image modal mode and legacy refresh options are dropped");
+assert.strictEqual(hooks.normalizeImageOptions("image_label,image_refresh=5,image_refresh_mode=bad"), "image_label", "image label option survives invalid legacy refresh values");
 const imageCardForLimit = {
   entity: "camera.front_door",
   label: "",
@@ -1645,17 +1642,12 @@ assertButtonRoundTrip(hooks, "image card default options", {
   precision: "",
   options: "",
 }, false);
-assertButtonRoundTrip(hooks, "image card refresh options", {
+assert.deepStrictEqual(buttonShape(hooks.parseButtonConfig(
+  "~camera.front_door,,Auto,Auto,,,image,,image_refresh=30%2Cimage_refresh_mode=timer"
+)), buttonShape({
   entity: "camera.front_door",
-  label: "",
-  icon: "Auto",
-  icon_on: "Auto",
-  sensor: "",
-  unit: "",
   type: "image",
-  precision: "",
-  options: "image_refresh=30,image_refresh_mode=timer",
-}, false);
+}), "image card legacy refresh options are cleaned up by web parser");
 assertButtonRoundTrip(hooks, "image card label option", {
   entity: "camera.front_door",
   label: "Front Door",
@@ -1667,17 +1659,14 @@ assertButtonRoundTrip(hooks, "image card label option", {
   precision: "",
   options: "image_label",
 }, false);
-assertButtonRoundTrip(hooks, "image card label and refresh options", {
+assert.deepStrictEqual(buttonShape(hooks.parseButtonConfig(
+  "~camera.front_door,Front%20Door,Auto,Auto,,,image,,image_label%2Cimage_refresh=30%2Cimage_refresh_mode=timer"
+)), buttonShape({
   entity: "camera.front_door",
   label: "Front Door",
-  icon: "Auto",
-  icon_on: "Auto",
-  sensor: "",
-  unit: "",
   type: "image",
-  precision: "",
-  options: "image_label,image_refresh=30,image_refresh_mode=timer",
-}, false);
+  options: "image_label",
+}), "image card label survives legacy refresh cleanup");
 assertButtonRoundTrip(hooks, "image card icon option", {
   entity: "camera.front_door",
   label: "",

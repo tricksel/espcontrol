@@ -11,23 +11,6 @@ var IMAGE_CARD_METADATA = {
   },
 };
 
-function imageRefreshIntervalOptions() {
-  return [
-    ["off", "Off"],
-    ["10", "10 seconds"],
-    ["30", "30 seconds"],
-    ["60", "1 minute"],
-    ["300", "5 minutes"],
-  ];
-}
-
-function imageRefreshModeOptions() {
-  return [
-    ["changes_timer", "Changes + interval"],
-    ["timer", "Interval only"],
-  ];
-}
-
 function imageModalModeOptions() {
   return [
     ["fill", "Crop to fit"],
@@ -43,13 +26,6 @@ function renderImageLabelSettings(panel, b, helpers) {
   );
   panel.appendChild(labelToggle.row);
 
-  var iconToggle = helpers.toggleRow(
-    "Show Icon",
-    helpers.idPrefix + "image-icon-toggle",
-    imageIconEnabled(b)
-  );
-  panel.appendChild(iconToggle.row);
-
   var labelField = helpers.renderCardTextField(panel, b, helpers, {
       text: {
         label: "Label",
@@ -60,8 +36,29 @@ function renderImageLabelSettings(panel, b, helpers) {
       },
   });
 
+  var iconToggle = helpers.toggleRow(
+    "Show Icon",
+    helpers.idPrefix + "image-icon-toggle",
+    imageIconEnabled(b)
+  );
+  panel.appendChild(iconToggle.row);
+
+  if (imageIconEnabled(b) && (!b.icon || b.icon === "Auto")) b.icon = "Camera";
+  var iconField = helpers.renderCardIconPicker(panel, b, helpers, {
+    label: "Icon",
+    idSuffix: "image-icon",
+    pickerIdSuffix: "image-icon-picker",
+    fallback: "Camera",
+    value: function () { return b.icon && b.icon !== "Auto" ? b.icon : "Camera"; },
+    onChange: function () { renderPreview(); },
+  });
+
   function syncLabelField() {
     labelField.field.hidden = !imageLabelEnabled(b);
+  }
+
+  function syncIconField() {
+    iconField.hidden = !imageIconEnabled(b);
   }
 
   labelToggle.input.addEventListener("change", function () {
@@ -73,10 +70,19 @@ function renderImageLabelSettings(panel, b, helpers) {
   });
   iconToggle.input.addEventListener("change", function () {
     setImageIconEnabled(b, this.checked);
+    if (this.checked && (!b.icon || b.icon === "Auto")) {
+      b.icon = "Camera";
+      helpers.saveField("icon", b.icon);
+    } else if (!this.checked) {
+      b.icon = "Auto";
+      helpers.saveField("icon", b.icon);
+    }
     helpers.saveField("options", b.options);
+    syncIconField();
     renderPreview();
   });
   syncLabelField();
+  syncIconField();
 }
 
 function renderImageModalSettings(panel, b, helpers) {
@@ -91,40 +97,6 @@ function renderImageModalSettings(panel, b, helpers) {
     setImageModalMode(b, this.value);
     helpers.saveField("options", b.options);
   });
-}
-
-function renderImageRefreshSettings(panel, b, helpers) {
-  var intervalField = helpers.selectField(
-    "Refresh Interval",
-    helpers.idPrefix + "image-refresh",
-    imageRefreshIntervalOptions(),
-    imageRefreshInterval(b)
-  );
-  panel.appendChild(intervalField.field);
-
-  var modeField = helpers.selectField(
-    "Refresh Mode",
-    helpers.idPrefix + "image-refresh-mode",
-    imageRefreshModeOptions(),
-    imageRefreshMode(b)
-  );
-  panel.appendChild(modeField.field);
-
-  function syncModeVisibility() {
-    modeField.field.hidden = imageRefreshInterval(b) === "off";
-    modeField.select.value = imageRefreshMode(b);
-  }
-
-  intervalField.select.addEventListener("change", function () {
-    setImageRefreshInterval(b, this.value);
-    helpers.saveField("options", b.options);
-    syncModeVisibility();
-  });
-  modeField.select.addEventListener("change", function () {
-    setImageRefreshMode(b, this.value);
-    helpers.saveField("options", b.options);
-  });
-  syncModeVisibility();
 }
 
 registerButtonType("image", {
@@ -146,7 +118,11 @@ registerButtonType("image", {
     b.options = normalizeImageOptions(b.options);
   },
   renderSettings: function (panel, b, slot, helpers) {
-    b.icon = "Auto";
+    if (imageIconEnabled(b)) {
+      if (!b.icon || b.icon === "Auto") b.icon = "Camera";
+    } else {
+      b.icon = "Auto";
+    }
     b.icon_on = "Auto";
     b.sensor = "";
     b.unit = "";
@@ -156,7 +132,6 @@ registerButtonType("image", {
     helpers.renderCardEntityField(panel, b, helpers, IMAGE_CARD_METADATA);
     renderImageLabelSettings(panel, b, helpers);
     renderImageModalSettings(panel, b, helpers);
-    renderImageRefreshSettings(panel, b, helpers);
   },
   renderPreview: function (b, helpers) {
     var tertiaryColor = (typeof state !== "undefined" && state.sensorColor) ? state.sensorColor : "212121";

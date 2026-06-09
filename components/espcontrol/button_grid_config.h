@@ -302,33 +302,17 @@ inline std::string image_card_options_normalized(const std::string &options) {
     if (!out.empty()) out += ",";
     out += std::string(IMAGE_MODAL_MODE_OPTION) + "=" + modal_mode;
   }
-  std::string interval = normalize_image_refresh_interval(
-    cfg_option_value(options, IMAGE_REFRESH_OPTION));
-  if (interval == "off") return out;
-  if (!out.empty()) out += ",";
-  out += std::string(IMAGE_REFRESH_OPTION) + "=" + interval;
-  std::string mode = normalize_image_refresh_mode(
-    cfg_option_value(options, IMAGE_REFRESH_MODE_OPTION));
-  if (mode != "changes_timer") {
-    out += ",";
-    out += std::string(IMAGE_REFRESH_MODE_OPTION) + "=" + mode;
-  }
   return out;
 }
 
 inline uint32_t image_card_refresh_interval_ms(const ParsedCfg &p) {
-  std::string interval = normalize_image_refresh_interval(
-    cfg_option_value(p.options, IMAGE_REFRESH_OPTION));
-  if (interval == "10") return 10000;
-  if (interval == "30") return 30000;
-  if (interval == "60") return 60000;
-  if (interval == "300") return 300000;
+  (void) p;
   return 0;
 }
 
 inline bool image_card_timer_only_refresh(const ParsedCfg &p) {
-  return normalize_image_refresh_mode(
-    cfg_option_value(p.options, IMAGE_REFRESH_MODE_OPTION)) == "timer";
+  (void) p;
+  return false;
 }
 
 inline bool image_card_label_enabled(const ParsedCfg &p) {
