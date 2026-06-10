@@ -19,6 +19,7 @@ constexpr uint8_t IMAGE_CARD_STARTUP_DOWNLOAD_RETRIES = 10;
 constexpr int IMAGE_CARD_MAX_CONTEXTS = 6;
 constexpr int IMAGE_CARD_MODAL_MAX_TARGET_SIDE_PX = 800;
 constexpr size_t IMAGE_CARD_MEMORY_HEADROOM_BYTES = 96 * 1024;
+constexpr lv_coord_t IMAGE_CARD_JC4880P443_MODAL_BACK_BUTTON_REF_PX = 58;
 constexpr const char *IMAGE_CARD_LOADING_ICON = "\U000F02E9";
 
 struct ImageCardCtx {
@@ -72,6 +73,20 @@ inline ImageCardCtx *image_card_contexts() {
 inline ImageCardModalUi &image_card_modal_ui() {
   static ImageCardModalUi ui;
   return ui;
+}
+
+inline void image_card_style_modal_back_button(lv_obj_t *btn,
+                                               const ControlModalLayout &layout) {
+  if (!btn) return;
+  control_modal_style_translucent_chrome_button(btn);
+  if (!control_modal_uses_compact_portrait_tuning(layout)) return;
+
+  lv_coord_t size = control_modal_scaled_px(
+    IMAGE_CARD_JC4880P443_MODAL_BACK_BUTTON_REF_PX, layout.short_side);
+  if (size <= layout.back_size) return;
+  lv_obj_set_size(btn, size, size);
+  lv_obj_set_style_radius(btn, size / 2, LV_PART_MAIN);
+  lv_obj_align(btn, LV_ALIGN_TOP_LEFT, layout.back_inset_x, layout.back_inset_y);
 }
 
 inline bool image_card_modal_active_for(ImageCardCtx *ctx) {
@@ -1229,7 +1244,7 @@ inline void image_card_open_modal(ImageCardCtx *ctx) {
   ui.overlay = shell.overlay;
   ui.panel = shell.panel;
   ui.back_btn = shell.close_btn;
-  control_modal_style_translucent_chrome_button(ui.back_btn);
+  image_card_style_modal_back_button(ui.back_btn, shell.layout);
 
   lv_obj_set_style_bg_color(ui.panel, lv_color_hex(DARK_OVERLAY), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(ui.panel, LV_OPA_COVER, LV_PART_MAIN);
