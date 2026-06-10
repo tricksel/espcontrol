@@ -1,8 +1,6 @@
 #include "jpeg_image.h"
 #ifdef USE_ARTWORK_IMAGE_JPEG_SUPPORT
 
-#include <cstdlib>
-
 #include "esphome/components/display/display_buffer.h"
 #include "esphome/core/application.h"
 #include "esphome/core/helpers.h"
@@ -117,31 +115,6 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
       cinfo.scale_denom = 1;
       jpeg_calc_output_dimensions(&cinfo);
     }
-    int max_decode_dim = this->image_->get_max_decode_dim();
-    int target_selected_w = static_cast<int>(cinfo.output_width);
-    int target_selected_h = static_cast<int>(cinfo.output_height);
-    int target_selected_max = target_selected_w > target_selected_h ? target_selected_w : target_selected_h;
-    if (max_decode_dim > 0 && target_selected_max > max_decode_dim) {
-      constexpr unsigned int capped_denoms[] = {1, 2, 4, 8};
-      unsigned int selected_denom = 8;
-      for (unsigned int denom : capped_denoms) {
-        cinfo.scale_num = 1;
-        cinfo.scale_denom = denom;
-        jpeg_calc_output_dimensions(&cinfo);
-        int output_w = static_cast<int>(cinfo.output_width);
-        int output_h = static_cast<int>(cinfo.output_height);
-        int output_max = output_w > output_h ? output_w : output_h;
-        if (output_max <= max_decode_dim) {
-          selected_denom = denom;
-          break;
-        }
-      }
-      cinfo.scale_num = 1;
-      cinfo.scale_denom = selected_denom;
-      jpeg_calc_output_dimensions(&cinfo);
-      ESP_LOGD(TAG, "Capped JPEG decode size at %dpx using 1/%u IDCT scale",
-               max_decode_dim, selected_denom);
-    }
   } else {
     jpeg_calc_output_dimensions(&cinfo);
   }
@@ -161,14 +134,7 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
 
   // Allocate row buffers (raw pointers — safe across longjmp)
   size_t row_stride = static_cast<size_t>(out_w) * 3;
-#ifdef USE_ESP32
-  row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
-  if (row_buffer == nullptr) {
-    row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_8BIT));
-  }
-#else
-  row_buffer = static_cast<uint8_t *>(malloc(row_stride));
-#endif
+  row_buffer = static_cast<uint8_t *>(heap_caps_malloc(row_stride, MALLOC_CAP_8BIT));
   if (row_buffer == nullptr) {
     ESP_LOGE(TAG, "JPEG row buffer allocation failed: %zu bytes", row_stride);
     jpeg_destroy_decompress(&cinfo);
@@ -220,11 +186,7 @@ int HOT JpegDecoder::decode(uint8_t *buffer, size_t size) {
 
   jpeg_finish_decompress(&cinfo);
   jpeg_destroy_decompress(&cinfo);
-#ifdef USE_ESP32
-  heap_caps_free(row_buffer);
-#else
   free(row_buffer);
-#endif
 
   this->decoded_bytes_ = size;
   ESP_LOGD(TAG, "JPEG decode finished: output=%dx%d", out_w, out_h);
