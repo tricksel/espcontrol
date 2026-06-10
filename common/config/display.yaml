@@ -130,7 +130,9 @@ script:
           if (!visible) return;
 
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
-                                    visible,
+                                    visible &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep),
                                     id(indoor_temp_enable).state,
                                     id(outdoor_temp_enable).state,
                                     id(indoor_temp), id(outdoor_temp));
@@ -215,6 +217,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -227,6 +231,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -250,6 +256,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -262,6 +270,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -286,6 +296,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -299,6 +311,8 @@ switch:
           refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                     id(clock_bar_enabled).state &&
                                       clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                      !id(display_asleep) &&
+                                      !id(screen_schedule_asleep) &&
                                       !id(screensaver_display_off_active) &&
                                       !id(screensaver_dimmed_active) &&
                                       !id(is_clock_showing) &&
@@ -476,6 +490,8 @@ select:
             refresh_clock_bar_temperature_label_values(id(main_page)->obj,
                                       id(clock_bar_enabled).state &&
                                         clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                                        !id(display_asleep) &&
+                                        !id(screen_schedule_asleep) &&
                                         !id(screensaver_display_off_active) &&
                                         !id(screensaver_dimmed_active) &&
                                         !id(is_clock_showing) &&
@@ -538,6 +554,8 @@ text:
               []() {
                 return id(clock_bar_enabled).state &&
                        clock_bar_active_on_button_grid_page(id(main_page)->obj) &&
+                       !id(display_asleep) &&
+                       !id(screen_schedule_asleep) &&
                        !id(screensaver_display_off_active) &&
                        !id(screensaver_dimmed_active) &&
                        !id(is_clock_showing) &&

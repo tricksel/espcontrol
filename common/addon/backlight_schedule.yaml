@@ -437,6 +437,8 @@ script:
       - script.stop: screensaver_idle_check
       - script.stop: home_screen_idle_check
       - script.stop: screen_schedule_wake_timeout_check
+      - script.execute: clock_bar_hide
+      - script.wait: clock_bar_hide
       - script.execute: hide_cover_art_view
       - globals.set:
           id: backlight_manual_off
@@ -491,6 +493,7 @@ script:
       - globals.set:
           id: display_asleep
           value: 'false'
+      - script.execute: clock_bar_apply
       - script.execute: backlight_apply_brightness
       - script.execute: screensaver_idle_check
       - script.execute: home_screen_idle_check
@@ -534,6 +537,7 @@ script:
       - globals.set:
           id: display_asleep
           value: 'false'
+      - script.execute: clock_bar_apply
       - script.execute: backlight_apply_brightness
       - script.execute: home_screen_idle_check
 

@@ -347,8 +347,6 @@ script:
   - id: backlight_sleep_display_off
     mode: restart
     then:
-      - script.execute: backlight_fade_current_ui_to_black
-      - script.wait: backlight_fade_current_ui_to_black
       - globals.set:
           id: display_asleep
           value: 'true'
@@ -362,6 +360,10 @@ script:
           id: cover_art_screensaver_active
           value: 'false'
       - lvgl.resume:
+      - script.execute: clock_bar_hide
+      - script.wait: clock_bar_hide
+      - script.execute: backlight_fade_current_ui_to_black
+      - script.wait: backlight_fade_current_ui_to_black
       - script.execute: hide_clock_view
       - script.execute: hide_cover_art_view
       - lvgl.widget.hide: dim_screensaver_touch_guard
@@ -377,6 +379,8 @@ script:
     then:
       - script.execute: backlight_force_display_off
       - lvgl.resume:
+      - script.execute: clock_bar_hide
+      - script.wait: clock_bar_hide
       - script.execute: hide_clock_view
       - globals.set:
           id: screensaver_dimmed_active
@@ -564,6 +568,7 @@ script:
                   - globals.set:
                       id: display_asleep
                       value: 'false'
+                  - script.execute: clock_bar_apply
                   - if:
                       condition:
                         lambda: 'return lv_scr_act() == id(screen_off_page)->obj;'
@@ -584,6 +589,7 @@ script:
                   - globals.set:
                       id: display_asleep
                       value: 'false'
+                  - script.execute: clock_bar_apply
                   - script.execute: backlight_apply_brightness
       - script.execute: screensaver_idle_check
       - script.execute: home_screen_idle_check
@@ -643,6 +649,8 @@ script:
           id: screensaver_dimmed_active
           value: 'true'
       - lvgl.resume:
+      - script.execute: clock_bar_hide
+      - script.wait: clock_bar_hide
       - script.execute: hide_clock_view
       - lambda: 'refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));'
       - lvgl.widget.show: dim_screensaver_touch_guard
