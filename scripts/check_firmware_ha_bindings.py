@@ -15,6 +15,7 @@ FIRMWARE_DIR = ROOT / "components" / "espcontrol"
 CORE_INFRA_PATH = ROOT / "common" / "device" / "core_infra.yaml"
 API_NAVIGATE_PATH = ROOT / "common" / "device" / "api_navigate.yaml"
 COVER_ART_PATH = ROOT / "common" / "device" / "screen_cover_art.yaml"
+ARTWORK_IMAGE_PATH = ROOT / "components" / "artwork_image" / "artwork_image.cpp"
 BACKLIGHT_PATH = ROOT / "common" / "addon" / "backlight.yaml"
 TIME_ADDON_PATH = ROOT / "common" / "addon" / "time.yaml"
 SUN_CALC_PATH = ROOT / "components" / "espcontrol" / "sun_calc.h"
@@ -767,6 +768,21 @@ def firmware_image_card_startup_errors(
     return errors
 
 
+def firmware_artwork_image_auth_errors(path: Path, root: Path) -> list[str]:
+    if not path.exists():
+        return []
+    rel = path.relative_to(root)
+    text = path.read_text(encoding="utf-8")
+    errors: list[str] = []
+    if "HTTP_AUTH_TYPE_BASIC" in text:
+        errors.append(
+            f"{rel}: keep local Home Assistant image proxy requests off HTTP Basic auth"
+        )
+    if "config.auth_type = HTTP_AUTH_TYPE_NONE;" not in text:
+        errors.append(f"{rel}: explicitly disable HTTP auth for local artwork requests")
+    return errors
+
+
 def firmware_screensaver_wake_guard_errors(backlight_path: Path, cover_art_path: Path, root: Path) -> list[str]:
     errors: list[str] = []
     if backlight_path.exists():
@@ -954,6 +970,7 @@ def run_scan() -> int:
     errors.extend(firmware_image_card_base_url_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_image_card_quality_errors(FIRMWARE_DIR, ROOT))
     errors.extend(firmware_image_card_startup_errors(FIRMWARE_DIR, CORE_INFRA_PATH, ROOT))
+    errors.extend(firmware_artwork_image_auth_errors(ARTWORK_IMAGE_PATH, ROOT))
     errors.extend(firmware_screensaver_wake_guard_errors(BACKLIGHT_PATH, COVER_ART_PATH, ROOT))
     errors.extend(firmware_climate_step_errors(FIRMWARE_DIR, ROOT))
     errors.extend(
@@ -1317,6 +1334,20 @@ def expect_screensaver_wake_guard_errors(
         cover_art_path.write_text(cover_art_text, encoding="utf-8")
 
         errors = firmware_screensaver_wake_guard_errors(backlight_path, cover_art_path, root)
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_artwork_image_auth_errors(name: str, text: str, expected: tuple[str, ...]) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "components" / "artwork_image" / "artwork_image.cpp"
+        path.parent.mkdir(parents=True)
+        path.write_text(text, encoding="utf-8")
+
+        errors = firmware_artwork_image_auth_errors(path, root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -2454,6 +2485,27 @@ def run_self_test() -> int:
         "                      id: screensaver_wake_touch_guard_active\n"
         "                      value: 'false'\n",
         valid_cover_art_wake_guard,
+        (),
+    )
+    expect_artwork_image_auth_errors(
+        "local artwork image request uses Basic auth",
+        "std::shared_ptr<http_request::HttpContainer> ArtworkImage::get_local_idf_(\n"
+        "    const std::string &url, const std::vector<http_request::Header> &headers) {\n"
+        "  esp_http_client_config_t config = {};\n"
+        "  config.auth_type = HTTP_AUTH_TYPE_BASIC;\n"
+        "}\n",
+        (
+            "keep local Home Assistant image proxy requests off HTTP Basic auth",
+            "explicitly disable HTTP auth for local artwork requests",
+        ),
+    )
+    expect_artwork_image_auth_errors(
+        "local artwork image request disables HTTP auth",
+        "std::shared_ptr<http_request::HttpContainer> ArtworkImage::get_local_idf_(\n"
+        "    const std::string &url, const std::vector<http_request::Header> &headers) {\n"
+        "  esp_http_client_config_t config = {};\n"
+        "  config.auth_type = HTTP_AUTH_TYPE_NONE;\n"
+        "}\n",
         (),
     )
     expect_climate_step_errors(

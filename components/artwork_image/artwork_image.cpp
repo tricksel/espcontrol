@@ -438,7 +438,7 @@ std::shared_ptr<http_request::HttpContainer> ArtworkImage::get_local_idf_(
   config.timeout_ms = std::min<int>(this->parent_->get_timeout(), LOCAL_ARTWORK_HTTP_TIMEOUT_MS);
   config.disable_auto_redirect = false;
   config.max_redirection_count = 3;
-  config.auth_type = HTTP_AUTH_TYPE_BASIC;
+  config.auth_type = HTTP_AUTH_TYPE_NONE;
   config.event_handler = insecure_local_http_event_handler;
 
   esp_http_client_handle_t client = esp_http_client_init(&config);
