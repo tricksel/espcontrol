@@ -315,11 +315,10 @@ function clockBarTemperatureUnitSymbol() {
   return state.temperatureDegreeSymbolOn ? "\u00B0" : "";
 }
 
-var MAX_CLOCK_BAR_TEMPERATURES = 6;
+var MAX_CLOCK_BAR_TEMPERATURES = 1;
 
 function defaultClockBarTemperatureEntity(index) {
   if (index === 0) return "sensor.outdoor_temperature";
-  if (index === 1) return "sensor.indoor_temperature";
   return "";
 }
 
@@ -365,9 +364,9 @@ function applyClockBarTemperatureEntities(list, postDevice) {
   state._clockBarTemperatureEntitiesReceived = true;
   var configured = clockBarTemperatureEntities();
   state._outdoorOn = configured.length > 0;
-  state._indoorOn = configured.length > 1;
+  state._indoorOn = false;
   state.outdoorEntity = configured[0] || "";
-  state.indoorEntity = configured[1] || "";
+  state.indoorEntity = "";
   if (postDevice) {
     postClockBarTemperatureEntities(serializeClockBarTemperatureEntities(state.clockBarTemperatureEntities));
     postSwitch(entityName("outdoor_temp_enable"), state._outdoorOn);

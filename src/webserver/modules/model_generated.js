@@ -818,7 +818,7 @@ var EspControlModel = (() => {
       const entity = String(entry || "").trim();
       if (entity && out.indexOf(entity) === -1) out.push(entity);
     }
-    return out.slice(0, 6);
+    return out.slice(0, 1);
   }
   function normalizeLanguage(value) {
     const language = String(value == null ? "" : value).trim().toLowerCase();
@@ -997,9 +997,9 @@ var EspControlModel = (() => {
       objectValue(settings, "clock_bar_temperature_entities") != null ? settings.clock_bar_temperature_entities : legacyTemperatureEntities
     );
     return {
-      indoorTempEnable: clockBarTemperatureEntities.length > 1,
+      indoorTempEnable: false,
       outdoorTempEnable: clockBarTemperatureEntities.length > 0,
-      indoorTempEntity: clockBarTemperatureEntities[1] || "",
+      indoorTempEntity: "",
       outdoorTempEntity: clockBarTemperatureEntities[0] || "",
       clockBarTemperatureEntities,
       clockBar: objectValue(settings, "clock_bar") != null ? !!settings.clock_bar : false,

@@ -12,7 +12,7 @@ export function normalizeClockBarTemperatureEntities(value: unknown): string[] {
     const entity = String(entry || "").trim();
     if (entity && out.indexOf(entity) === -1) out.push(entity);
   }
-  return out.slice(0, 6);
+  return out.slice(0, 1);
 }
 
 export function normalizeLanguage(value: unknown): string {
@@ -312,9 +312,9 @@ export function normalizeBackupPanelSettings(
       : legacyTemperatureEntities,
   );
   return {
-    indoorTempEnable: clockBarTemperatureEntities.length > 1,
+    indoorTempEnable: false,
     outdoorTempEnable: clockBarTemperatureEntities.length > 0,
-    indoorTempEntity: clockBarTemperatureEntities[1] || "",
+    indoorTempEntity: "",
     outdoorTempEntity: clockBarTemperatureEntities[0] || "",
     clockBarTemperatureEntities,
     clockBar: objectValue(settings, "clock_bar") != null ? !!settings.clock_bar : false,

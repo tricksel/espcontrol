@@ -160,8 +160,10 @@ int main() {
   assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_TEMPERATURE] == CLOCK_BAR_SECTION_LEFT);
   assert(fallback_clock_bar.order[CLOCK_BAR_ITEM_TEMPERATURE] == 0);
   assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_TIME] == CLOCK_BAR_SECTION_MIDDLE);
+  assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_WEATHER] == CLOCK_BAR_SECTION_RIGHT);
+  assert(fallback_clock_bar.order[CLOCK_BAR_ITEM_WEATHER] == 0);
   assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_NETWORK] == CLOCK_BAR_SECTION_RIGHT);
-  assert(fallback_clock_bar.section[CLOCK_BAR_ITEM_WEATHER] == -1);
+  assert(fallback_clock_bar.order[CLOCK_BAR_ITEM_NETWORK] == 1);
 
   auto duplicate_clock_bar = parse_clock_bar_layout(
     " left : temperature , temperature | middle: time | right: network,network,weather ");
@@ -185,10 +187,8 @@ int main() {
 
   auto clock_bar_entities = parse_clock_bar_temperature_entities(
     " sensor.outdoor | sensor.indoor, sensor.outdoor\nsensor.loft,, ");
-  assert(clock_bar_entities.size() == 3);
+  assert(clock_bar_entities.size() == 1);
   assert(clock_bar_entities[0] == "sensor.outdoor");
-  assert(clock_bar_entities[1] == "sensor.indoor");
-  assert(clock_bar_entities[2] == "sensor.loft");
 
   set_clock_bar_temperature_value_count(6);
   lv_obj_t temperature_1;
@@ -218,7 +218,9 @@ int main() {
 	    &weather_icon_container,
 	    true, true, true, true, true,
 	    1024, 12, 17, 20, 10, 80, 10);
-  assert(lv_obj_move_background_calls == 9);
+  assert(lv_obj_move_background_calls == 4);
+  assert(lv_obj_has_flag(&temperature_2, LV_OBJ_FLAG_HIDDEN));
+  assert(lv_obj_has_flag(&temperature_6, LV_OBJ_FLAG_HIDDEN));
   hide_clock_bar_top_layer_widgets(
     temperature_labels, 6, &display_time, &network_status_button, &weather_icon_container);
   assert(lv_obj_has_flag(&temperature_1, LV_OBJ_FLAG_HIDDEN));

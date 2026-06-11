@@ -195,7 +195,6 @@ function importConfig() {
         applyClockBarTemperatureEntities(importedSettings.clockBarTemperatureEntities, true);
         postClockBar(importedSettings.clockBar);
         applyClockBarLayoutValue(importedSettings.clockBarLayout);
-        postClockBarLayout(importedSettings.clockBarLayout);
         postClockBarTime(importedSettings.clockBarTime);
         postClockBarWeatherIcon(importedSettings.clockBarWeatherIcon);
         postText(entityName("clock_bar_weather_entity"), importedSettings.clockBarWeatherEntity);

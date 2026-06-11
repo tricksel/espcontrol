@@ -774,209 +774,59 @@ async function assertClockBarEditorSmoke(page, posts, label) {
   await page.getByRole("tab", { name: "Screen" }).click();
   await page.waitForSelector("#sp-screen.sp-page.active");
 
-  async function expectClockBarSelection() {
-    await page.locator(".sp-selection-bar.sp-visible", { hasText: "1 clock bar item selected" }).waitFor({ state: "visible" });
-    assert.strictEqual(
-      await page.locator(".sp-settings-overlay.sp-visible").count(),
-      0,
-      `${label}: clock bar click selects without opening the editor`
-    );
-  }
-
-  async function openSelectedClockBarEditor(title) {
-    await expectClockBarSelection();
-    await page.getByRole("button", { name: "Edit", exact: true }).click();
-    await page.waitForSelector(".sp-settings-overlay.sp-visible");
-    assert(await page.locator(".sp-section-title", { hasText: title }).isVisible(), `${label}: ${title.toLowerCase()} editor opens`);
-  }
-
-  async function selectAndOpenClockBarEditor(selector, title) {
-    await page.locator(selector).click();
-    await openSelectedClockBarEditor(title);
-  }
-
-  async function addClockBarItemFromPanel(section, item) {
-    await page.locator(`[data-clockbar-section="${section}"] [data-clockbar-add]`).click({ force: true });
-    await page.waitForSelector(".sp-settings-overlay.sp-visible");
-    assert.strictEqual(await page.locator(".sp-ctx-menu").count(), 0, `${label}: adding ${item} opens settings instead of a context menu`);
-    await page.locator("#sp-clockbar-add-type").selectOption(item);
-  }
-
-  async function waitForClockBarAddModalClosed() {
-    await page.waitForFunction(() => {
-      var overlay = document.querySelector(".sp-settings-overlay");
-      return overlay && !overlay.classList.contains("sp-visible");
-    });
-  }
-
-  for (const selector of [
-    '[data-clockbar-item="temperature"]',
-    '[data-clockbar-item="time"]',
-    '[data-clockbar-item="network"]',
-  ]) {
+  const fixedItems = [
+    { selector: '[data-clockbar-item="temperature"]', section: "left" },
+    { selector: '[data-clockbar-item="time"]', section: "middle" },
+    { selector: '[data-clockbar-item="network"]', section: "right" },
+  ];
+  for (const item of fixedItems) {
+    const selector = `${item.selector}[data-clockbar-section="${item.section}"]`;
     const box = await page.locator(selector).boundingBox();
-    const addBox = await page.locator('[data-clockbar-section="right"] [data-clockbar-add]').boundingBox();
-    assert(box, `${label}: ${selector} has a visible hit area`);
-    assert(addBox, `${label}: clock bar add control has a visible bounded area`);
-    assert(
-      Math.abs(box.height - addBox.height) <= 1,
-      `${label}: ${selector} hover height matches add control`
-    );
+    assert(box, `${label}: ${selector} remains visible in the fixed clock bar`);
   }
-  await page.locator('.sp-clockbar-section[data-clockbar-section="left"]').hover();
-  const initialLeftItemBoxes = await page.locator('[data-clockbar-item][data-clockbar-section="left"]').evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const rect = node.getBoundingClientRect();
-      return { right: rect.right };
-    })
-  );
-  const initialLeftAddBox = await page.locator('[data-clockbar-section="left"] [data-clockbar-add]').boundingBox();
-  const initialLeftContentRight = Math.max(...initialLeftItemBoxes.map((box) => box.right));
-  assert(Number.isFinite(initialLeftContentRight) && initialLeftAddBox, `${label}: left clock bar controls are measurable`);
-  assert(
-    initialLeftAddBox.x - initialLeftContentRight <= 12,
-    `${label}: left add control sits beside left-side content`
-  );
 
-  await page.dragAndDrop('[data-clockbar-item="time"]', '[data-clockbar-section="left"]');
+  assert.strictEqual(await page.locator("[data-clockbar-add]").count(), 0, `${label}: clock bar add controls are removed`);
+  assert.strictEqual(await page.locator('[data-clockbar-item="temperature_2"]').count(), 0, `${label}: extra temperature mini cards are not rendered`);
+  assert.strictEqual(await page.locator("#sp-clockbar-add-type").count(), 0, `${label}: add-item selector is not present`);
+  assert.strictEqual(await page.locator("#sp-clockbar-weather-entity").count(), 0, `${label}: clock bar weather editor is not present`);
+  assert.strictEqual(await page.locator("#sp-clockbar-temperature-entity-0").count(), 0, `${label}: clock bar temperature editor is not present`);
+
+  const before = posts.length;
+  await page.locator('.sp-clockbar-section[data-clockbar-section="left"]').hover();
+  await page.locator('[data-clockbar-item="time"]').click({ force: true });
   assert.strictEqual(
     await page.locator('[data-clockbar-item="time"]').getAttribute("data-clockbar-section"),
-    "left",
-    `${label}: time can be dragged to the left clock bar section`
+    "middle",
+    `${label}: clock bar time remains in the fixed middle section`
   );
+  assert.strictEqual(await page.locator(".sp-selection-bar.sp-visible").count(), 0, `${label}: clicking clock bar does not select an item`);
+  assert.strictEqual(await page.locator(".sp-settings-overlay.sp-visible").count(), 0, `${label}: clicking clock bar does not open settings`);
+  assert.strictEqual(posts.length, before, `${label}: clock bar click/hover does not post customization changes`);
 
-  let before = posts.length;
-  await expectClockBarSelection();
-  assert.strictEqual(
-    await page.locator(".sp-selection-bar.sp-visible").getByRole("button", { name: "Edit", exact: true }).count(),
-    0,
-    `${label}: time selection has no local editor`
-  );
-  await page.getByRole("button", { name: "Clock bar item actions" }).click();
-  await page.getByText("Delete", { exact: true }).click();
-  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_off" }, `${label}: delete time`, before);
-  await page.locator('[data-clockbar-item="time"]').waitFor({ state: "detached" });
-  before = posts.length;
-  await page.locator('[data-clockbar-section="middle"] [data-clockbar-add]').click();
-  await page.waitForSelector(".sp-settings-overlay.sp-visible");
-  assert.strictEqual(await page.locator(".sp-ctx-menu").count(), 0, `${label}: adding time opens settings instead of a context menu`);
-  await page.locator("#sp-clockbar-add-type").selectOption("time");
-  await page.locator(".sp-settings-modal .sp-save-btn").click();
-  await waitForClockBarAddModalClosed();
-  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_time", action: "turn_on" }, `${label}: add time`, before);
-  await page.locator('[data-clockbar-item="time"][data-clockbar-section="middle"]').waitFor({ state: "visible" });
   const screenBox = await page.locator(".sp-screen").boundingBox();
   const timeBox = await page.locator('[data-clockbar-item="time"][data-clockbar-section="middle"]').boundingBox();
-  const middleAddBox = await page.locator('[data-clockbar-section="middle"] [data-clockbar-add]').boundingBox();
-  assert(screenBox && timeBox && middleAddBox, `${label}: middle clock bar controls are measurable`);
+  assert(screenBox && timeBox, `${label}: middle clock bar time is measurable`);
   const screenCenter = screenBox.x + screenBox.width / 2;
   const timeCenter = timeBox.x + timeBox.width / 2;
   assert(
     Math.abs(timeCenter - screenCenter) <= 1,
     `${label}: middle clock bar time remains centered on the screen`
   );
-  assert(
-    middleAddBox.x >= timeBox.x + timeBox.width,
-    `${label}: middle add control sits beside the centered time`
-  );
-  await page.locator('[data-clockbar-item="time"][data-clockbar-section="middle"]').click();
-  await expectClockBarSelection();
-  assert.strictEqual(
-    await page.locator(".sp-selection-bar.sp-visible").getByRole("button", { name: "Edit", exact: true }).count(),
-    0,
-    `${label}: re-added time keeps settings global`
-  );
 
-  before = posts.length;
-  await page.locator('[data-clockbar-item="network"]').click();
-  await expectClockBarSelection();
-  assert.strictEqual(
-    await page.locator(".sp-selection-bar.sp-visible").getByRole("button", { name: "Edit", exact: true }).count(),
-    0,
-    `${label}: network status selection has no empty editor`
-  );
-  await page.getByRole("button", { name: "Clock bar item actions" }).click();
-  await page.getByText("Delete", { exact: true }).click();
-  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_off" }, `${label}: delete network`, before);
-  await page.locator('[data-clockbar-item="network"]').waitFor({ state: "detached" });
   const topbarBox = await page.locator(".sp-topbar").boundingBox();
-  const rightAddBox = await page.locator('[data-clockbar-section="right"] [data-clockbar-add]').boundingBox();
+  const networkBox = await page.locator('[data-clockbar-item="network"][data-clockbar-section="right"]').boundingBox();
   const firstCardBox = await page.locator(".sp-main > *").first().boundingBox();
-  assert(topbarBox && rightAddBox, `${label}: right add control has a visible bounded area`);
-  assert(rightAddBox.y > topbarBox.y, `${label}: right add control does not touch the top of the clock bar`);
+  assert(topbarBox && networkBox, `${label}: network status has a visible bounded area`);
+  assert(networkBox.y > topbarBox.y, `${label}: network status does not touch the top of the clock bar`);
   assert(
-    rightAddBox.y + rightAddBox.height < topbarBox.y + topbarBox.height,
-    `${label}: right add control does not touch the bottom of the clock bar`
+    networkBox.y + networkBox.height < topbarBox.y + topbarBox.height,
+    `${label}: network status does not touch the bottom of the clock bar`
   );
   assert(firstCardBox, `${label}: first card has a visible bounded area`);
   assert(
-    rightAddBox.y + rightAddBox.height < firstCardBox.y,
-    `${label}: right add control stays clear of the first card row`
+    networkBox.y + networkBox.height < firstCardBox.y,
+    `${label}: network status stays clear of the first card row`
   );
-  before = posts.length;
-  await addClockBarItemFromPanel("right", "network");
-  await page.locator(".sp-settings-modal .sp-save-btn").click();
-  await waitForClockBarAddModalClosed();
-  await waitForPost(posts, { domain: "switch", name: "screen__network_status_icon", action: "turn_on" }, `${label}: add network`, before);
-  await page.locator('[data-clockbar-item="network"][data-clockbar-section="right"]').waitFor({ state: "visible" });
-  const rightAddAfterBox = await page.locator('[data-clockbar-section="right"] [data-clockbar-add]').boundingBox();
-  const networkBox = await page.locator('[data-clockbar-item="network"][data-clockbar-section="right"]').boundingBox();
-  assert(rightAddAfterBox && networkBox, `${label}: right add and network controls are visible`);
-  assert(
-    rightAddAfterBox.x < networkBox.x,
-    `${label}: right add control appears to the left of right-side controls`
-  );
-  assert(
-    networkBox.x - (rightAddAfterBox.x + rightAddAfterBox.width) <= 12,
-    `${label}: right add control sits beside right-side content`
-  );
-  assert(
-    Math.abs(networkBox.width - rightAddAfterBox.width) <= 1 &&
-      Math.abs(networkBox.height - rightAddAfterBox.height) <= 1,
-    `${label}: right network hover box matches add control size`
-  );
-
-  before = posts.length;
-  await addClockBarItemFromPanel("right", "weather");
-  await page.locator("#sp-clockbar-add-weather-entity").fill("weather.home");
-  await page.locator(".sp-settings-modal .sp-save-btn").click();
-  await waitForClockBarAddModalClosed();
-  await waitForPost(posts, { domain: "switch", name: "screen__clock_bar_weather_icon", action: "turn_on" }, `${label}: add weather`, before);
-  await waitForPost(posts, { domain: "text", name: "Clock Bar: Weather Entity", action: "set", value: "weather.home" }, `${label}: set weather entity`, before);
-  await page.locator('[data-clockbar-item="weather"][data-clockbar-section="right"]').waitFor({ state: "visible" });
-  await selectAndOpenClockBarEditor('[data-clockbar-item="weather"]', "Weather");
-  await page.locator("#sp-clockbar-weather-entity").fill("weather.patio");
-  await page.locator(".sp-settings-modal .sp-save-btn").click();
-  await waitForPost(posts, { domain: "text", name: "Clock Bar: Weather Entity", action: "set", value: "weather.patio" }, `${label}: edit weather entity`, before);
-
-  before = posts.length;
-  await selectAndOpenClockBarEditor('[data-clockbar-item="temperature"]', "Temperature");
-  await page.getByText("Show Degree Symbol", { exact: true }).waitFor({ state: "visible" });
-  assert.strictEqual(await page.locator("#sp-clockbar-temperature-unit").count(), 0, `${label}: temperature unit selector stays out of clock bar editor`);
-  await page.getByRole("button", { name: "Delete" }).click();
-  await waitForAnyPost(posts, [
-    { domain: "text", name: "Clock Bar: Temperature Entities", action: "set", value: "sensor.indoor_temperature" },
-    { domain: "text", name: "clock_bar__temperature_entities", action: "set", value: "sensor.indoor_temperature" },
-  ], `${label}: delete first temperature`, before);
-  await waitForPost(posts, { domain: "switch", name: "indoor_temp_enable", action: "turn_off" }, `${label}: delete first temperature disables legacy second slot`, before);
-  await page.locator('[data-clockbar-item="temperature"]').waitFor({ state: "visible" });
-  assert.strictEqual(await page.locator('[data-clockbar-item="temperature_2"]').count(), 0, `${label}: deleting one temperature removes the second mini card`);
-  before = posts.length;
-  await page.locator('.sp-clockbar-section[data-clockbar-section="left"]').hover();
-  await addClockBarItemFromPanel("left", "temperature_2");
-  await page.locator("#sp-clockbar-add-temperature-entity-1").waitFor({ state: "visible" });
-  await page.locator(".sp-settings-modal .sp-save-btn").click();
-  await waitForClockBarAddModalClosed();
-  await waitForAnyPost(posts, [
-    { domain: "text", name: "Clock Bar: Temperature Entities", action: "set", value: "sensor.indoor_temperature" },
-    { domain: "text", name: "clock_bar__temperature_entities", action: "set", value: "sensor.indoor_temperature" },
-  ], `${label}: add second temperature mini card`, before);
-  await page.locator('[data-clockbar-item="temperature"][data-clockbar-section="left"]').waitFor({ state: "visible" });
-  await page.locator('[data-clockbar-item="temperature_2"][data-clockbar-section="left"]').waitFor({ state: "visible" });
-  await page.locator('[data-clockbar-item="temperature_2"][data-clockbar-section="left"]').click();
-  await openSelectedClockBarEditor("Temperature");
-  await page.getByText("Show Degree Symbol", { exact: true }).waitFor({ state: "visible" });
-  await page.locator(".sp-settings-close").click();
 
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.waitForSelector("#sp-settings.sp-page.active");

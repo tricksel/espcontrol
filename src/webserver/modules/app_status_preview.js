@@ -95,7 +95,7 @@ var CLOCK_BAR_SECTIONS = ["left", "middle", "right"];
 var CLOCK_BAR_DEFAULT_LAYOUT = {
   left: ["temperature"],
   middle: ["time"],
-  right: ["network"],
+  right: ["weather", "network"],
 };
 var CLOCK_BAR_LAYOUT_STORAGE_PREFIX = "espcontrol.clockBarLayout.";
 var clockBarLayoutLoaded = false;
@@ -106,10 +106,7 @@ function clockBarTemperatureItemId(index) {
 
 function clockBarTemperatureItemIndex(item) {
   if (item === "temperature") return 0;
-  var match = String(item || "").match(/^temperature_(\d+)$/);
-  if (!match) return -1;
-  var index = parseInt(match[1], 10) - 1;
-  return index >= 1 && index < MAX_CLOCK_BAR_TEMPERATURES ? index : -1;
+  return -1;
 }
 
 function isClockBarTemperatureItem(item) {
@@ -118,7 +115,6 @@ function isClockBarTemperatureItem(item) {
 
 function clockBarTemperatureItemIds(includeNext) {
   var count = clockBarTemperatureEntries().length;
-  if (includeNext && count < MAX_CLOCK_BAR_TEMPERATURES) count++;
   var out = [];
   for (var i = 0; i < count && i < MAX_CLOCK_BAR_TEMPERATURES; i++) {
     out.push(clockBarTemperatureItemId(i));
@@ -241,23 +237,20 @@ function saveClockBarLayout(postDevice) {
       window.localStorage.setItem(clockBarLayoutStorageKey(), JSON.stringify(cloneClockBarLayout(state.clockBarLayout)));
     }
   } catch (_) {}
-  if (postDevice) postClockBarLayout(serialized);
+  // Layout customization has been removed; keep this as a local compatibility cache only.
 }
 
 function normalizeClockBarLayout() {
-  var current = loadClockBarLayout();
   var next = { left: [], middle: [], right: [] };
-  var seen = {};
-  var allowed = clockBarItems(true);
   CLOCK_BAR_SECTIONS.forEach(function (section) {
-    (current[section] || []).forEach(function (item) {
-      if (allowed.indexOf(item) === -1 || seen[item]) return;
-      seen[item] = true;
-      next[section].push(item);
+    (CLOCK_BAR_DEFAULT_LAYOUT[section] || []).forEach(function (item) {
+      if (!clockBarItemActive(item)) return;
+      if (next[section].indexOf(item) === -1) next[section].push(item);
     });
   });
   clockBarItems(false).forEach(function (item) {
-    if (seen[item] || !clockBarItemActive(item)) return;
+    var section = clockBarDefaultSection(item);
+    if (!clockBarItemActive(item) || next[section].indexOf(item) !== -1) return;
     next[clockBarDefaultSection(item)].push(item);
   });
   state.clockBarLayout = next;
@@ -265,63 +258,28 @@ function normalizeClockBarLayout() {
 }
 
 function moveClockBarItem(item, section) {
-  if (isConfigLocked() || clockBarItems(true).indexOf(item) === -1 || CLOCK_BAR_SECTIONS.indexOf(section) === -1) return;
-  var layout = normalizeClockBarLayout();
-  CLOCK_BAR_SECTIONS.forEach(function (name) {
-    layout[name] = layout[name].filter(function (entry) { return entry !== item; });
-  });
-  layout[section].push(item);
-  state.clockBarLayout = layout;
-  saveClockBarLayout(true);
+  normalizeClockBarLayout();
   updateClockBarItemUi();
 }
 
 function removeClockBarItemFromLayout(item) {
-  var layout = normalizeClockBarLayout();
-  CLOCK_BAR_SECTIONS.forEach(function (section) {
-    layout[section] = layout[section].filter(function (entry) { return entry !== item; });
-  });
-  state.clockBarLayout = layout;
-  saveClockBarLayout(true);
+  normalizeClockBarLayout();
 }
 
 function removeClockBarTemperatureItemFromLayout(index) {
-  var layout = normalizeClockBarLayout();
-  CLOCK_BAR_SECTIONS.forEach(function (section) {
-    var next = [];
-    (layout[section] || []).forEach(function (entry) {
-      var tempIndex = clockBarTemperatureItemIndex(entry);
-      if (tempIndex < 0) {
-        next.push(entry);
-      } else if (tempIndex < index) {
-        next.push(entry);
-      } else if (tempIndex > index) {
-        next.push(clockBarTemperatureItemId(tempIndex - 1));
-      }
-    });
-    layout[section] = next;
-  });
-  state.clockBarLayout = layout;
-  saveClockBarLayout(true);
+  normalizeClockBarLayout();
 }
 
 function clockBarItemsAvailableToAdd(section) {
-  normalizeClockBarLayout();
-  var out = [];
-  clockBarItems(true).forEach(function (item) {
-    if (!clockBarItemActive(item) || !clockBarItemElement(item)) out.push(item);
-  });
-  return out;
+  return [];
 }
 
 function createClockBarItemElement(item, section) {
-  var button = document.createElement("button");
-  button.type = "button";
+  var button = document.createElement("div");
   button.className = "sp-clockbar-item sp-clockbar-" + (isClockBarTemperatureItem(item) ? "temperature" : item);
   button.setAttribute("data-clockbar-item", item);
   button.setAttribute("data-clockbar-section", section);
-  button.setAttribute("aria-label", "Edit " + clockBarItemLabel(item).toLowerCase());
-  button.draggable = true;
+  button.setAttribute("aria-label", clockBarItemLabel(item));
 
   if (isClockBarTemperatureItem(item)) {
     var temp = document.createElement("span");
@@ -350,16 +308,6 @@ function createClockBarItemElement(item, section) {
   return button;
 }
 
-function createClockBarAddElement(section) {
-  var button = document.createElement("button");
-  button.type = "button";
-  button.className = "sp-clockbar-section-add";
-  button.setAttribute("data-clockbar-add", section);
-  button.setAttribute("aria-label", "Add Clock Bar item to " + section);
-  button.innerHTML = '<span class="mdi mdi-plus"></span>';
-  return button;
-}
-
 function renderClockBarLayout() {
   if (!els.clockBarSections) return;
   var layout = normalizeClockBarLayout();
@@ -373,7 +321,6 @@ function renderClockBarLayout() {
     if (!container) return;
     container.innerHTML = "";
     var rendered = 0;
-    if (section === "right") container.appendChild(createClockBarAddElement(section));
     layout[section].forEach(function (item) {
       if (!clockBarItemActive(item)) return;
       var itemEl = createClockBarItemElement(item, section);
@@ -382,7 +329,6 @@ function renderClockBarLayout() {
       rendered++;
     });
     container.className = "sp-clockbar-section sp-clockbar-" + section + (rendered ? "" : " sp-clockbar-section-empty");
-    if (section !== "right") container.appendChild(createClockBarAddElement(section));
   });
   updateTempPreview();
   updateClockText();
@@ -398,9 +344,7 @@ function syncClockBarItemElement(item) {
     .replace(/\s?sp-clockbar-inactive/g, "")
     .replace(/\s?sp-selected/g, "");
   if (!active) el.className += " sp-clockbar-inactive";
-  if (state.clockBarSelectedItem === item) el.className += " sp-selected";
-  el.setAttribute("aria-pressed", state.clockBarSelectedItem === item ? "true" : "false");
-  el.setAttribute("title", active ? "Edit " + clockBarItemLabel(item) : "Add " + clockBarItemLabel(item));
+  el.setAttribute("title", clockBarItemLabel(item));
 }
 
 function updateClockBarItemUi() {
@@ -412,74 +356,19 @@ function updateClockBarItemUi() {
 }
 
 function setClockBarItemSelected(item, open) {
-  state.clockBarSelectedItem = item || "";
-  if (item) {
-    ctx().setSelected([]);
-    ctx().setLastClicked(-1);
-  }
+  state.clockBarSelectedItem = "";
+  state.clockBarAddDraft = null;
   updateClockBarItemUi();
   renderPreview();
   renderButtonSettings(!!open);
 }
 
 function addClockBarItem(item) {
-  if (isConfigLocked()) return;
-  if (isClockBarTemperatureItem(item)) {
-    var tempIndex = clockBarTemperatureItemIndex(item);
-    var restore = normalizeClockBarTemperatureEntities(state.clockBarTempRestoreEntities);
-    var next = clockBarTemperatureEntries();
-    if (tempIndex >= next.length) {
-      while (next.length < tempIndex) next.push("");
-      next[tempIndex] = restore[tempIndex] || "";
-      if (!next[tempIndex]) next[tempIndex] = defaultClockBarTemperatureEntity(tempIndex);
-    }
-    applyClockBarTemperatureEntities(next, false);
-    updateTempPreview();
-  } else if (item === "time") {
-    state.clockBarTimeOn = true;
-    postClockBarTime(true);
-    syncClockBarUi();
-  } else if (item === "weather") {
-    state.clockBarWeatherOn = true;
-    postClockBarWeatherIcon(true);
-    syncClockBarUi();
-  } else if (item === "network") {
-    state.networkStatusOn = true;
-    postNetworkStatusIcon(true);
-    syncClockBarUi();
-  }
   normalizeClockBarLayout();
-  saveClockBarLayout(true);
+  updateClockBarItemUi();
 }
 
 function deleteClockBarItem(item) {
-  if (isConfigLocked()) return;
-  if (isClockBarTemperatureItem(item)) {
-    var tempIndex = clockBarTemperatureItemIndex(item);
-    removeClockBarTemperatureItemFromLayout(tempIndex);
-    state.clockBarTempRestoreIndoor = !!state._indoorOn;
-    state.clockBarTempRestoreOutdoor = !!state._outdoorOn;
-    state.clockBarTempRestoreEntities = clockBarTemperatureEntities();
-    var next = clockBarTemperatureEntries();
-    if (tempIndex >= 0) next.splice(tempIndex, 1);
-    applyClockBarTemperatureEntities(next, true);
-    updateTempPreview();
-  } else if (item === "time") {
-    removeClockBarItemFromLayout(item);
-    state.clockBarTimeOn = false;
-    postClockBarTime(false);
-    syncClockBarUi();
-  } else if (item === "weather") {
-    removeClockBarItemFromLayout(item);
-    state.clockBarWeatherOn = false;
-    postClockBarWeatherIcon(false);
-    syncClockBarUi();
-  } else if (item === "network") {
-    removeClockBarItemFromLayout(item);
-    state.networkStatusOn = false;
-    postNetworkStatusIcon(false);
-    syncClockBarUi();
-  }
   state.clockBarSelectedItem = "";
   hideSettingsOverlay();
   updateClockBarItemUi();

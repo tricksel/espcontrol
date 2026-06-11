@@ -15,6 +15,7 @@
 #include "temperature_unit.h"
 
 static const size_t CLOCK_BAR_TEMPERATURE_SLOT_COUNT = 6;
+static const size_t CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT = 1;
 
 inline void format_clock_time_without_suffix(char *buf, size_t size,
                                              int hour, int minute,
@@ -403,7 +404,7 @@ inline std::vector<std::string> parse_clock_bar_temperature_entities(const std::
         entities.push_back(entity);
       }
       current.clear();
-      if (entities.size() >= CLOCK_BAR_TEMPERATURE_SLOT_COUNT) return entities;
+      if (entities.size() >= CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT) return entities;
     } else {
       current.push_back(ch);
     }
@@ -412,8 +413,8 @@ inline std::vector<std::string> parse_clock_bar_temperature_entities(const std::
   if (!entity.empty() && std::find(entities.begin(), entities.end(), entity) == entities.end()) {
     entities.push_back(entity);
   }
-  if (entities.size() > CLOCK_BAR_TEMPERATURE_SLOT_COUNT) {
-    entities.resize(CLOCK_BAR_TEMPERATURE_SLOT_COUNT);
+  if (entities.size() > CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT) {
+    entities.resize(CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT);
   }
   return entities;
 }
@@ -456,6 +457,7 @@ inline void refresh_clock_bar_temperature_label_values(
     size_t label_index = 0;
     auto set_legacy_temperature = [&](float value) {
       if (label_index >= labels.size()) return;
+      if (label_index >= CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT) return;
       lv_obj_t *label = labels[label_index++];
       if (!label) return;
       char value_buf[16];
@@ -568,10 +570,8 @@ inline void clock_bar_add_item(ClockBarParsedLayout &layout, int section, int it
 
 inline void clock_bar_add_missing_default_items(ClockBarParsedLayout &layout) {
   clock_bar_add_item(layout, CLOCK_BAR_SECTION_LEFT, CLOCK_BAR_ITEM_TEMPERATURE);
-  for (int i = 1; i < (int) CLOCK_BAR_TEMPERATURE_SLOT_COUNT; i++) {
-    clock_bar_add_item(layout, CLOCK_BAR_SECTION_LEFT, CLOCK_BAR_ITEM_TEMPERATURE + i);
-  }
   clock_bar_add_item(layout, CLOCK_BAR_SECTION_MIDDLE, CLOCK_BAR_ITEM_TIME);
+  clock_bar_add_item(layout, CLOCK_BAR_SECTION_RIGHT, CLOCK_BAR_ITEM_WEATHER);
   clock_bar_add_item(layout, CLOCK_BAR_SECTION_RIGHT, CLOCK_BAR_ITEM_NETWORK);
 }
 
@@ -789,13 +789,24 @@ inline size_t clock_bar_visible_temperature_count(bool indoor_enabled,
                                                   bool outdoor_enabled) {
   if (clock_bar_temperature_has_items()) {
     size_t count = clock_bar_temperature_values().size();
-    return count > CLOCK_BAR_TEMPERATURE_SLOT_COUNT ? CLOCK_BAR_TEMPERATURE_SLOT_COUNT : count;
+    return count > CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
+               ? CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
+               : count;
   }
 
   size_t count = 0;
   if (outdoor_enabled) count++;
   if (indoor_enabled) count++;
-  return count;
+  return count > CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
+             ? CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT
+             : count;
+}
+
+inline ClockBarParsedLayout clock_bar_fixed_layout() {
+  ClockBarParsedLayout layout;
+  clock_bar_clear_layout(layout);
+  clock_bar_add_missing_default_items(layout);
+  return layout;
 }
 
 inline ClockBarParsedLayout compact_clock_bar_layout(
@@ -838,7 +849,12 @@ inline void apply_clock_bar_layout(const std::string &layout_text,
                                    int right_x, int network_y,
                                    int item_gap,
                                    int visual_gap) {
-  ClockBarParsedLayout parsed_layout = parse_clock_bar_layout(layout_text);
+  (void) layout_text;
+  for (size_t i = CLOCK_BAR_VISIBLE_TEMPERATURE_SLOT_COUNT;
+       temperature_labels && i < temperature_label_count; i++) {
+    clock_bar_set_widget_hidden(temperature_labels[i], true);
+  }
+  ClockBarParsedLayout parsed_layout = clock_bar_fixed_layout();
   ClockBarParsedLayout layout = compact_clock_bar_layout(
       parsed_layout,
       clock_bar_visible_temperature_count(indoor_temperature_visible,
