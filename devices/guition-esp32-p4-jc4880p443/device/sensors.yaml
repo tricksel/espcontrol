@@ -55,6 +55,9 @@ script:
             id(home_screen_idle_suspended) = true;
             id(home_screen_idle_check).stop();
             id(screensaver_idle_check).stop();
+            id(screensaver_sleep_timer).stop();
+            id(screensaver_sleep_sensor).stop();
+            id(screensaver_sleep_display_off).stop();
           };
           cfg.resume_home_idle = []() {
             id(home_screen_idle_suspended) = false;
@@ -166,6 +169,9 @@ esphome:
               id(home_screen_idle_suspended) = true;
               id(home_screen_idle_check).stop();
               id(screensaver_idle_check).stop();
+              id(screensaver_sleep_timer).stop();
+              id(screensaver_sleep_sensor).stop();
+              id(screensaver_sleep_display_off).stop();
             };
             cfg.resume_home_idle = []() {
               id(home_screen_idle_suspended) = false;
@@ -316,6 +322,9 @@ esphome:
               id(home_screen_idle_suspended) = true;
               id(home_screen_idle_check).stop();
               id(screensaver_idle_check).stop();
+              id(screensaver_sleep_timer).stop();
+              id(screensaver_sleep_sensor).stop();
+              id(screensaver_sleep_display_off).stop();
             };
             cfg.resume_home_idle = []() {
               id(home_screen_idle_suspended) = false;
