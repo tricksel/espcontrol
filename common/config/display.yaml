@@ -89,7 +89,7 @@ script:
           int clock_bar_item_width = ${clock_bar_item_gap};
           int clock_bar_visual_gap = ${clock_bar_visual_gap};
           int clock_bar_right_x =
-              clock_bar_480_square ? 8 : (clock_bar_screen_width >= 700 ? 20 : 16);
+              clock_bar_480_square ? 4 : (clock_bar_screen_width >= 700 ? 8 : 6);
           lv_obj_t *temperature_labels[] = {
             id(temperatures),
             id(temperature_2),
@@ -121,7 +121,7 @@ script:
                                  visible && id(indoor_temp_enable).state,
                                  visible && id(outdoor_temp_enable).state,
                                  clock_bar_screen_width,
-                                 clock_bar_screen_width >= 700 ? 12 : 8,
+                                 clock_bar_screen_width >= 700 ? 4 : 3,
                                  clock_bar_label_y,
                                  clock_bar_right_x,
                                  clock_bar_icon_y,

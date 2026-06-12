@@ -710,6 +710,14 @@ inline void clock_bar_add_layout_box(ClockBarLayoutBox *boxes,
   box.y = y;
 }
 
+inline void clock_bar_align_box_text(const ClockBarLayoutBox &box) {
+  if (!box.obj || box.item == CLOCK_BAR_ITEM_NETWORK) return;
+  int align = LV_TEXT_ALIGN_CENTER;
+  if (box.section == CLOCK_BAR_SECTION_LEFT) align = LV_TEXT_ALIGN_LEFT;
+  else if (box.section == CLOCK_BAR_SECTION_RIGHT) align = LV_TEXT_ALIGN_RIGHT;
+  lv_obj_set_style_text_align(box.obj, align, LV_PART_MAIN);
+}
+
 inline ClockBarLayoutBox *clock_bar_box_at_order(ClockBarLayoutBox *boxes,
                                                  int box_count,
                                                  int section,
@@ -774,6 +782,7 @@ inline void align_clock_bar_layout_section(ClockBarLayoutBox *boxes,
   for (int order = 0; placed < expected && order < CLOCK_BAR_ITEM_COUNT; order++) {
     ClockBarLayoutBox *box = clock_bar_box_at_order(boxes, box_count, section, order);
     if (!box || !box->obj) continue;
+    clock_bar_align_box_text(*box);
     lv_obj_align(box->obj, LV_ALIGN_TOP_LEFT, x, box->y);
     lv_obj_move_background(box->obj);
     x += box->width + visual_gap;
