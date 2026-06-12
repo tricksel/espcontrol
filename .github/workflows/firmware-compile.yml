@@ -73,9 +73,12 @@ jobs:
     needs: [detect-changes, device-matrix]
     if: needs.detect-changes.outputs.compile_required == 'true'
     runs-on: self-hosted
+    concurrency:
+      group: firmware-compile-self-hosted
+      cancel-in-progress: false
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 1
       matrix: ${{ fromJSON(needs.device-matrix.outputs.matrix) }}
     steps:
       - name: Prepare self-hosted workspace
@@ -108,7 +111,7 @@ jobs:
       - name: Prepare isolated ESPHome cache
         working-directory: espcontrol-${{ matrix.slug }}
         run: |
-          RUN_CACHE_ROOT="${RUNNER_TEMP}/espcontrol-esphome/${{ matrix.slug }}"
+          RUN_CACHE_ROOT="${RUNNER_TEMP}/espcontrol-esphome/${{ github.run_id }}-${{ github.run_attempt }}/${{ matrix.slug }}"
           PLATFORMIO_CACHE="${RUN_CACHE_ROOT}/platformio-${ESPHOME_VERSION}"
           BUILD_CACHE="${RUN_CACHE_ROOT}/build"
           rm -rf "${RUN_CACHE_ROOT}"
