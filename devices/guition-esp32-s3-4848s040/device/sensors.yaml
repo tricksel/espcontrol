@@ -74,6 +74,12 @@ script:
           };
           cfg.resume_display_takeover = []() {
             id(display_takeover_suspended) = false;
+            if (id(screensaver_sensor_sleep_pending) &&
+                id(screensaver_mode).state == "sensor" &&
+                !id(presence_detected)) {
+              id(screensaver_sleep_sensor).execute();
+              return;
+            }
             id(home_screen_idle_check).execute();
             id(screensaver_idle_check).execute();
           };
@@ -183,6 +189,12 @@ esphome:
             };
             cfg.resume_display_takeover = []() {
               id(display_takeover_suspended) = false;
+              if (id(screensaver_sensor_sleep_pending) &&
+                  id(screensaver_mode).state == "sensor" &&
+                  !id(presence_detected)) {
+                id(screensaver_sleep_sensor).execute();
+                return;
+              }
               id(home_screen_idle_check).execute();
               id(screensaver_idle_check).execute();
             };
@@ -310,6 +322,12 @@ esphome:
             };
             cfg.resume_display_takeover = []() {
               id(display_takeover_suspended) = false;
+              if (id(screensaver_sensor_sleep_pending) &&
+                  id(screensaver_mode).state == "sensor" &&
+                  !id(presence_detected)) {
+                id(screensaver_sleep_sensor).execute();
+                return;
+              }
               id(home_screen_idle_check).execute();
               id(screensaver_idle_check).execute();
             };

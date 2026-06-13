@@ -88,6 +88,12 @@ script:
           };
           cfg.resume_display_takeover = []() {
             id(display_takeover_suspended) = false;
+            if (id(screensaver_sensor_sleep_pending) &&
+                id(screensaver_mode).state == "sensor" &&
+                !id(presence_detected)) {
+              id(screensaver_sleep_sensor).execute();
+              return;
+            }
             id(home_screen_idle_check).execute();
             id(screensaver_idle_check).execute();
           };
@@ -110,6 +116,7 @@ script:
           cfg.image_card_images = image_card_downloaders;
           cfg.image_card_modal_images = image_card_modal_downloaders;
           cfg.image_card_image_count = 6;
+          cfg.image_card_diagnostics = true;
           cfg.home_assistant_base_url = []() {
             std::string base = id(cover_art_home_assistant_base_url);
             while (!base.empty() && base.back() == '/') base.pop_back();
@@ -228,6 +235,12 @@ esphome:
             };
             cfg.resume_display_takeover = []() {
               id(display_takeover_suspended) = false;
+              if (id(screensaver_sensor_sleep_pending) &&
+                  id(screensaver_mode).state == "sensor" &&
+                  !id(presence_detected)) {
+                id(screensaver_sleep_sensor).execute();
+                return;
+              }
               id(home_screen_idle_check).execute();
               id(screensaver_idle_check).execute();
             };
@@ -250,6 +263,7 @@ esphome:
             cfg.image_card_images = image_card_downloaders;
             cfg.image_card_modal_images = image_card_modal_downloaders;
             cfg.image_card_image_count = 6;
+            cfg.image_card_diagnostics = true;
             cfg.home_assistant_base_url = []() {
               std::string base = id(cover_art_home_assistant_base_url);
               while (!base.empty() && base.back() == '/') base.pop_back();
@@ -430,6 +444,12 @@ esphome:
             };
             cfg.resume_display_takeover = []() {
               id(display_takeover_suspended) = false;
+              if (id(screensaver_sensor_sleep_pending) &&
+                  id(screensaver_mode).state == "sensor" &&
+                  !id(presence_detected)) {
+                id(screensaver_sleep_sensor).execute();
+                return;
+              }
               id(home_screen_idle_check).execute();
               id(screensaver_idle_check).execute();
             };
@@ -452,6 +472,7 @@ esphome:
             cfg.image_card_images = image_card_downloaders;
             cfg.image_card_modal_images = image_card_modal_downloaders;
             cfg.image_card_image_count = 6;
+            cfg.image_card_diagnostics = true;
             cfg.home_assistant_base_url = []() {
               std::string base = id(cover_art_home_assistant_base_url);
               while (!base.empty() && base.back() == '/') base.pop_back();
