@@ -494,7 +494,7 @@ inline bool bind_passive_card_sources(BtnSlot &s, const ParsedCfg &p) {
 }
 
 inline bool bind_garage_status_card(BtnSlot &s, const ParsedCfg &p) {
-  if (p.type != "garage" || p.entity.empty() || garage_command_mode(p.sensor)) {
+  if (p.type != "garage" || p.entity.empty()) {
     return false;
   }
   bool show_status = garage_card_show_status(p);
@@ -886,7 +886,7 @@ inline void grid_phase2(
           subscribe_control_availability(s.btn, s.btn, p.entity);
         }
       }
-      if (!garage_command_mode(p.sensor))
+      if (!garage_command_mode(p.sensor) || garage_card_show_status(p))
         bind_garage_status_card(s, p);
       continue;
     }
@@ -1449,6 +1449,10 @@ inline void grid_phase2(
         if (!sb_cfg.entity.empty()) {
           if (garage_command_mode(sb_cfg.sensor)) {
             subscribe_control_availability(sub_slot.btn, sub_slot.btn, sb_cfg.entity);
+            if (garage_card_show_status(sb_cfg)) {
+              bind_garage_status_card(sub_slot, sb_cfg);
+              add_parent_indicator(sb_cfg.entity);
+            }
             ParsedCfg *ctx = new ParsedCfg(sb_cfg);
             lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
               ParsedCfg *c = (ParsedCfg *)lv_event_get_user_data(e);
