@@ -618,7 +618,7 @@ inline void cover_control_update_position_fill(int position_pct) {
   lv_coord_t height = lv_obj_get_height(ui.position_slider);
   if (width <= 0 || height <= 0) return;
   lv_obj_set_style_bg_color(
-    ui.position_fill, lv_color_hex(cover_control_slider_fill_color(ui.active, position_pct)),
+    ui.position_fill, lv_color_hex(cover_control_slider_fill_color(ui.active, fill_pct)),
     LV_PART_MAIN);
   lv_coord_t fill_h = (lv_coord_t)((int32_t) height * fill_pct / 100);
   lv_coord_t min_handle_cap = cover_control_slider_handle_inset(ui.position_slider) * 2 + 8;
