@@ -557,6 +557,7 @@ inline void cover_control_layout_slider(lv_obj_t *slider, lv_coord_t width,
   if (slider_radius < 18) slider_radius = 18;
   if (slider_radius > 34) slider_radius = 34;
   lv_obj_set_style_radius(slider, slider_radius, LV_PART_MAIN);
+  lv_obj_set_style_clip_corner(slider, true, LV_PART_MAIN);
   lv_obj_set_style_radius(slider, 0, LV_PART_INDICATOR);
   lv_obj_set_style_width(slider, 0, LV_PART_KNOB);
   lv_obj_set_style_height(slider, 0, LV_PART_KNOB);
