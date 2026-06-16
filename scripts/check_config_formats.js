@@ -266,6 +266,7 @@ assertButtonTypeSpecBacked("cover", "cover card");
 assertButtonTypeSpecBacked("light_brightness", "light brightness card");
 assertButtonTypeSpecBacked("light_switch", "light switch card");
 assertButtonTypeSpecBacked("light_temperature", "light temperature card");
+assertButtonTypeSpecBacked("light_control", "full light control card");
 assertButtonTypeSpecBacked("calendar", "calendar card");
 assertButtonTypeSpecBacked("clock", "clock card");
 assertButtonTypeSpecBacked("timezone", "timezone card");
@@ -393,20 +394,36 @@ const coverOptionSpecs = hooks.cardContractOptions("cover");
 const coverOptionByName = Object.fromEntries(coverOptionSpecs.map((option) => [option.name, option]));
 assert.deepStrictEqual(
   Array.from(coverOptionByName.cover_mode.values),
-  ["", "tilt", "toggle", "open", "close", "stop", "set_position"],
-  "cover mode spec exposes slider, tilt, toggle, and command modes"
+  ["modal", "", "tilt", "toggle", "open", "close", "stop", "set_position"],
+  "cover mode spec exposes modal, slider, tilt, toggle, and command modes"
 );
 assert.deepStrictEqual(
   Array.from(hooks.coverModeOptionValues(false)),
-  ["", "tilt", "toggle"],
+  ["modal", "", "tilt", "toggle"],
   "cover mode helper hides command modes when commands are not allowed"
 );
 assert.deepStrictEqual(
   Array.from(hooks.coverModeOptionValues(true)),
-  ["", "tilt", "toggle", "open", "close", "stop", "set_position"],
+  ["modal", "", "tilt", "toggle", "open", "close", "stop", "set_position"],
   "cover mode helper exposes command modes when commands are allowed"
 );
+assert.strictEqual(hooks.normalizeCoverMode("modal", true), "modal", "cover modal mode normalizes from spec");
 assert.strictEqual(hooks.normalizeCoverMode("set_position", true), "set_position", "cover command mode normalizes from spec");
+assert.deepStrictEqual(
+  Array.from(hooks.coverModeOptionLabelsForExperimental(false, "")),
+  [":Slider: Position", "tilt:Slider: Tilt", "toggle:Toggle", "open:Open", "close:Close", "stop:Stop", "set_position:Set Position"],
+  "cover modal option is hidden when developer features are off"
+);
+assert.deepStrictEqual(
+  Array.from(hooks.coverModeOptionLabelsForExperimental(true, "")),
+  ["modal:Modal", ":Slider: Position", "tilt:Slider: Tilt", "toggle:Toggle", "open:Open", "close:Close", "stop:Stop", "set_position:Set Position"],
+  "cover modal option is visible when developer features are on"
+);
+assert.deepStrictEqual(
+  Array.from(hooks.coverModeOptionLabelsForExperimental(false, "modal")),
+  ["modal:Modal (experimental)", ":Slider: Position", "tilt:Slider: Tilt", "toggle:Toggle", "open:Open", "close:Close", "stop:Stop", "set_position:Set Position"],
+  "saved cover modal cards remain represented when developer features are off"
+);
 assert.strictEqual(hooks.normalizeCoverMode("set_position", false), "", "cover command mode is rejected when commands are disabled");
 assert.strictEqual(hooks.normalizeCoverPosition("-1"), "0", "cover position spec clamps minimum");
 assert.strictEqual(hooks.normalizeCoverPosition("101"), "100", "cover position spec clamps maximum");
@@ -1528,12 +1545,26 @@ assertButtonRoundTrip(hooks, "light switch card", {
   precision: "",
   options: "",
 }, false);
+assertButtonRoundTrip(hooks, "full light control card", {
+  entity: "light.living_room",
+  label: "Living Room",
+  icon: "Auto",
+  icon_on: "Auto",
+  sensor: "",
+  unit: "",
+  type: "light_control",
+  precision: "",
+  options: "",
+}, false);
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_brightness", false, false), true, "lights picker visible on parent page");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_brightness", false, true), true, "lights picker visible in subpages");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_switch", false, false), false, "light switch subtype hidden from top-level picker");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_switch", false, true), false, "light switch subtype hidden from subpage picker");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_temperature", false, false), false, "light temperature subtype hidden from top-level picker");
 assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_temperature", false, true), false, "light temperature subtype hidden from subpage picker");
+assert.strictEqual(hooks.buttonTypeVisibleInPickerForExperimental("light_control", false, false), false, "full light control subtype hidden from top-level picker");
+assert.strictEqual(hooks.buttonTypeRuntimeSpec("light_control").experimental, "", "full light control is available without developer features");
+assert.strictEqual(hooks.buttonTypeRuntimeSpec("light_control").hidden, true, "full light control is grouped under Lights");
 assert.strictEqual(
   hooks.buttonTypePickerKeysForExperimental(false, false, "light_brightness").indexOf("light_brightness") >= 0,
   true,

@@ -364,6 +364,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_fan_card(s, p);
     return;
   }
+  if (p.type == "cover" && cover_modal_mode(p.sensor)) {
+    setup_cover_modal_card(s, p);
+    return;
+  }
   if (p.type == "cover" && cover_command_mode(p.sensor)) {
     setup_cover_command_card(s, p);
     return;
@@ -423,6 +427,10 @@ inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
     setup_climate_control_button(
       s.btn, s.icon_lbl, s.sensor_container, s.sensor_lbl, s.unit_lbl,
       s.text_lbl, p, display_icon_font(display));
+    return;
+  }
+  if (p.type == "light_control") {
+    setup_light_control_card(s, p);
     return;
   }
   if (brightness_slider_type(p.type) || p.type == "cover") {
@@ -634,7 +642,8 @@ inline void refresh_card_layout(BtnSlot &s, const ParsedCfg &p,
   } else if (p.type == "media") {
     refresh_media_card_layout(s, p, cfg, row_span);
   } else if (brightness_slider_type(p.type) || p.type == "light_temperature" ||
-             (p.type == "cover" && !cover_command_mode(p.sensor) && !cover_toggle_mode(p.sensor))) {
+             (p.type == "cover" && !cover_modal_mode(p.sensor) &&
+              !cover_command_mode(p.sensor) && !cover_toggle_mode(p.sensor))) {
     refresh_slider_card_layout(s);
   }
 }
@@ -1175,8 +1184,34 @@ inline void grid_phase2(
       }
       continue;
     }
+    if (p.type == "light_control") {
+      if (!p.entity.empty()) {
+        LightControlCtx *ctx = create_light_control_context(
+          s, p,
+          has_on ? on_val : DEFAULT_SLIDER_COLOR,
+          display_volume_number_font(display),
+          display_volume_label_font(display)
+            ? display_volume_label_font(display)
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          display_icon_font(display),
+          display_main_width_percent(display));
+        subscribe_light_control_state(ctx);
+      }
+      continue;
+    }
 
     if (p.entity.empty()) continue;
+
+    if (p.type == "cover" && cover_modal_mode(p.sensor)) {
+      CoverControlCtx *ctx = create_cover_control_context(
+        s, p,
+        has_on ? on_val : DEFAULT_SLIDER_COLOR,
+        has_off ? off_val : DEFAULT_OFF_COLOR,
+        display_icon_font(display),
+        display_main_width_percent(display));
+      subscribe_cover_control_state(ctx);
+      continue;
+    }
 
     if (brightness_slider_type(p.type) || p.type == "cover") {
       lv_obj_t *slider = (lv_obj_t *)lv_obj_get_user_data(s.sensor_container);
@@ -1431,6 +1466,25 @@ inline void grid_phase2(
       if (bind_image_card(sub_slot, sb_cfg, cfg, true)) continue;
       if (bind_basic_sensor_card(sub_slot, sb_cfg, palette)) continue;
       if (bind_passive_card_sources(sub_slot, sb_cfg)) continue;
+      if (sb_cfg.type == "cover" && cover_modal_mode(sb_cfg.sensor)) {
+        if (!sb_cfg.entity.empty()) {
+          CoverControlCtx *ctx = create_cover_control_context(
+            sub_slot, sb_cfg,
+            has_on ? on_val : DEFAULT_SLIDER_COLOR,
+            has_off ? off_val : DEFAULT_OFF_COLOR,
+            display_icon_font(display),
+            display_main_width_percent(display));
+          subscribe_cover_control_state(ctx);
+          add_parent_indicator(sb_cfg.entity);
+          lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
+            lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
+            if (target && lv_obj_has_state(target, LV_STATE_DISABLED)) return;
+            CoverControlCtx *ctx = (CoverControlCtx *)lv_obj_get_user_data(target);
+            if (ctx) cover_control_open_modal(ctx);
+          }, LV_EVENT_CLICKED, nullptr);
+        }
+        continue;
+      }
       if (sb_cfg.type == "cover" && cover_command_mode(sb_cfg.sensor)) {
         if (!sb_cfg.entity.empty()) {
           if (sb_cfg.label.empty())
@@ -1793,6 +1847,21 @@ inline void grid_phase2(
             ClimateControlCtx *ctx = (ClimateControlCtx *)lv_event_get_user_data(e);
             if (ctx) climate_control_open_modal(ctx);
           }, LV_EVENT_CLICKED, ctx);
+        }
+        continue;
+      }
+      if (sb_cfg.type == "light_control") {
+        if (!sb_cfg.entity.empty()) {
+          LightControlCtx *ctx = create_light_control_context(
+            sub_slot, sb_cfg,
+            has_on ? on_val : DEFAULT_SLIDER_COLOR,
+            display_volume_number_font(display),
+            display_volume_label_font(display)
+              ? display_volume_label_font(display)
+              : lv_obj_get_style_text_font(sub_slot.text_lbl, LV_PART_MAIN),
+            display_icon_font(display),
+            display_main_width_percent(display));
+          subscribe_light_control_state(ctx);
         }
         continue;
       }

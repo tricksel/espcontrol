@@ -24,6 +24,12 @@
       "comment": "Modal close button"
     },
     {
+      "name": "Folder",
+      "codepoint": "F024B",
+      "mdi": "folder",
+      "comment": "Default subpage indicator"
+    },
+    {
       "name": "Download",
       "codepoint": "F01DA",
       "mdi": "download",
@@ -935,6 +941,11 @@
       "mdi": "stove"
     },
     {
+      "name": "Palette",
+      "codepoint": "F03D8",
+      "mdi": "palette"
+    },
+    {
       "name": "Package",
       "codepoint": "F03D6",
       "mdi": "package-variant"
@@ -1245,6 +1256,11 @@
       "mdi": "swap-horizontal"
     },
     {
+      "name": "Swap Vertical",
+      "codepoint": "F04E2",
+      "mdi": "swap-vertical"
+    },
+    {
       "name": "Power Socket UK",
       "codepoint": "F07E8",
       "mdi": "power-socket-uk"
@@ -1368,6 +1384,11 @@
       "name": "Vacuum Outline",
       "codepoint": "F19A2",
       "mdi": "vacuum-outline"
+    },
+    {
+      "name": "View Headline",
+      "codepoint": "F0571",
+      "mdi": "view-headline"
     },
     {
       "name": "Volume High",
