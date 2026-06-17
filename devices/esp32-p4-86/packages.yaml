@@ -87,6 +87,7 @@ packages:
   device:          !include device/device.yaml
   touchscreen:     !include device/touchscreen${network_package_suffix}.yaml
   network_coprocessor: !include device/network_coprocessor${network_package_suffix}.yaml
+  esp32_c6_firmware_update: !include ../../common/device/esp32_c6_firmware_update.yaml
   icons:           !include ../../common/assets/icons.yaml
   fonts_device:    !include device/fonts.yaml
   button_theme:    !include ../../common/theme/button.yaml
