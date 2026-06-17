@@ -232,6 +232,7 @@ var ALARM_LABEL_DISPLAY_OPTION = "label_display";
 var GARAGE_LABEL_DISPLAY_OPTION = "label_display";
 var CLIMATE_LABEL_DISPLAY_OPTION = "label_display";
 var CLIMATE_NUMBER_DISPLAY_OPTION = "number_display";
+var CLIMATE_TEMPERATURE_STEP_OPTION = "temperature_step";
 var MEDIA_VOLUME_MAX_OPTION = "volume_max";
 var SUBPAGE_KIND_OPTION = "subpage_kind";
 var IMAGE_LABEL_OPTION = "image_label";
@@ -1110,17 +1111,29 @@ function normalizeClimateNumberDisplayMode(value) {
   return values.indexOf(value) >= 0 ? value : climateDefaultNumberDisplayMode();
 }
 
+function normalizeClimateTemperatureStep(value) {
+  value = String(value || "").trim();
+  var spec = cardContractOptionSpec("climate", CLIMATE_TEMPERATURE_STEP_OPTION);
+  var values = spec && spec.values ? spec.values : ["1", "0.5"];
+  return values.indexOf(value) >= 0 ? value : climateDefaultTemperatureStep();
+}
+
 function normalizeClimateOptions(options) {
   var labelMode = normalizeClimateLabelDisplayMode(
     configOptionValue(options, CLIMATE_LABEL_DISPLAY_OPTION));
   var numberMode = normalizeClimateNumberDisplayMode(
     configOptionValue(options, CLIMATE_NUMBER_DISPLAY_OPTION));
+  var temperatureStep = normalizeClimateTemperatureStep(
+    configOptionValue(options, CLIMATE_TEMPERATURE_STEP_OPTION));
   var out = "";
   if (labelMode !== climateDefaultLabelDisplayMode()) {
     out = setConfigOptionValue(out, CLIMATE_LABEL_DISPLAY_OPTION, labelMode);
   }
   if (numberMode !== climateDefaultNumberDisplayMode()) {
     out = setConfigOptionValue(out, CLIMATE_NUMBER_DISPLAY_OPTION, numberMode);
+  }
+  if (temperatureStep !== climateDefaultTemperatureStep()) {
+    out = setConfigOptionValue(out, CLIMATE_TEMPERATURE_STEP_OPTION, temperatureStep);
   }
   if (numberMode !== "icon") {
     out = copyLargeNumbersOption(out, options);
@@ -1157,6 +1170,23 @@ function setClimateNumberDisplayMode(b, mode) {
     b.options,
     CLIMATE_NUMBER_DISPLAY_OPTION,
     normalized === climateDefaultNumberDisplayMode() ? "" : normalized
+  );
+  b.options = normalizeClimateOptions(b.options);
+  return b.options;
+}
+
+function climateTemperatureStep(b) {
+  return normalizeClimateTemperatureStep(
+    configOptionValue(b && b.options, CLIMATE_TEMPERATURE_STEP_OPTION));
+}
+
+function setClimateTemperatureStep(b, step) {
+  if (!b) return "";
+  var normalized = normalizeClimateTemperatureStep(step);
+  b.options = setConfigOptionValue(
+    b.options,
+    CLIMATE_TEMPERATURE_STEP_OPTION,
+    normalized === climateDefaultTemperatureStep() ? "" : normalized
   );
   b.options = normalizeClimateOptions(b.options);
   return b.options;
@@ -1351,6 +1381,12 @@ function climateDefaultNumberDisplayMode() {
   var behavior = climateBehaviorSpec();
   var fallback = behavior && behavior.defaultNumberDisplay || "target";
   return cardContractOptionDefaultValue("climate", CLIMATE_NUMBER_DISPLAY_OPTION, fallback);
+}
+
+function climateDefaultTemperatureStep() {
+  var behavior = climateBehaviorSpec();
+  var fallback = behavior && behavior.defaultTemperatureStep || "1";
+  return cardContractOptionDefaultValue("climate", CLIMATE_TEMPERATURE_STEP_OPTION, fallback);
 }
 
 function normalizeClimatePrecisionConfig(value) {

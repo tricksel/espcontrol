@@ -1087,14 +1087,16 @@ def firmware_climate_step_errors(firmware_dir: Path, root: Path) -> list[str]:
         if (
             "CLIMATE_DEFAULT_STEP_TENTHS" not in body
             or "CLIMATE_WHOLE_NUMBER_STEP_TENTHS" not in body
-            or "ctx->precision <= 0" not in body
-            or "ctx->step_tenths >= minimum" not in body
+            or "ctx->configured_step_tenths" not in body
+            or "ctx->step_tenths > minimum" not in body
         ):
             errors.append(f"{rel}: keep climate temperature changes at a display-appropriate minimum")
     if "int step = climate_effective_step_tenths(ctx);" not in text:
         errors.append(f"{rel}: round climate targets using the display-appropriate minimum step")
     if "int base = ctx->precision <= 0 ? 0 : ctx->min_tenths;" not in text:
         errors.append(f"{rel}: round whole-number climate targets to whole-degree boundaries")
+    if 'cfg_option_value(p.options, "temperature_step")' not in text:
+        errors.append(f"{rel}: use the configured climate temperature step")
     if "climate_selected_target(ui.active) - ui.active->step_tenths" in text:
         errors.append(f"{rel}: use the display-appropriate minimum step for the climate minus button")
     if "climate_selected_target(ui.active) + ui.active->step_tenths" in text:
@@ -3184,10 +3186,11 @@ def run_self_test() -> int:
         "climate enforces display-appropriate minimum step",
         "constexpr int CLIMATE_DEFAULT_STEP_TENTHS = 5;\n"
         "constexpr int CLIMATE_WHOLE_NUMBER_STEP_TENTHS = 10;\n"
+        "int configured_step_tenths = CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
         "inline int climate_effective_step_tenths(ClimateControlCtx *ctx) {\n"
         "  if (!ctx) return CLIMATE_DEFAULT_STEP_TENTHS;\n"
-        "  int minimum = ctx->precision <= 0 ? CLIMATE_WHOLE_NUMBER_STEP_TENTHS : CLIMATE_DEFAULT_STEP_TENTHS;\n"
-        "  if (ctx->step_tenths >= minimum && ctx->step_tenths <= 100)\n"
+        "  int minimum = ctx->configured_step_tenths > 0 ? ctx->configured_step_tenths : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
+        "  if (ctx->step_tenths > minimum && ctx->step_tenths <= 100)\n"
         "    return ctx->step_tenths;\n"
         "  return minimum;\n"
         "}\n"
@@ -3195,6 +3198,12 @@ def run_self_test() -> int:
         "  int step = climate_effective_step_tenths(ctx);\n"
         "  int base = ctx->precision <= 0 ? 0 : ctx->min_tenths;\n"
         "  return value + step;\n"
+        "}\n"
+        "inline ClimateControlCtx *create_climate_control_context(const ParsedCfg &p) {\n"
+        "  ctx->configured_step_tenths = normalize_climate_temperature_step(\n"
+        "    cfg_option_value(p.options, \"temperature_step\")) == \"0.5\"\n"
+        "      ? CLIMATE_DEFAULT_STEP_TENTHS\n"
+        "      : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
         "}\n"
         "inline void climate_control_open_modal(ClimateControlCtx *ctx) {\n"
         "  climate_selected_target(ui.active) - climate_effective_step_tenths(ui.active);\n"

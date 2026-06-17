@@ -77,6 +77,7 @@ struct ClimateControlCtx {
   bool received_min = false;
   bool received_max = false;
   int step_tenths = CLIMATE_DEFAULT_STEP_TENTHS;
+  int configured_step_tenths = CLIMATE_WHOLE_NUMBER_STEP_TENTHS;
   int precision = 0;
   std::string label_display = "label";
   std::string number_display = "target";
@@ -252,8 +253,8 @@ inline int climate_clamp_tenths(ClimateControlCtx *ctx, int value) {
 
 inline int climate_effective_step_tenths(ClimateControlCtx *ctx) {
   if (!ctx) return CLIMATE_DEFAULT_STEP_TENTHS;
-  int minimum = ctx->precision <= 0 ? CLIMATE_WHOLE_NUMBER_STEP_TENTHS : CLIMATE_DEFAULT_STEP_TENTHS;
-  if (ctx->step_tenths >= minimum && ctx->step_tenths <= 100)
+  int minimum = ctx->configured_step_tenths > 0 ? ctx->configured_step_tenths : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;
+  if (ctx->step_tenths > minimum && ctx->step_tenths <= 100)
     return ctx->step_tenths;
   return minimum;
 }
@@ -302,8 +303,13 @@ inline int climate_constrain_selected_target(ClimateControlCtx *ctx, int value) 
 inline std::string climate_format_tenths(int value, int precision) {
   char buf[20];
   if (precision <= 0) {
-    int whole = value >= 0 ? (value + 5) / 10 : (value - 5) / 10;
-    snprintf(buf, sizeof(buf), "%d", whole);
+    if (value % 10 == 0) {
+      snprintf(buf, sizeof(buf), "%d", value / 10);
+    } else {
+      int sign = value < 0 ? -1 : 1;
+      int abs_v = value < 0 ? -value : value;
+      snprintf(buf, sizeof(buf), "%s%d.%d", sign < 0 ? "-" : "", abs_v / 10, abs_v % 10);
+    }
   } else {
     int sign = value < 0 ? -1 : 1;
     int abs_v = value < 0 ? -value : value;
@@ -1812,6 +1818,10 @@ inline ClimateControlCtx *create_climate_control_context(
   climate_apply_saved_range(ctx, p.precision);
   ctx->label_display = normalize_climate_label_display(cfg_option_value(p.options, "label_display"));
   ctx->number_display = normalize_climate_number_display(cfg_option_value(p.options, "number_display"));
+  ctx->configured_step_tenths = normalize_climate_temperature_step(
+    cfg_option_value(p.options, "temperature_step")) == "0.5"
+      ? CLIMATE_DEFAULT_STEP_TENTHS
+      : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;
   ctx->accent_color = accent_color;
   ctx->secondary_color = secondary_color;
   ctx->tertiary_color = tertiary_color;

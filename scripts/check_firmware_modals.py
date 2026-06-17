@@ -278,14 +278,16 @@ def firmware_climate_step_errors(root: Path) -> list[str]:
         if (
             "CLIMATE_DEFAULT_STEP_TENTHS" not in body
             or "CLIMATE_WHOLE_NUMBER_STEP_TENTHS" not in body
-            or "ctx->precision <= 0" not in body
-            or "ctx->step_tenths >= minimum" not in body
+            or "ctx->configured_step_tenths" not in body
+            or "ctx->step_tenths > minimum" not in body
         ):
             errors.append(f"{rel}: keep climate controls at a 0.5C minimum step")
 
     required = (
         "constexpr int CLIMATE_DEFAULT_STEP_TENTHS = 5;",
         "constexpr int CLIMATE_WHOLE_NUMBER_STEP_TENTHS = 10;",
+        "int configured_step_tenths = CLIMATE_WHOLE_NUMBER_STEP_TENTHS;",
+        'cfg_option_value(p.options, "temperature_step")',
         "int step = climate_effective_step_tenths(ctx);",
         "int base = ctx->precision <= 0 ? 0 : ctx->min_tenths;",
         "climate_round_to_step(ctx, climate_constrain_selected_target(ctx, value))",
@@ -568,10 +570,11 @@ def run_self_test() -> int:
         (
             "constexpr int CLIMATE_DEFAULT_STEP_TENTHS = 5;\n"
             "constexpr int CLIMATE_WHOLE_NUMBER_STEP_TENTHS = 10;\n"
+            "int configured_step_tenths = CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
             "inline int climate_effective_step_tenths(ClimateControlCtx *ctx) {\n"
             "  if (!ctx) return CLIMATE_DEFAULT_STEP_TENTHS;\n"
-            "  int minimum = ctx->precision <= 0 ? CLIMATE_WHOLE_NUMBER_STEP_TENTHS : CLIMATE_DEFAULT_STEP_TENTHS;\n"
-            "  if (ctx->step_tenths >= minimum && ctx->step_tenths <= 100)\n"
+            "  int minimum = ctx->configured_step_tenths > 0 ? ctx->configured_step_tenths : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
+            "  if (ctx->step_tenths > minimum && ctx->step_tenths <= 100)\n"
             "    return ctx->step_tenths;\n"
             "  return minimum;\n"
             "}\n"
@@ -582,6 +585,12 @@ def run_self_test() -> int:
             "}\n"
             "inline void climate_apply_selected_target(ClimateControlCtx *ctx, int value, bool send_now, bool debounce) {\n"
             "  value = climate_round_to_step(ctx, climate_constrain_selected_target(ctx, value));\n"
+            "}\n"
+            "inline ClimateControlCtx *create_climate_control_context(const ParsedCfg &p) {\n"
+            "  ctx->configured_step_tenths = normalize_climate_temperature_step(\n"
+            "    cfg_option_value(p.options, \"temperature_step\")) == \"0.5\"\n"
+            "      ? CLIMATE_DEFAULT_STEP_TENTHS\n"
+            "      : CLIMATE_WHOLE_NUMBER_STEP_TENTHS;\n"
             "}\n"
             "inline void climate_control_open_modal(ClimateControlCtx *ctx) {\n"
             "  climate_preview_selected_target(ui.active, lv_arc_get_value(arc));\n"
