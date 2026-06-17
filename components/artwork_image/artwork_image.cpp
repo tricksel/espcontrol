@@ -8,6 +8,10 @@
 #include "esphome/core/log.h"
 #include "esphome/core/version.h"
 
+#if defined(USE_LVGL) && ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 4, 0)
+#include "src/misc/cache/instance/lv_image_cache.h"
+#endif
+
 #ifdef USE_ESP32
 #include "esp_heap_caps.h"
 #endif
