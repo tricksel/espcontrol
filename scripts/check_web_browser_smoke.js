@@ -482,19 +482,21 @@ async function assertSettingsPage(page, label, options = {}) {
     0,
     `${label}: sensor cover art override should not render`
   );
-  const advancedCard = page.locator("#sp-settings .card").filter({
-    has: page.locator(".card-header h3", { hasText: /^Advanced$/ }),
+  const homeAssistantSettingsCard = page.locator("#sp-settings .card").filter({
+    has: page.locator(".card-header h3", { hasText: /^Home Assistant Settings$/ }),
   }).first();
-  assert(await advancedCard.isVisible(), `${label}: advanced settings card should render`);
-  if (!(await advancedCard.locator("#sp-set-ha-artwork-port").isVisible())) {
-    await advancedCard.locator(".card-header").click();
-  }
+  assert(await homeAssistantSettingsCard.isVisible(), `${label}: Home Assistant settings card should render`);
   assert(
-    await advancedCard.locator("#sp-set-ha-artwork-port").isVisible(),
-    `${label}: Home Assistant port field should render in advanced settings`
+    !(await homeAssistantSettingsCard.locator("#sp-set-ha-artwork-port").isVisible()),
+    `${label}: Home Assistant settings card should be collapsed by default`
+  );
+  await homeAssistantSettingsCard.locator(".card-header").click();
+  assert(
+    await homeAssistantSettingsCard.locator("#sp-set-ha-artwork-port").isVisible(),
+    `${label}: Home Assistant port field should render in Home Assistant settings`
   );
   assert.strictEqual(
-    await advancedCard.locator("#sp-set-ha-artwork-port").inputValue(),
+    await homeAssistantSettingsCard.locator("#sp-set-ha-artwork-port").inputValue(),
     "8123",
     `${label}: Home Assistant port field should default to 8123`
   );

@@ -1052,7 +1052,7 @@ function buildSettingsPage(parent) {
 
   var firmwareCard = makeCollapsibleCard("Firmware", fwBody, true);
 
-  var advancedBody = document.createElement("div");
+  var homeAssistantSettingsBody = document.createElement("div");
   var haPortField = document.createElement("div");
   haPortField.className = "sp-field";
   haPortField.appendChild(fieldLabel("Home Assistant Port", "sp-set-ha-artwork-port"));
@@ -1071,12 +1071,12 @@ function buildSettingsPage(parent) {
     postHomeAssistantArtworkPort(state.coverArtHomeAssistantPort);
   });
   haPortField.appendChild(haPortInput);
-  advancedBody.appendChild(haPortField);
+  homeAssistantSettingsBody.appendChild(haPortField);
   els.setCoverArtHomeAssistantPort = haPortInput;
-  var advancedCard = makeCollapsibleCard(
-    "Advanced",
-    advancedBody,
-    normalizeHomeAssistantArtworkPort(state.coverArtHomeAssistantPort) !== 8123);
+  var homeAssistantSettingsCard = makeCollapsibleCard(
+    "Home Assistant Settings",
+    homeAssistantSettingsBody,
+    true);
 
   appendSettingsSection(config, "Display", [
     appearanceCard,
@@ -1096,7 +1096,7 @@ function buildSettingsPage(parent) {
     temperatureCard,
     backupCard,
     firmwareCard,
-    advancedCard,
+    homeAssistantSettingsCard,
   ]);
 
   page.appendChild(config);
