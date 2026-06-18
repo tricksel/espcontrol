@@ -711,10 +711,10 @@ inline void light_control_layout_modal(LightControlCtx *ctx) {
 
   int tab_count = static_cast<int>(visible_tabs.count);
   if (tab_count < 1) tab_count = 1;
-  lv_coord_t tab_size = layout.back_size * 5 / 6;
-  if (tab_size < 58) tab_size = 58;
-  if (tab_size > 76) tab_size = 76;
-  lv_coord_t selected_tab_size = tab_size + tab_size / 6;
+  lv_coord_t tab_size = layout.back_size;
+  if (tab_size < 68) tab_size = 68;
+  if (tab_size > 88) tab_size = 88;
+  lv_coord_t selected_tab_size = tab_size + tab_size / 7;
   lv_coord_t tab_frame_pad = tab_size / 4;
   lv_coord_t tab_gap = tab_size / 3;
   lv_coord_t tabs_total_w = tab_size * tab_count + tab_gap * (tab_count - 1);
@@ -722,9 +722,9 @@ inline void light_control_layout_modal(LightControlCtx *ctx) {
   lv_coord_t tab_frame_h = tab_size + tab_frame_pad * 2;
   lv_coord_t tab_safe_left = layout.back_inset_x + layout.back_size + layout.inset / 2;
   lv_coord_t centered_left = (layout.panel_w - tab_frame_w) / 2;
-  while (centered_left < tab_safe_left && tab_size > 52) {
+  while (centered_left < tab_safe_left && tab_size > 60) {
     tab_size--;
-    selected_tab_size = tab_size + tab_size / 6;
+    selected_tab_size = tab_size + tab_size / 7;
     tab_frame_pad = tab_size / 4;
     tab_gap = tab_size / 3;
     tabs_total_w = tab_size * tab_count + tab_gap * (tab_count - 1);
