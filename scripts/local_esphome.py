@@ -10,6 +10,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -119,6 +120,20 @@ def build_esphome_command(
     ]
 
 
+def resolve_esphome_bin(esphome_bin: str, cwd: Path | None = None) -> str:
+    if os.sep not in esphome_bin and (not os.altsep or os.altsep not in esphome_bin):
+        return esphome_bin
+
+    path = Path(esphome_bin).expanduser()
+    if path.is_absolute():
+        return str(path)
+    return str(((cwd or Path.cwd()) / path).resolve())
+
+
+def esphome_working_dir(yaml_path: Path) -> Path:
+    return yaml_path.parent
+
+
 def parse_args(argv: list[str]) -> tuple[bool, Path, str, list[str]]:
     dry_run = False
     filtered_args: list[str] = []
@@ -143,14 +158,14 @@ def parse_args(argv: list[str]) -> tuple[bool, Path, str, list[str]]:
 def run(argv: list[str]) -> int:
     dry_run, yaml_path, command, command_args = parse_args(argv)
     version = local_version_for(yaml_path)
-    esphome_bin = os.environ.get("ESPHOME_BIN", "esphome")
+    esphome_bin = resolve_esphome_bin(os.environ.get("ESPHOME_BIN", "esphome"))
     esphome_command = build_esphome_command(yaml_path, command, command_args, version, esphome_bin)
 
     if dry_run:
         print(shlex.join(esphome_command))
         return 0
 
-    return subprocess.run(esphome_command, cwd=ROOT).returncode
+    return subprocess.run(esphome_command, cwd=esphome_working_dir(yaml_path)).returncode
 
 
 class LocalEsphomeTests(unittest.TestCase):
@@ -186,6 +201,30 @@ class LocalEsphomeTests(unittest.TestCase):
                 "192.168.1.10",
             ],
         )
+
+    def test_keeps_esphome_command_name_for_path_lookup(self) -> None:
+        self.assertEqual(resolve_esphome_bin("esphome"), "esphome")
+
+    def test_resolves_relative_esphome_bin_before_changing_directory(self) -> None:
+        self.assertEqual(
+            resolve_esphome_bin(".venv/bin/esphome", cwd=ROOT),
+            str(ROOT / ".venv" / "bin" / "esphome"),
+        )
+
+    def test_runs_esphome_from_yaml_directory(self) -> None:
+        path = ROOT / "devices" / "esp32-p4-86" / "dev.yaml"
+        self.assertEqual(esphome_working_dir(path), ROOT / "devices" / "esp32-p4-86")
+
+    def test_invokes_esphome_from_yaml_directory(self) -> None:
+        path = ROOT / "devices" / "esp32-p4-86" / "dev.yaml"
+        with (
+            mock.patch(__name__ + ".parse_args", return_value=(False, path, "run", [])),
+            mock.patch(__name__ + ".local_version_for", return_value="local-version"),
+            mock.patch(__name__ + ".subprocess.run") as run_mock,
+        ):
+            run_mock.return_value.returncode = 0
+            self.assertEqual(run(["devices/esp32-p4-86/dev.yaml", "run"]), 0)
+            self.assertEqual(run_mock.call_args.kwargs["cwd"], path.parent)
 
 
 def self_test() -> int:
