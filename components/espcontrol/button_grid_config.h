@@ -2364,6 +2364,51 @@ struct InternalRelayClickCtx {
   bool push_mode;
 };
 
+// ── Local action controls ─────────────────────────────────────────────
+//
+// Devices register named one-shot callbacks here at boot. The button type
+// "local" dispatches to these by key, so device-specific addons (e.g. BLE
+// keyboard) can be triggered from the grid without going through HA.
+
+struct LocalActionControl {
+  std::string key;
+  std::string label;
+  std::function<void()> action;
+};
+
+inline std::vector<LocalActionControl> &local_action_registry() {
+  static std::vector<LocalActionControl> actions;
+  return actions;
+}
+
+inline void register_local_action(
+    const std::string &key, const std::string &label,
+    std::function<void()> action) {
+  if (key.empty()) return;
+  LocalActionControl a;
+  a.key = key;
+  a.label = label;
+  a.action = action;
+  auto &reg = local_action_registry();
+  for (auto &existing : reg) {
+    if (existing.key == key) {
+      existing = a;
+      return;
+    }
+  }
+  reg.push_back(a);
+}
+
+inline void send_local_action(const std::string &key) {
+  for (auto &a : local_action_registry()) {
+    if (a.key == key) {
+      if (a.action) a.action();
+      return;
+    }
+  }
+  ESP_LOGW("espcontrol", "Local action '%s' not registered", key.c_str());
+}
+
 // ── Local sensor controls ─────────────────────────────────────────────
 //
 // Displays a live value from any ESPHome sensor/text_sensor on the device.
@@ -2384,18 +2429,61 @@ inline std::vector<LocalSensorControl> &local_sensor_registry() {
 }
 
 #ifdef USE_WEBSERVER
+inline std::string local_endpoint_json_escape(const std::string &s) {
+  std::string out;
+  out.reserve(s.size() + 4);
+  for (char c : s) {
+    if (c == '"') out += "\\\"";
+    else if (c == '\\') out += "\\\\";
+    else out += c;
+  }
+  return out;
+}
+
+class LocalActionHandler : public esphome::web_server_idf::AsyncWebHandler {
+ public:
+  bool canHandle(esphome::web_server_idf::AsyncWebServerRequest *request) const override {
+    if (request->method() != HTTP_GET) return false;
+    char url_buf[esphome::web_server_idf::AsyncWebServerRequest::URL_BUF_SIZE];
+    esphome::StringRef url = request->url_to(url_buf);
+    return strncmp(url.c_str(), "/local_actions", 14) == 0;
+  }
+
+  void handleRequest(esphome::web_server_idf::AsyncWebServerRequest *request) override {
+    std::string json;
+    json.reserve(256);
+    json = "[";
+    bool first = true;
+    for (auto &a : local_action_registry()) {
+      if (!first) json += ",";
+      first = false;
+      json += "{\"key\":\"" + local_endpoint_json_escape(a.key) +
+              "\",\"label\":\"" + local_endpoint_json_escape(a.label) + "\"}";
+    }
+    json += "]";
+    httpd_req_t *req = *request;
+    httpd_resp_set_status(req, "200 OK");
+    httpd_resp_set_type(req, "application/json");
+    esp_err_t err = httpd_resp_send(req, json.c_str(), HTTPD_RESP_USE_STRLEN);
+    if (err != ESP_OK) ESP_LOGE("espcontrol", "httpd_resp_send failed: %d", err);
+  }
+};
+
+inline void register_local_action_endpoint() {
+  static bool registered = false;
+  if (registered) return;
+  auto *server = esphome::web_server_idf::global_async_web_server();
+  if (!server) {
+    ESP_LOGW("espcontrol", "register_local_action_endpoint: server not ready");
+    return;
+  }
+  server->addHandler(new LocalActionHandler());
+  registered = true;
+  ESP_LOGI("espcontrol", "Local action endpoint registered");
+}
+
 class LocalSensorHandler : public esphome::web_server_idf::AsyncWebHandler {
  public:
-  static std::string json_escape(const std::string &s) {
-    std::string out;
-    out.reserve(s.size() + 4);
-    for (char c : s) {
-      if (c == '"') out += "\\\"";
-      else if (c == '\\') out += "\\\\";
-      else out += c;
-    }
-    return out;
-  }
 
   static std::string build_json() {
     std::string json;
@@ -2406,8 +2494,8 @@ class LocalSensorHandler : public esphome::web_server_idf::AsyncWebHandler {
                       const std::string &unit, const char *type, bool internal) {
       if (!first) json += ",";
       first = false;
-      json += "{\"key\":\"" + json_escape(key) + "\",\"name\":\"" + json_escape(name) +
-              "\",\"unit\":\"" + json_escape(unit) + "\",\"type\":\"" + type + "\"";
+      json += "{\"key\":\"" + local_endpoint_json_escape(key) + "\",\"name\":\"" + local_endpoint_json_escape(name) +
+              "\",\"unit\":\"" + local_endpoint_json_escape(unit) + "\",\"type\":\"" + type + "\"";
       if (internal) json += ",\"internal\":true";
       json += "}";
     };

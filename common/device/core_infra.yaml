@@ -46,6 +46,7 @@ api:
             ha_flush_deferred_state_requests();
           }
         }
+        register_local_action_endpoint();
     - delay: 2s
     - lambda: |-
         if (ha_api_connected()) refresh_image_cards();
