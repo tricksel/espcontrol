@@ -239,17 +239,28 @@ def _config_schema(config):
     )(config)
     model = MODELS[config[CONF_MODEL].upper()]
     width, height = model_dimensions(config, model)
-    display.add_metadata(
-        config[CONF_ID],
-        width,
-        height,
-        has_hardware_rotation=False,
-        byte_order=config[CONF_BYTE_ORDER],
-        has_writer=requires_buffer(config)
-        or config.get(CONF_AUTO_CLEAR_ENABLED) is True,
-        rotation=model.rotation_as_transform(config),
-        draw_rounding=config[CONF_DRAW_ROUNDING],
-    )
+    has_writer = requires_buffer(config) or config.get(CONF_AUTO_CLEAR_ENABLED) is True
+    try:
+        display.add_metadata(
+            config[CONF_ID],
+            width,
+            height,
+            has_hardware_rotation=False,
+            byte_order=config[CONF_BYTE_ORDER],
+            has_writer=has_writer,
+            rotation=model.rotation_as_transform(config),
+            draw_rounding=config[CONF_DRAW_ROUNDING],
+        )
+    except TypeError as err:
+        if "unexpected keyword argument" not in str(err):
+            raise
+        display.add_metadata(
+            config[CONF_ID],
+            width,
+            height,
+            has_writer=has_writer,
+            has_hardware_rotation=False,
+        )
     return config
 
 
