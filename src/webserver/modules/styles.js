@@ -264,9 +264,11 @@ var CSS =
   ".card-chevron svg{width:100%;height:100%}" +
   ".card.collapsed .card-chevron{transform:rotate(-90deg)}" +
   ".card.collapsed .card-body{display:none}" +
-  ".card-header-right{display:flex;align-items:center;gap:8px}" +
+  ".card-header-right{display:flex;align-items:center;gap:12px}" +
   ".card.collapsed .sp-card-header-action{display:none}" +
-  ".sp-card-header-action{width:32px;height:32px;font-size:18px}" +
+  ".sp-card-header-action{width:24px;height:24px;margin-right:12px;border:0;background:transparent;" +
+  "border-radius:0;color:var(--text3);font-size:20px}" +
+  ".sp-card-header-action:hover{background:transparent;color:var(--text)}" +
   ".sp-card-badge{display:inline-flex;align-items:center;gap:7px;min-height:24px;" +
   "padding:0 12px 0 10px;border-radius:999px;background:rgba(48,164,108,.16);" +
   "color:#30a46c;font-size:.68rem;font-weight:400;text-transform:uppercase;letter-spacing:.04em;line-height:1}" +
