@@ -116,12 +116,13 @@ function clockBarTemperatureItemIds() {
 }
 
 function clockBarItems() {
-  return ["temperature", "time", "network"];
+  return ["temperature", "time", "voice", "network"];
 }
 
 function clockBarDefaultSection(item) {
   if (isClockBarTemperatureItem(item)) return "left";
   if (item === "time") return "middle";
+  if (item === "voice") return "right";
   if (item === "network") return "right";
   return "left";
 }
@@ -130,6 +131,7 @@ function clockBarItemActive(item) {
   var tempIndex = clockBarTemperatureItemIndex(item);
   if (tempIndex >= 0) return clockBarTemperatureVisible();
   if (item === "time") return !!state.clockBarTimeOn;
+  if (item === "voice") return !!state.voiceServicesOn;
   if (item === "network") return !!state.networkStatusOn;
   return false;
 }
@@ -141,6 +143,7 @@ function clockBarItemElement(item) {
 function clockBarItemLabel(item) {
   if (isClockBarTemperatureItem(item)) return "Temperature";
   if (item === "time") return "Clock";
+  if (item === "voice") return "Voice Services";
   if (item === "network") return "Connectivity";
   return "Clock Bar";
 }
@@ -246,16 +249,14 @@ function createClockBarItemElement(item, section) {
     button.appendChild(clock);
     els.clock = clock;
   } else if (item === "network") {
-    var group = document.createElement("span");
-    group.className = "sp-network-preview-group";
-    var voice = document.createElement("span");
-    voice.className = "sp-voice-preview mdi mdi-microphone";
-    group.appendChild(voice);
     var network = document.createElement("span");
     network.className = "sp-network-preview mdi mdi-wifi-strength-4";
-    group.appendChild(network);
-    button.appendChild(group);
+    button.appendChild(network);
     els.networkPreview = network;
+  } else if (item === "voice") {
+    var voice = document.createElement("span");
+    voice.className = "sp-voice-preview mdi mdi-microphone";
+    button.appendChild(voice);
     els.voicePreview = voice;
   }
   return button;

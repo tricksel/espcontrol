@@ -342,11 +342,11 @@ function clockBarTemperatureUnitSymbol() {
 }
 
 var MAX_CLOCK_BAR_TEMPERATURES = 1;
-var CLOCK_BAR_FIXED_LAYOUT_STRING = "left:temperature|middle:time|right:network";
+var CLOCK_BAR_FIXED_LAYOUT_STRING = "left:temperature|middle:time|right:voice,network";
 var CLOCK_BAR_FIXED_LAYOUT = {
   left: ["temperature"],
   middle: ["time"],
-  right: ["network"],
+  right: ["voice", "network"],
 };
 
 function defaultClockBarTemperatureEntity(index) {
@@ -462,6 +462,9 @@ function setClockBarItemVisible(item, visible) {
   } else if (item === "time") {
     state.clockBarTimeOn = visible;
     postClockBarTime(state.clockBarTimeOn);
+  } else if (item === "voice") {
+    state.voiceServicesOn = visible;
+    postVoiceServices(state.voiceServicesOn);
   } else if (item === "network") {
     state.networkStatusOn = visible;
     postNetworkStatusIcon(state.networkStatusOn);

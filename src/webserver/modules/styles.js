@@ -55,11 +55,10 @@ var CSS =
   ".sp-clockbar-item.sp-selected{border-color:var(--accent);background:rgba(92,115,231,.18)}" +
   ".sp-clockbar-item.sp-clockbar-hidden{opacity:.42;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}" +
   ".sp-clockbar-item.sp-clockbar-hidden.sp-selected{opacity:.65;border-color:var(--accent)}" +
-  ".sp-clockbar-network{padding:0;width:min(52px,calc(var(--topbar-fs)*3.1));min-width:28px}" +
+  ".sp-clockbar-network,.sp-clockbar-voice{padding:0;width:min(32px,calc(var(--topbar-fs)*1.9));min-width:24px}" +
   ".sp-temp{color:#fff;font-size:var(--topbar-fs);white-space:nowrap;opacity:0;transition:opacity .3s}" +
   ".sp-temp.sp-visible{opacity:1}" +
   ".sp-clock{color:#fff;font-size:var(--clock-fs,var(--topbar-fs));white-space:nowrap;opacity:1;transition:opacity .3s}" +
-  ".sp-network-preview-group{height:100%;display:flex;align-items:center;justify-content:center;gap:calc(var(--topbar-fs)*.14)}" +
   ".sp-network-preview,.sp-voice-preview{color:#fff;font-size:calc(var(--topbar-fs)*.86);" +
   "line-height:1;width:calc(var(--topbar-fs)*1.05);height:100%;display:flex;align-items:center;" +
   "justify-content:center;opacity:0;transition:opacity .3s}" +

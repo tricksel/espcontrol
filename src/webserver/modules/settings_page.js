@@ -22,6 +22,16 @@ function appendSettingsSection(parent, title, cards) {
   });
 }
 
+function openVoiceServicesSettings() {
+  if (isConfigLocked() || !els.voiceServicesCard) return;
+  switchTab("settings");
+  els.voiceServicesCard.classList.remove("collapsed");
+  els.voiceServicesCard.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (els.setVoiceServicesToggle) {
+    window.setTimeout(function () { els.setVoiceServicesToggle.focus(); }, 150);
+  }
+}
+
 function coverArtTrackOverlayDurationSupported() {
   return !!(CFG && CFG.coverArtSquareOverlay);
 }
@@ -550,6 +560,7 @@ function buildSettingsPage(parent) {
       postVoiceServices(state.voiceServicesOn);
     });
     voiceServicesCard = makeCollapsibleCard("Voice Services", voiceServicesBody, true);
+    els.voiceServicesCard = voiceServicesCard;
   }
 
   var rotationCard = null;
