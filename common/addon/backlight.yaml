@@ -175,7 +175,7 @@ script:
                   lambda: |-
                     return id(cover_art_screensaver_active) ||
                            (id(media_player_sleep_prevention_enabled).state &&
-                            id(cover_art_media_playing));
+                            id(media_player_playing));
                 then:
                   - script.execute: screensaver_idle_check
                 else:
