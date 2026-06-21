@@ -314,6 +314,10 @@ inline void light_control_apply_card_visual(LightControlCtx *ctx) {
   }
 }
 
+inline int light_control_display_pct(LightControlCtx *ctx) {
+  return ctx && ctx->on ? ctx->current_pct : 0;
+}
+
 inline void light_control_set_modal_value(LightControlCtx *ctx, int pct) {
   LightControlModalUi &ui = light_control_modal_ui();
   if (!ctx || ui.active != ctx) return;
@@ -664,6 +668,7 @@ inline lv_obj_t *light_control_create_power_button(lv_obj_t *parent, const lv_fo
     if (!ui.active || !ui.active->available) return;
     ui.active->on = turn_on;
     light_control_apply_card_visual(ui.active);
+    light_control_set_modal_value(ui.active, light_control_display_pct(ui.active));
     light_control_apply_modal_power(ui.active);
     if (turn_on) send_turn_on_action(ui.active->entity_id);
     else send_turn_off_action(ui.active->entity_id);
@@ -768,10 +773,11 @@ inline void light_control_layout_modal(LightControlCtx *ctx) {
   light_control_apply_modal_power(ctx);
   light_control_layout_slider(ui.slider, slider_w, slider_h, content_center_y);
   lv_obj_update_layout(ui.panel);
+  int display_pct = light_control_display_pct(ctx);
   light_control_update_slider_fill(
-    ui.slider, ui.slider_fill, ui.slider_handle, ctx->current_pct,
+    ui.slider, ui.slider_fill, ui.slider_handle, display_pct,
     lv_color_hex(ctx->accent_color));
-  light_control_update_slider_handle(ui.slider, ui.slider_handle, ctx->current_pct);
+  light_control_update_slider_handle(ui.slider, ui.slider_handle, display_pct);
   light_control_layout_slider(ui.temp_slider, slider_w, slider_h, content_center_y);
   lv_obj_update_layout(ui.panel);
   light_control_update_slider_fill(
@@ -973,7 +979,7 @@ inline void light_control_open_modal(LightControlCtx *ctx) {
   }
 
   light_control_layout_modal(ctx);
-  light_control_set_modal_value(ctx, ctx->current_pct);
+  light_control_set_modal_value(ctx, light_control_display_pct(ctx));
   light_control_set_temp_modal_value(ctx, ctx->current_kelvin);
   light_control_apply_modal_power(ctx);
   light_control_apply_tab_visibility();
@@ -1022,6 +1028,7 @@ inline void subscribe_light_control_state(LightControlCtx *ctx) {
         ctx->available = !ha_state_unavailable_ref(state);
         ctx->on = is_entity_on_ref(state);
         light_control_apply_card_visual(ctx);
+        light_control_set_modal_value(ctx, light_control_display_pct(ctx));
         light_control_apply_modal_power(ctx);
       })
   );
@@ -1032,7 +1039,7 @@ inline void subscribe_light_control_state(LightControlCtx *ctx) {
         int pct = 0;
         if (!slider_parse_light_brightness_pct(value, pct)) return;
         ctx->current_pct = pct;
-        light_control_set_modal_value(ctx, pct);
+        light_control_set_modal_value(ctx, light_control_display_pct(ctx));
       })
   );
   ha_subscribe_attribute(

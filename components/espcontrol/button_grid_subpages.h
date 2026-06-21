@@ -155,6 +155,12 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
     b.precision.clear();
     b.options.clear();
   }
+  if (b.type == "light_control") {
+    b.sensor.clear();
+    b.unit.clear();
+    b.precision.clear();
+    b.options = light_control_card_options_normalized(b.options);
+  }
   if (b.type == "subpage") {
     b.options = subpage_card_options_normalized(b.options, b.sensor, b.precision);
   }
@@ -192,7 +198,7 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
       b.type != "webhook" &&
       b.type != "todo" &&
       b.type != "sensor" && b.type != "door_window" && b.type != "presence" &&
-      b.type != "subpage" &&
+      b.type != "subpage" && b.type != "light_control" &&
       !fan_card_type(b.type) && !card_large_numbers_supported(p)) {
     b.options.clear();
   }
