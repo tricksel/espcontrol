@@ -246,10 +246,17 @@ function createClockBarItemElement(item, section) {
     button.appendChild(clock);
     els.clock = clock;
   } else if (item === "network") {
+    var group = document.createElement("span");
+    group.className = "sp-network-preview-group";
     var network = document.createElement("span");
     network.className = "sp-network-preview mdi mdi-wifi-strength-4";
-    button.appendChild(network);
+    group.appendChild(network);
+    var voice = document.createElement("span");
+    voice.className = "sp-voice-preview mdi mdi-microphone";
+    group.appendChild(voice);
+    button.appendChild(group);
     els.networkPreview = network;
+    els.voicePreview = voice;
   }
   return button;
 }
@@ -261,6 +268,7 @@ function renderClockBarLayout() {
   els.temps = {};
   els.clock = null;
   els.networkPreview = null;
+  els.voicePreview = null;
   CLOCK_BAR_SECTIONS.forEach(function (section) {
     var container = els.clockBarSections[section];
     if (!container) return;
@@ -385,4 +393,8 @@ function updateNetworkPreview() {
   els.networkPreview.className = "sp-network-preview mdi mdi-" +
     networkPreviewIconSlug(state.networkTransport, state.wifiStrengthPercent) +
     (show ? " sp-visible" : "");
+  if (els.voicePreview) {
+    els.voicePreview.className = "sp-voice-preview mdi mdi-microphone" +
+      (show && state.voiceServicesOn ? " sp-visible" : "");
+  }
 }
