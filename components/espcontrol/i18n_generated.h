@@ -50,6 +50,7 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Kryt";
   if (std::strcmp(text, "Date") == 0) return "Datum";
   if (std::strcmp(text, "Dev build") == 0) return "Vývojová verze";
+  if (std::strcmp(text, "Device Volume") == 0) return "Hlasitost zařízení";
   if (std::strcmp(text, "Dimmed") == 0) return "Ztlumeno";
   if (std::strcmp(text, "Direction") == 0) return "Směr";
   if (std::strcmp(text, "Disarm") == 0) return "Odzajistit";
@@ -90,6 +91,8 @@ inline const char *espcontrol_i18n_cs(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Média";
   if (std::strcmp(text, "Mode") == 0) return "Režim";
   if (std::strcmp(text, "Monthly") == 0) return "Měsíčně";
+  if (std::strcmp(text, "more") == 0) return "další";
+  if (std::strcmp(text, "More items") == 0) return "Další položky";
   if (std::strcmp(text, "January") == 0) return "leden";
   if (std::strcmp(text, "February") == 0) return "únor";
   if (std::strcmp(text, "March") == 0) return "březen";
@@ -252,6 +255,7 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Dæksel";
   if (std::strcmp(text, "Date") == 0) return "Dato";
   if (std::strcmp(text, "Dev build") == 0) return "Udviklerversion";
+  if (std::strcmp(text, "Device Volume") == 0) return "Enhedslydstyrke";
   if (std::strcmp(text, "Dimmed") == 0) return "Neddæmpet";
   if (std::strcmp(text, "Direction") == 0) return "Retning";
   if (std::strcmp(text, "Disarm") == 0) return "Deaktiver";
@@ -291,6 +295,8 @@ inline const char *espcontrol_i18n_da(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Medie";
   if (std::strcmp(text, "Mode") == 0) return "Tilstand";
   if (std::strcmp(text, "Monthly") == 0) return "Månedligt";
+  if (std::strcmp(text, "more") == 0) return "mere";
+  if (std::strcmp(text, "More items") == 0) return "Flere elementer";
   if (std::strcmp(text, "January") == 0) return "januar";
   if (std::strcmp(text, "February") == 0) return "februar";
   if (std::strcmp(text, "March") == 0) return "marts";
@@ -449,6 +455,7 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Datum";
   if (std::strcmp(text, "Dev") == 0) return "Entw.";
   if (std::strcmp(text, "Dev build") == 0) return "Entwicklerversion";
+  if (std::strcmp(text, "Device Volume") == 0) return "Gerätelautstärke";
   if (std::strcmp(text, "Dimmed") == 0) return "Gedimmt";
   if (std::strcmp(text, "Direction") == 0) return "Richtung";
   if (std::strcmp(text, "Disarm") == 0) return "Entschärfen";
@@ -489,6 +496,8 @@ inline const char *espcontrol_i18n_de(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Medien";
   if (std::strcmp(text, "Mode") == 0) return "Modus";
   if (std::strcmp(text, "Monthly") == 0) return "Monatlich";
+  if (std::strcmp(text, "more") == 0) return "weitere";
+  if (std::strcmp(text, "More items") == 0) return "Weitere Elemente";
   if (std::strcmp(text, "January") == 0) return "Januar";
   if (std::strcmp(text, "February") == 0) return "Februar";
   if (std::strcmp(text, "March") == 0) return "März";
@@ -642,6 +651,7 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Cubierta";
   if (std::strcmp(text, "Date") == 0) return "Fecha";
   if (std::strcmp(text, "Dev build") == 0) return "Versión dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volumen del dispositivo";
   if (std::strcmp(text, "Dimmed") == 0) return "Atenuado";
   if (std::strcmp(text, "Direction") == 0) return "Dirección";
   if (std::strcmp(text, "Disarm") == 0) return "Desarmar";
@@ -681,6 +691,8 @@ inline const char *espcontrol_i18n_es(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Multimedia";
   if (std::strcmp(text, "Mode") == 0) return "Modo";
   if (std::strcmp(text, "Monthly") == 0) return "Mensual";
+  if (std::strcmp(text, "more") == 0) return "más";
+  if (std::strcmp(text, "More items") == 0) return "Más elementos";
   if (std::strcmp(text, "January") == 0) return "enero";
   if (std::strcmp(text, "February") == 0) return "febrero";
   if (std::strcmp(text, "March") == 0) return "marzo";
@@ -844,6 +856,7 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Päivämäärä";
   if (std::strcmp(text, "Dev") == 0) return "Kehitys";
   if (std::strcmp(text, "Dev build") == 0) return "Kehitysversio";
+  if (std::strcmp(text, "Device Volume") == 0) return "Laitteen äänenvoimakkuus";
   if (std::strcmp(text, "Dimmed") == 0) return "Himmennetty";
   if (std::strcmp(text, "Direction") == 0) return "Suunta";
   if (std::strcmp(text, "Disarm") == 0) return "Poista viritys";
@@ -885,6 +898,8 @@ inline const char *espcontrol_i18n_fi(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Keskitaso";
   if (std::strcmp(text, "Mode") == 0) return "Tila";
   if (std::strcmp(text, "Monthly") == 0) return "Kuukausittain";
+  if (std::strcmp(text, "more") == 0) return "lisää";
+  if (std::strcmp(text, "More items") == 0) return "Lisää kohteita";
   if (std::strcmp(text, "January") == 0) return "Tammikuu";
   if (std::strcmp(text, "February") == 0) return "Helmikuu";
   if (std::strcmp(text, "March") == 0) return "Maaliskuu";
@@ -1050,6 +1065,7 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Could not load") == 0) return "Impossible de charger";
   if (std::strcmp(text, "Cover") == 0) return "Volet";
   if (std::strcmp(text, "Dev build") == 0) return "Version dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volume de l’appareil";
   if (std::strcmp(text, "Dimmed") == 0) return "Tamisé";
   if (std::strcmp(text, "Disarm") == 0) return "Désarmer";
   if (std::strcmp(text, "Disarmed") == 0) return "Désarmé";
@@ -1088,6 +1104,8 @@ inline const char *espcontrol_i18n_fr(const char *text) {
   if (std::strcmp(text, "Low target") == 0) return "Cible basse";
   if (std::strcmp(text, "Media") == 0) return "Média";
   if (std::strcmp(text, "Monthly") == 0) return "Mensuel";
+  if (std::strcmp(text, "more") == 0) return "de plus";
+  if (std::strcmp(text, "More items") == 0) return "Plus d’éléments";
   if (std::strcmp(text, "January") == 0) return "janvier";
   if (std::strcmp(text, "February") == 0) return "février";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -1248,6 +1266,7 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Dátum";
   if (std::strcmp(text, "Dev") == 0) return "Fejlesztői";
   if (std::strcmp(text, "Dev build") == 0) return "Fejlesztői build";
+  if (std::strcmp(text, "Device Volume") == 0) return "Eszköz hangereje";
   if (std::strcmp(text, "Dimmed") == 0) return "Halványított";
   if (std::strcmp(text, "Direction") == 0) return "Irány";
   if (std::strcmp(text, "Disarm") == 0) return "Hatástalanítás";
@@ -1290,6 +1309,8 @@ inline const char *espcontrol_i18n_hu(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Közepes";
   if (std::strcmp(text, "Mode") == 0) return "Mód";
   if (std::strcmp(text, "Monthly") == 0) return "Havonta";
+  if (std::strcmp(text, "more") == 0) return "további";
+  if (std::strcmp(text, "More items") == 0) return "További elemek";
   if (std::strcmp(text, "January") == 0) return "Január";
   if (std::strcmp(text, "February") == 0) return "Február";
   if (std::strcmp(text, "March") == 0) return "Március";
@@ -1456,6 +1477,7 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Tapparella";
   if (std::strcmp(text, "Date") == 0) return "Data";
   if (std::strcmp(text, "Dev build") == 0) return "Build dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volume dispositivo";
   if (std::strcmp(text, "Dimmed") == 0) return "Attenuato";
   if (std::strcmp(text, "Direction") == 0) return "Direzione";
   if (std::strcmp(text, "Disarm") == 0) return "Disinserisci";
@@ -1496,6 +1518,8 @@ inline const char *espcontrol_i18n_it(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Medio";
   if (std::strcmp(text, "Mode") == 0) return "Modalità";
   if (std::strcmp(text, "Monthly") == 0) return "Mensile";
+  if (std::strcmp(text, "more") == 0) return "altri";
+  if (std::strcmp(text, "More items") == 0) return "Altri elementi";
   if (std::strcmp(text, "January") == 0) return "Gennaio";
   if (std::strcmp(text, "February") == 0) return "Febbraio";
   if (std::strcmp(text, "March") == 0) return "Marzo";
@@ -1658,6 +1682,7 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Deksel";
   if (std::strcmp(text, "Date") == 0) return "Dato";
   if (std::strcmp(text, "Dev build") == 0) return "Utviklerversjon";
+  if (std::strcmp(text, "Device Volume") == 0) return "Enhetsvolum";
   if (std::strcmp(text, "Dimmed") == 0) return "Neddimmet";
   if (std::strcmp(text, "Direction") == 0) return "Retning";
   if (std::strcmp(text, "Disarm") == 0) return "Deaktiver";
@@ -1697,6 +1722,8 @@ inline const char *espcontrol_i18n_nb(const char *text) {
   if (std::strcmp(text, "Low target") == 0) return "Lavt mål";
   if (std::strcmp(text, "Mode") == 0) return "Modus";
   if (std::strcmp(text, "Monthly") == 0) return "Månedlig";
+  if (std::strcmp(text, "more") == 0) return "flere";
+  if (std::strcmp(text, "More items") == 0) return "Flere elementer";
   if (std::strcmp(text, "January") == 0) return "januar";
   if (std::strcmp(text, "February") == 0) return "februar";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -1858,6 +1885,7 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Datum";
   if (std::strcmp(text, "Dev") == 0) return "Ontwikkeling";
   if (std::strcmp(text, "Dev build") == 0) return "Ontwikkelversie";
+  if (std::strcmp(text, "Device Volume") == 0) return "Apparaatvolume";
   if (std::strcmp(text, "Dimmed") == 0) return "Gedimd";
   if (std::strcmp(text, "Direction") == 0) return "Richting";
   if (std::strcmp(text, "Disarm") == 0) return "Uitschakelen";
@@ -1897,6 +1925,8 @@ inline const char *espcontrol_i18n_nl(const char *text) {
   if (std::strcmp(text, "Low target") == 0) return "Laag doel";
   if (std::strcmp(text, "Mode") == 0) return "Modus";
   if (std::strcmp(text, "Monthly") == 0) return "Maandelijks";
+  if (std::strcmp(text, "more") == 0) return "meer";
+  if (std::strcmp(text, "More items") == 0) return "Meer items";
   if (std::strcmp(text, "January") == 0) return "januari";
   if (std::strcmp(text, "February") == 0) return "februari";
   if (std::strcmp(text, "March") == 0) return "maart";
@@ -2055,6 +2085,7 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Osłona";
   if (std::strcmp(text, "Date") == 0) return "Data";
   if (std::strcmp(text, "Dev build") == 0) return "Wersja dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Głośność urządzenia";
   if (std::strcmp(text, "Dimmed") == 0) return "Przyciemnione";
   if (std::strcmp(text, "Direction") == 0) return "Kierunek";
   if (std::strcmp(text, "Disarm") == 0) return "Rozbrój";
@@ -2094,6 +2125,8 @@ inline const char *espcontrol_i18n_pl(const char *text) {
   if (std::strcmp(text, "Low target") == 0) return "Niski cel";
   if (std::strcmp(text, "Mode") == 0) return "Tryb";
   if (std::strcmp(text, "Monthly") == 0) return "Co miesiąc";
+  if (std::strcmp(text, "more") == 0) return "więcej";
+  if (std::strcmp(text, "More items") == 0) return "Więcej elementów";
   if (std::strcmp(text, "January") == 0) return "styczeń";
   if (std::strcmp(text, "February") == 0) return "luty";
   if (std::strcmp(text, "March") == 0) return "marzec";
@@ -2254,6 +2287,7 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Cobertura";
   if (std::strcmp(text, "Date") == 0) return "Data";
   if (std::strcmp(text, "Dev build") == 0) return "Versão dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volume do dispositivo";
   if (std::strcmp(text, "Dimmed") == 0) return "Escurecido";
   if (std::strcmp(text, "Direction") == 0) return "Direção";
   if (std::strcmp(text, "Disarm") == 0) return "Desarmar";
@@ -2293,6 +2327,8 @@ inline const char *espcontrol_i18n_pt_br(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Mídia";
   if (std::strcmp(text, "Mode") == 0) return "Modo";
   if (std::strcmp(text, "Monthly") == 0) return "Mensal";
+  if (std::strcmp(text, "more") == 0) return "mais";
+  if (std::strcmp(text, "More items") == 0) return "Mais itens";
   if (std::strcmp(text, "January") == 0) return "janeiro";
   if (std::strcmp(text, "February") == 0) return "fevereiro";
   if (std::strcmp(text, "March") == 0) return "março";
@@ -2454,6 +2490,7 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Cobertura";
   if (std::strcmp(text, "Date") == 0) return "Data";
   if (std::strcmp(text, "Dev build") == 0) return "Versão dev";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volume do dispositivo";
   if (std::strcmp(text, "Dimmed") == 0) return "Escurecido";
   if (std::strcmp(text, "Direction") == 0) return "Direção";
   if (std::strcmp(text, "Disarm") == 0) return "Desarmar";
@@ -2494,6 +2531,8 @@ inline const char *espcontrol_i18n_pt(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Multimédia";
   if (std::strcmp(text, "Mode") == 0) return "Modo";
   if (std::strcmp(text, "Monthly") == 0) return "Mensal";
+  if (std::strcmp(text, "more") == 0) return "mais";
+  if (std::strcmp(text, "More items") == 0) return "Mais itens";
   if (std::strcmp(text, "January") == 0) return "janeiro";
   if (std::strcmp(text, "February") == 0) return "fevereiro";
   if (std::strcmp(text, "March") == 0) return "março";
@@ -2657,6 +2696,7 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Dată";
   if (std::strcmp(text, "Dev") == 0) return "Dezvoltare";
   if (std::strcmp(text, "Dev build") == 0) return "Versiune de dezvoltare";
+  if (std::strcmp(text, "Device Volume") == 0) return "Volumul dispozitivului";
   if (std::strcmp(text, "Dimmed") == 0) return "Estompat";
   if (std::strcmp(text, "Direction") == 0) return "Direcție";
   if (std::strcmp(text, "Disarm") == 0) return "Dezarmează";
@@ -2698,6 +2738,8 @@ inline const char *espcontrol_i18n_ro(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Mediu";
   if (std::strcmp(text, "Mode") == 0) return "Mod";
   if (std::strcmp(text, "Monthly") == 0) return "Lunar";
+  if (std::strcmp(text, "more") == 0) return "încă";
+  if (std::strcmp(text, "More items") == 0) return "Mai multe elemente";
   if (std::strcmp(text, "January") == 0) return "Ianuarie";
   if (std::strcmp(text, "February") == 0) return "Februarie";
   if (std::strcmp(text, "March") == 0) return "Martie";
@@ -2864,6 +2906,7 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Kryt";
   if (std::strcmp(text, "Date") == 0) return "Dátum";
   if (std::strcmp(text, "Dev build") == 0) return "Vývojová verzia";
+  if (std::strcmp(text, "Device Volume") == 0) return "Hlasitosť zariadenia";
   if (std::strcmp(text, "Dimmed") == 0) return "Stlmené";
   if (std::strcmp(text, "Direction") == 0) return "Smer";
   if (std::strcmp(text, "Disarm") == 0) return "Odzbrojiť";
@@ -2904,6 +2947,8 @@ inline const char *espcontrol_i18n_sk(const char *text) {
   if (std::strcmp(text, "Media") == 0) return "Médiá";
   if (std::strcmp(text, "Mode") == 0) return "Režim";
   if (std::strcmp(text, "Monthly") == 0) return "Mesačne";
+  if (std::strcmp(text, "more") == 0) return "ďalšie";
+  if (std::strcmp(text, "More items") == 0) return "Ďalšie položky";
   if (std::strcmp(text, "January") == 0) return "január";
   if (std::strcmp(text, "February") == 0) return "február";
   if (std::strcmp(text, "March") == 0) return "marec";
@@ -3068,6 +3113,7 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Datum";
   if (std::strcmp(text, "Dev") == 0) return "Razvijalec";
   if (std::strcmp(text, "Dev build") == 0) return "Razvojna različica";
+  if (std::strcmp(text, "Device Volume") == 0) return "Glasnost naprave";
   if (std::strcmp(text, "Dimmed") == 0) return "Zatemnjeno";
   if (std::strcmp(text, "Direction") == 0) return "Smer";
   if (std::strcmp(text, "Disarm") == 0) return "Izklopi varovanje";
@@ -3110,6 +3156,8 @@ inline const char *espcontrol_i18n_sl(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Srednje";
   if (std::strcmp(text, "Mode") == 0) return "Način";
   if (std::strcmp(text, "Monthly") == 0) return "Mesečno";
+  if (std::strcmp(text, "more") == 0) return "več";
+  if (std::strcmp(text, "More items") == 0) return "Več elementov";
   if (std::strcmp(text, "January") == 0) return "Januar";
   if (std::strcmp(text, "February") == 0) return "Februar";
   if (std::strcmp(text, "March") == 0) return "Marec";
@@ -3273,6 +3321,7 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Cover") == 0) return "Skydd";
   if (std::strcmp(text, "Date") == 0) return "Datum";
   if (std::strcmp(text, "Dev build") == 0) return "Utvecklarversion";
+  if (std::strcmp(text, "Device Volume") == 0) return "Enhetsvolym";
   if (std::strcmp(text, "Dimmed") == 0) return "Nedtonad";
   if (std::strcmp(text, "Direction") == 0) return "Riktning";
   if (std::strcmp(text, "Disarm") == 0) return "Avlarma";
@@ -3312,6 +3361,8 @@ inline const char *espcontrol_i18n_sv(const char *text) {
   if (std::strcmp(text, "Low target") == 0) return "Lågt mål";
   if (std::strcmp(text, "Mode") == 0) return "Läge";
   if (std::strcmp(text, "Monthly") == 0) return "Månadsvis";
+  if (std::strcmp(text, "more") == 0) return "fler";
+  if (std::strcmp(text, "More items") == 0) return "Fler objekt";
   if (std::strcmp(text, "January") == 0) return "januari";
   if (std::strcmp(text, "February") == 0) return "februari";
   if (std::strcmp(text, "March") == 0) return "mars";
@@ -3472,6 +3523,7 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Tarih";
   if (std::strcmp(text, "Dev") == 0) return "Geliştirici";
   if (std::strcmp(text, "Dev build") == 0) return "Geliştirici sürümü";
+  if (std::strcmp(text, "Device Volume") == 0) return "Cihaz sesi";
   if (std::strcmp(text, "Dimmed") == 0) return "Kısılmış";
   if (std::strcmp(text, "Direction") == 0) return "Yön";
   if (std::strcmp(text, "Disarm") == 0) return "Devre dışı bırak";
@@ -3513,6 +3565,8 @@ inline const char *espcontrol_i18n_tr(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Orta";
   if (std::strcmp(text, "Mode") == 0) return "Mod";
   if (std::strcmp(text, "Monthly") == 0) return "Aylık";
+  if (std::strcmp(text, "more") == 0) return "daha";
+  if (std::strcmp(text, "More items") == 0) return "Daha fazla öğe";
   if (std::strcmp(text, "January") == 0) return "Ocak";
   if (std::strcmp(text, "February") == 0) return "Şubat";
   if (std::strcmp(text, "March") == 0) return "Mart";
@@ -3683,6 +3737,7 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Date") == 0) return "Дата";
   if (std::strcmp(text, "Dev") == 0) return "Розробка";
   if (std::strcmp(text, "Dev build") == 0) return "Збірка для розробки";
+  if (std::strcmp(text, "Device Volume") == 0) return "Гучність пристрою";
   if (std::strcmp(text, "Dimmed") == 0) return "Приглушено";
   if (std::strcmp(text, "Direction") == 0) return "Напрямок";
   if (std::strcmp(text, "Disarm") == 0) return "Вимкнути охорону";
@@ -3725,6 +3780,8 @@ inline const char *espcontrol_i18n_uk(const char *text) {
   if (std::strcmp(text, "Medium") == 0) return "Середньо";
   if (std::strcmp(text, "Mode") == 0) return "Режим";
   if (std::strcmp(text, "Monthly") == 0) return "Щомісяця";
+  if (std::strcmp(text, "more") == 0) return "ще";
+  if (std::strcmp(text, "More items") == 0) return "Більше елементів";
   if (std::strcmp(text, "January") == 0) return "Січень";
   if (std::strcmp(text, "February") == 0) return "Лютий";
   if (std::strcmp(text, "March") == 0) return "Березень";
@@ -3898,6 +3955,7 @@ inline const char *espcontrol_i18n_key_en(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Date";
   if (std::strcmp(key, "dev") == 0) return "Dev";
   if (std::strcmp(key, "dev_build") == 0) return "Dev build";
+  if (std::strcmp(key, "device_volume") == 0) return "Device Volume";
   if (std::strcmp(key, "dimmed") == 0) return "Dimmed";
   if (std::strcmp(key, "direction") == 0) return "Direction";
   if (std::strcmp(key, "disarm") == 0) return "Disarm";
@@ -3940,6 +3998,8 @@ inline const char *espcontrol_i18n_key_en(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Medium";
   if (std::strcmp(key, "mode") == 0) return "Mode";
   if (std::strcmp(key, "monthly") == 0) return "Monthly";
+  if (std::strcmp(key, "more") == 0) return "more";
+  if (std::strcmp(key, "more_items") == 0) return "More items";
   if (std::strcmp(key, "january") == 0) return "January";
   if (std::strcmp(key, "february") == 0) return "February";
   if (std::strcmp(key, "march") == 0) return "March";
@@ -4111,6 +4171,7 @@ inline const char *espcontrol_i18n_key_cs(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Kryt";
   if (std::strcmp(key, "date") == 0) return "Datum";
   if (std::strcmp(key, "dev_build") == 0) return "Vývojová verze";
+  if (std::strcmp(key, "device_volume") == 0) return "Hlasitost zařízení";
   if (std::strcmp(key, "dimmed") == 0) return "Ztlumeno";
   if (std::strcmp(key, "direction") == 0) return "Směr";
   if (std::strcmp(key, "disarm") == 0) return "Odzajistit";
@@ -4151,6 +4212,8 @@ inline const char *espcontrol_i18n_key_cs(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Média";
   if (std::strcmp(key, "mode") == 0) return "Režim";
   if (std::strcmp(key, "monthly") == 0) return "Měsíčně";
+  if (std::strcmp(key, "more") == 0) return "další";
+  if (std::strcmp(key, "more_items") == 0) return "Další položky";
   if (std::strcmp(key, "january") == 0) return "leden";
   if (std::strcmp(key, "february") == 0) return "únor";
   if (std::strcmp(key, "march") == 0) return "březen";
@@ -4314,6 +4377,7 @@ inline const char *espcontrol_i18n_key_da(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Dæksel";
   if (std::strcmp(key, "date") == 0) return "Dato";
   if (std::strcmp(key, "dev_build") == 0) return "Udviklerversion";
+  if (std::strcmp(key, "device_volume") == 0) return "Enhedslydstyrke";
   if (std::strcmp(key, "dimmed") == 0) return "Neddæmpet";
   if (std::strcmp(key, "direction") == 0) return "Retning";
   if (std::strcmp(key, "disarm") == 0) return "Deaktiver";
@@ -4353,6 +4417,8 @@ inline const char *espcontrol_i18n_key_da(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Medie";
   if (std::strcmp(key, "mode") == 0) return "Tilstand";
   if (std::strcmp(key, "monthly") == 0) return "Månedligt";
+  if (std::strcmp(key, "more") == 0) return "mere";
+  if (std::strcmp(key, "more_items") == 0) return "Flere elementer";
   if (std::strcmp(key, "january") == 0) return "januar";
   if (std::strcmp(key, "february") == 0) return "februar";
   if (std::strcmp(key, "march") == 0) return "marts";
@@ -4512,6 +4578,7 @@ inline const char *espcontrol_i18n_key_de(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Datum";
   if (std::strcmp(key, "dev") == 0) return "Entw.";
   if (std::strcmp(key, "dev_build") == 0) return "Entwicklerversion";
+  if (std::strcmp(key, "device_volume") == 0) return "Gerätelautstärke";
   if (std::strcmp(key, "dimmed") == 0) return "Gedimmt";
   if (std::strcmp(key, "direction") == 0) return "Richtung";
   if (std::strcmp(key, "disarm") == 0) return "Entschärfen";
@@ -4552,6 +4619,8 @@ inline const char *espcontrol_i18n_key_de(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Medien";
   if (std::strcmp(key, "mode") == 0) return "Modus";
   if (std::strcmp(key, "monthly") == 0) return "Monatlich";
+  if (std::strcmp(key, "more") == 0) return "weitere";
+  if (std::strcmp(key, "more_items") == 0) return "Weitere Elemente";
   if (std::strcmp(key, "january") == 0) return "Januar";
   if (std::strcmp(key, "february") == 0) return "Februar";
   if (std::strcmp(key, "march") == 0) return "März";
@@ -4706,6 +4775,7 @@ inline const char *espcontrol_i18n_key_es(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Cubierta";
   if (std::strcmp(key, "date") == 0) return "Fecha";
   if (std::strcmp(key, "dev_build") == 0) return "Versión dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Volumen del dispositivo";
   if (std::strcmp(key, "dimmed") == 0) return "Atenuado";
   if (std::strcmp(key, "direction") == 0) return "Dirección";
   if (std::strcmp(key, "disarm") == 0) return "Desarmar";
@@ -4745,6 +4815,8 @@ inline const char *espcontrol_i18n_key_es(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Multimedia";
   if (std::strcmp(key, "mode") == 0) return "Modo";
   if (std::strcmp(key, "monthly") == 0) return "Mensual";
+  if (std::strcmp(key, "more") == 0) return "más";
+  if (std::strcmp(key, "more_items") == 0) return "Más elementos";
   if (std::strcmp(key, "january") == 0) return "enero";
   if (std::strcmp(key, "february") == 0) return "febrero";
   if (std::strcmp(key, "march") == 0) return "marzo";
@@ -4909,6 +4981,7 @@ inline const char *espcontrol_i18n_key_fi(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Päivämäärä";
   if (std::strcmp(key, "dev") == 0) return "Kehitys";
   if (std::strcmp(key, "dev_build") == 0) return "Kehitysversio";
+  if (std::strcmp(key, "device_volume") == 0) return "Laitteen äänenvoimakkuus";
   if (std::strcmp(key, "dimmed") == 0) return "Himmennetty";
   if (std::strcmp(key, "direction") == 0) return "Suunta";
   if (std::strcmp(key, "disarm") == 0) return "Poista viritys";
@@ -4950,6 +5023,8 @@ inline const char *espcontrol_i18n_key_fi(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Keskitaso";
   if (std::strcmp(key, "mode") == 0) return "Tila";
   if (std::strcmp(key, "monthly") == 0) return "Kuukausittain";
+  if (std::strcmp(key, "more") == 0) return "lisää";
+  if (std::strcmp(key, "more_items") == 0) return "Lisää kohteita";
   if (std::strcmp(key, "january") == 0) return "Tammikuu";
   if (std::strcmp(key, "february") == 0) return "Helmikuu";
   if (std::strcmp(key, "march") == 0) return "Maaliskuu";
@@ -5116,6 +5191,7 @@ inline const char *espcontrol_i18n_key_fr(const char *key) {
   if (std::strcmp(key, "could_not_load") == 0) return "Impossible de charger";
   if (std::strcmp(key, "cover") == 0) return "Volet";
   if (std::strcmp(key, "dev_build") == 0) return "Version dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Volume de l’appareil";
   if (std::strcmp(key, "dimmed") == 0) return "Tamisé";
   if (std::strcmp(key, "disarm") == 0) return "Désarmer";
   if (std::strcmp(key, "disarmed") == 0) return "Désarmé";
@@ -5154,6 +5230,8 @@ inline const char *espcontrol_i18n_key_fr(const char *key) {
   if (std::strcmp(key, "low_target") == 0) return "Cible basse";
   if (std::strcmp(key, "media") == 0) return "Média";
   if (std::strcmp(key, "monthly") == 0) return "Mensuel";
+  if (std::strcmp(key, "more") == 0) return "de plus";
+  if (std::strcmp(key, "more_items") == 0) return "Plus d’éléments";
   if (std::strcmp(key, "january") == 0) return "janvier";
   if (std::strcmp(key, "february") == 0) return "février";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -5315,6 +5393,7 @@ inline const char *espcontrol_i18n_key_hu(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Dátum";
   if (std::strcmp(key, "dev") == 0) return "Fejlesztői";
   if (std::strcmp(key, "dev_build") == 0) return "Fejlesztői build";
+  if (std::strcmp(key, "device_volume") == 0) return "Eszköz hangereje";
   if (std::strcmp(key, "dimmed") == 0) return "Halványított";
   if (std::strcmp(key, "direction") == 0) return "Irány";
   if (std::strcmp(key, "disarm") == 0) return "Hatástalanítás";
@@ -5357,6 +5436,8 @@ inline const char *espcontrol_i18n_key_hu(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Közepes";
   if (std::strcmp(key, "mode") == 0) return "Mód";
   if (std::strcmp(key, "monthly") == 0) return "Havonta";
+  if (std::strcmp(key, "more") == 0) return "további";
+  if (std::strcmp(key, "more_items") == 0) return "További elemek";
   if (std::strcmp(key, "january") == 0) return "Január";
   if (std::strcmp(key, "february") == 0) return "Február";
   if (std::strcmp(key, "march") == 0) return "Március";
@@ -5524,6 +5605,7 @@ inline const char *espcontrol_i18n_key_it(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Tapparella";
   if (std::strcmp(key, "date") == 0) return "Data";
   if (std::strcmp(key, "dev_build") == 0) return "Build dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Volume dispositivo";
   if (std::strcmp(key, "dimmed") == 0) return "Attenuato";
   if (std::strcmp(key, "direction") == 0) return "Direzione";
   if (std::strcmp(key, "disarm") == 0) return "Disinserisci";
@@ -5564,6 +5646,8 @@ inline const char *espcontrol_i18n_key_it(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Medio";
   if (std::strcmp(key, "mode") == 0) return "Modalità";
   if (std::strcmp(key, "monthly") == 0) return "Mensile";
+  if (std::strcmp(key, "more") == 0) return "altri";
+  if (std::strcmp(key, "more_items") == 0) return "Altri elementi";
   if (std::strcmp(key, "january") == 0) return "Gennaio";
   if (std::strcmp(key, "february") == 0) return "Febbraio";
   if (std::strcmp(key, "march") == 0) return "Marzo";
@@ -5727,6 +5811,7 @@ inline const char *espcontrol_i18n_key_nb(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Deksel";
   if (std::strcmp(key, "date") == 0) return "Dato";
   if (std::strcmp(key, "dev_build") == 0) return "Utviklerversjon";
+  if (std::strcmp(key, "device_volume") == 0) return "Enhetsvolum";
   if (std::strcmp(key, "dimmed") == 0) return "Neddimmet";
   if (std::strcmp(key, "direction") == 0) return "Retning";
   if (std::strcmp(key, "disarm") == 0) return "Deaktiver";
@@ -5766,6 +5851,8 @@ inline const char *espcontrol_i18n_key_nb(const char *key) {
   if (std::strcmp(key, "low_target") == 0) return "Lavt mål";
   if (std::strcmp(key, "mode") == 0) return "Modus";
   if (std::strcmp(key, "monthly") == 0) return "Månedlig";
+  if (std::strcmp(key, "more") == 0) return "flere";
+  if (std::strcmp(key, "more_items") == 0) return "Flere elementer";
   if (std::strcmp(key, "january") == 0) return "januar";
   if (std::strcmp(key, "february") == 0) return "februar";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -5928,6 +6015,7 @@ inline const char *espcontrol_i18n_key_nl(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Datum";
   if (std::strcmp(key, "dev") == 0) return "Ontwikkeling";
   if (std::strcmp(key, "dev_build") == 0) return "Ontwikkelversie";
+  if (std::strcmp(key, "device_volume") == 0) return "Apparaatvolume";
   if (std::strcmp(key, "dimmed") == 0) return "Gedimd";
   if (std::strcmp(key, "direction") == 0) return "Richting";
   if (std::strcmp(key, "disarm") == 0) return "Uitschakelen";
@@ -5967,6 +6055,8 @@ inline const char *espcontrol_i18n_key_nl(const char *key) {
   if (std::strcmp(key, "low_target") == 0) return "Laag doel";
   if (std::strcmp(key, "mode") == 0) return "Modus";
   if (std::strcmp(key, "monthly") == 0) return "Maandelijks";
+  if (std::strcmp(key, "more") == 0) return "meer";
+  if (std::strcmp(key, "more_items") == 0) return "Meer items";
   if (std::strcmp(key, "january") == 0) return "januari";
   if (std::strcmp(key, "february") == 0) return "februari";
   if (std::strcmp(key, "march") == 0) return "maart";
@@ -6125,6 +6215,7 @@ inline const char *espcontrol_i18n_key_pl(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Osłona";
   if (std::strcmp(key, "date") == 0) return "Data";
   if (std::strcmp(key, "dev_build") == 0) return "Wersja dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Głośność urządzenia";
   if (std::strcmp(key, "dimmed") == 0) return "Przyciemnione";
   if (std::strcmp(key, "direction") == 0) return "Kierunek";
   if (std::strcmp(key, "disarm") == 0) return "Rozbrój";
@@ -6164,6 +6255,8 @@ inline const char *espcontrol_i18n_key_pl(const char *key) {
   if (std::strcmp(key, "low_target") == 0) return "Niski cel";
   if (std::strcmp(key, "mode") == 0) return "Tryb";
   if (std::strcmp(key, "monthly") == 0) return "Co miesiąc";
+  if (std::strcmp(key, "more") == 0) return "więcej";
+  if (std::strcmp(key, "more_items") == 0) return "Więcej elementów";
   if (std::strcmp(key, "january") == 0) return "styczeń";
   if (std::strcmp(key, "february") == 0) return "luty";
   if (std::strcmp(key, "march") == 0) return "marzec";
@@ -6325,6 +6418,7 @@ inline const char *espcontrol_i18n_key_pt_br(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Cobertura";
   if (std::strcmp(key, "date") == 0) return "Data";
   if (std::strcmp(key, "dev_build") == 0) return "Versão dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Volume do dispositivo";
   if (std::strcmp(key, "dimmed") == 0) return "Escurecido";
   if (std::strcmp(key, "direction") == 0) return "Direção";
   if (std::strcmp(key, "disarm") == 0) return "Desarmar";
@@ -6364,6 +6458,8 @@ inline const char *espcontrol_i18n_key_pt_br(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Mídia";
   if (std::strcmp(key, "mode") == 0) return "Modo";
   if (std::strcmp(key, "monthly") == 0) return "Mensal";
+  if (std::strcmp(key, "more") == 0) return "mais";
+  if (std::strcmp(key, "more_items") == 0) return "Mais itens";
   if (std::strcmp(key, "january") == 0) return "janeiro";
   if (std::strcmp(key, "february") == 0) return "fevereiro";
   if (std::strcmp(key, "march") == 0) return "março";
@@ -6526,6 +6622,7 @@ inline const char *espcontrol_i18n_key_pt(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Cobertura";
   if (std::strcmp(key, "date") == 0) return "Data";
   if (std::strcmp(key, "dev_build") == 0) return "Versão dev";
+  if (std::strcmp(key, "device_volume") == 0) return "Volume do dispositivo";
   if (std::strcmp(key, "dimmed") == 0) return "Escurecido";
   if (std::strcmp(key, "direction") == 0) return "Direção";
   if (std::strcmp(key, "disarm") == 0) return "Desarmar";
@@ -6566,6 +6663,8 @@ inline const char *espcontrol_i18n_key_pt(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Multimédia";
   if (std::strcmp(key, "mode") == 0) return "Modo";
   if (std::strcmp(key, "monthly") == 0) return "Mensal";
+  if (std::strcmp(key, "more") == 0) return "mais";
+  if (std::strcmp(key, "more_items") == 0) return "Mais itens";
   if (std::strcmp(key, "january") == 0) return "janeiro";
   if (std::strcmp(key, "february") == 0) return "fevereiro";
   if (std::strcmp(key, "march") == 0) return "março";
@@ -6730,6 +6829,7 @@ inline const char *espcontrol_i18n_key_ro(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Dată";
   if (std::strcmp(key, "dev") == 0) return "Dezvoltare";
   if (std::strcmp(key, "dev_build") == 0) return "Versiune de dezvoltare";
+  if (std::strcmp(key, "device_volume") == 0) return "Volumul dispozitivului";
   if (std::strcmp(key, "dimmed") == 0) return "Estompat";
   if (std::strcmp(key, "direction") == 0) return "Direcție";
   if (std::strcmp(key, "disarm") == 0) return "Dezarmează";
@@ -6771,6 +6871,8 @@ inline const char *espcontrol_i18n_key_ro(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Mediu";
   if (std::strcmp(key, "mode") == 0) return "Mod";
   if (std::strcmp(key, "monthly") == 0) return "Lunar";
+  if (std::strcmp(key, "more") == 0) return "încă";
+  if (std::strcmp(key, "more_items") == 0) return "Mai multe elemente";
   if (std::strcmp(key, "january") == 0) return "Ianuarie";
   if (std::strcmp(key, "february") == 0) return "Februarie";
   if (std::strcmp(key, "march") == 0) return "Martie";
@@ -6938,6 +7040,7 @@ inline const char *espcontrol_i18n_key_sk(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Kryt";
   if (std::strcmp(key, "date") == 0) return "Dátum";
   if (std::strcmp(key, "dev_build") == 0) return "Vývojová verzia";
+  if (std::strcmp(key, "device_volume") == 0) return "Hlasitosť zariadenia";
   if (std::strcmp(key, "dimmed") == 0) return "Stlmené";
   if (std::strcmp(key, "direction") == 0) return "Smer";
   if (std::strcmp(key, "disarm") == 0) return "Odzbrojiť";
@@ -6978,6 +7081,8 @@ inline const char *espcontrol_i18n_key_sk(const char *key) {
   if (std::strcmp(key, "media") == 0) return "Médiá";
   if (std::strcmp(key, "mode") == 0) return "Režim";
   if (std::strcmp(key, "monthly") == 0) return "Mesačne";
+  if (std::strcmp(key, "more") == 0) return "ďalšie";
+  if (std::strcmp(key, "more_items") == 0) return "Ďalšie položky";
   if (std::strcmp(key, "january") == 0) return "január";
   if (std::strcmp(key, "february") == 0) return "február";
   if (std::strcmp(key, "march") == 0) return "marec";
@@ -7143,6 +7248,7 @@ inline const char *espcontrol_i18n_key_sl(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Datum";
   if (std::strcmp(key, "dev") == 0) return "Razvijalec";
   if (std::strcmp(key, "dev_build") == 0) return "Razvojna različica";
+  if (std::strcmp(key, "device_volume") == 0) return "Glasnost naprave";
   if (std::strcmp(key, "dimmed") == 0) return "Zatemnjeno";
   if (std::strcmp(key, "direction") == 0) return "Smer";
   if (std::strcmp(key, "disarm") == 0) return "Izklopi varovanje";
@@ -7185,6 +7291,8 @@ inline const char *espcontrol_i18n_key_sl(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Srednje";
   if (std::strcmp(key, "mode") == 0) return "Način";
   if (std::strcmp(key, "monthly") == 0) return "Mesečno";
+  if (std::strcmp(key, "more") == 0) return "več";
+  if (std::strcmp(key, "more_items") == 0) return "Več elementov";
   if (std::strcmp(key, "january") == 0) return "Januar";
   if (std::strcmp(key, "february") == 0) return "Februar";
   if (std::strcmp(key, "march") == 0) return "Marec";
@@ -7349,6 +7457,7 @@ inline const char *espcontrol_i18n_key_sv(const char *key) {
   if (std::strcmp(key, "cover") == 0) return "Skydd";
   if (std::strcmp(key, "date") == 0) return "Datum";
   if (std::strcmp(key, "dev_build") == 0) return "Utvecklarversion";
+  if (std::strcmp(key, "device_volume") == 0) return "Enhetsvolym";
   if (std::strcmp(key, "dimmed") == 0) return "Nedtonad";
   if (std::strcmp(key, "direction") == 0) return "Riktning";
   if (std::strcmp(key, "disarm") == 0) return "Avlarma";
@@ -7388,6 +7497,8 @@ inline const char *espcontrol_i18n_key_sv(const char *key) {
   if (std::strcmp(key, "low_target") == 0) return "Lågt mål";
   if (std::strcmp(key, "mode") == 0) return "Läge";
   if (std::strcmp(key, "monthly") == 0) return "Månadsvis";
+  if (std::strcmp(key, "more") == 0) return "fler";
+  if (std::strcmp(key, "more_items") == 0) return "Fler objekt";
   if (std::strcmp(key, "january") == 0) return "januari";
   if (std::strcmp(key, "february") == 0) return "februari";
   if (std::strcmp(key, "march") == 0) return "mars";
@@ -7549,6 +7660,7 @@ inline const char *espcontrol_i18n_key_tr(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Tarih";
   if (std::strcmp(key, "dev") == 0) return "Geliştirici";
   if (std::strcmp(key, "dev_build") == 0) return "Geliştirici sürümü";
+  if (std::strcmp(key, "device_volume") == 0) return "Cihaz sesi";
   if (std::strcmp(key, "dimmed") == 0) return "Kısılmış";
   if (std::strcmp(key, "direction") == 0) return "Yön";
   if (std::strcmp(key, "disarm") == 0) return "Devre dışı bırak";
@@ -7590,6 +7702,8 @@ inline const char *espcontrol_i18n_key_tr(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Orta";
   if (std::strcmp(key, "mode") == 0) return "Mod";
   if (std::strcmp(key, "monthly") == 0) return "Aylık";
+  if (std::strcmp(key, "more") == 0) return "daha";
+  if (std::strcmp(key, "more_items") == 0) return "Daha fazla öğe";
   if (std::strcmp(key, "january") == 0) return "Ocak";
   if (std::strcmp(key, "february") == 0) return "Şubat";
   if (std::strcmp(key, "march") == 0) return "Mart";
@@ -7761,6 +7875,7 @@ inline const char *espcontrol_i18n_key_uk(const char *key) {
   if (std::strcmp(key, "date") == 0) return "Дата";
   if (std::strcmp(key, "dev") == 0) return "Розробка";
   if (std::strcmp(key, "dev_build") == 0) return "Збірка для розробки";
+  if (std::strcmp(key, "device_volume") == 0) return "Гучність пристрою";
   if (std::strcmp(key, "dimmed") == 0) return "Приглушено";
   if (std::strcmp(key, "direction") == 0) return "Напрямок";
   if (std::strcmp(key, "disarm") == 0) return "Вимкнути охорону";
@@ -7803,6 +7918,8 @@ inline const char *espcontrol_i18n_key_uk(const char *key) {
   if (std::strcmp(key, "medium") == 0) return "Середньо";
   if (std::strcmp(key, "mode") == 0) return "Режим";
   if (std::strcmp(key, "monthly") == 0) return "Щомісяця";
+  if (std::strcmp(key, "more") == 0) return "ще";
+  if (std::strcmp(key, "more_items") == 0) return "Більше елементів";
   if (std::strcmp(key, "january") == 0) return "Січень";
   if (std::strcmp(key, "february") == 0) return "Лютий";
   if (std::strcmp(key, "march") == 0) return "Березень";

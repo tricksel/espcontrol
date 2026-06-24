@@ -407,7 +407,8 @@ inline void todo_lite_render_items(TodoCardCtx *ctx) {
 
   if (ui.more_count > 0) {
     char more_label[32];
-    std::snprintf(more_label, sizeof(more_label), "%d more", ui.more_count);
+    std::snprintf(
+      more_label, sizeof(more_label), "%d %s", ui.more_count, espcontrol_i18n("more"));
     todo_lite_create_note_row(ctx, more_label, row_h, content_w);
   }
 }
@@ -1106,7 +1107,9 @@ inline void todo_modal_render_items(TodoCardCtx *ctx, const std::vector<TodoItem
   for (const auto &item : items) {
     if (item.more) {
       ui.more_items_visible = true;
-      std::string label = item.summary.empty() ? "More items" : item.summary + " more";
+      std::string label = item.summary.empty()
+        ? espcontrol_i18n(std::string("More items"))
+        : item.summary + " " + espcontrol_i18n(std::string("more"));
       todo_modal_create_list_item_row(
         ui.list, label, false, false, false, row_h, content_w,
         checkbox_size, item_gap, ctx->label_font,
