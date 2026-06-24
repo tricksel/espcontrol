@@ -186,8 +186,13 @@ def test_square_s3_reapplies_clock_bar_layout() -> None:
 def test_p4_43_rotation_refresh_rebuilds_subpages() -> None:
     slug = "guition-esp32-p4-jc4880p443"
     sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
-    assert "navigation_return_home(id(main_page)->obj);" in sensors, (
-        "4.3-inch P4 rotation refresh must return home before rebuilding subpages"
+    assert (
+        "grid_refresh_layout(slots, cfg,\n"
+        "            id(button_order).state,\n"
+        "            id(main_page)->obj);\n"
+        "          navigation_return_home(id(main_page)->obj);"
+    ) in sensors, (
+        "4.3-inch P4 rotation refresh must refresh the home grid before rebuilding subpages"
     )
     assert "grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7," in sensors, (
         "4.3-inch P4 rotation refresh must rebuild subpage grids with the current column count"
