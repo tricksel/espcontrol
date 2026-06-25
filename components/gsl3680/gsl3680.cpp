@@ -224,15 +224,23 @@ void GSL3680::update_touches() {
 
     ESP_LOGV(TAG, "update_touches: touch [%d] %dx%d (%d)", cinfo.finger_num, cinfo.x[0], cinfo.y[0], mask);
 
-    const bool first_touch_in_bounds =
-        cinfo.x[0] >= this->x_raw_min_ && cinfo.x[0] <= this->x_raw_max_ &&
-        cinfo.y[0] >= this->y_raw_min_ && cinfo.y[0] <= this->y_raw_max_;
-    if (cinfo.finger_num >= 1 && first_touch_in_bounds) {
-        // Report the first contact even when the controller sees a noisy or
-        // multi-touch wake tap; the screensaver wake path only needs one touch.
-        this->add_raw_touch_position_(0, cinfo.x[0], cinfo.y[0]);
+    int selected_touch = -1;
+    for (int i = 0; i < cinfo.finger_num && i < 2; i++) {
+        const bool touch_in_bounds =
+            cinfo.x[i] >= this->x_raw_min_ && cinfo.x[i] <= this->x_raw_max_ &&
+            cinfo.y[i] >= this->y_raw_min_ && cinfo.y[i] <= this->y_raw_max_;
+        if (touch_in_bounds) {
+            selected_touch = i;
+            break;
+        }
+    }
+    if (selected_touch >= 0) {
+        // Report the first valid contact even when the controller sees a noisy
+        // or multi-touch wake tap; the screensaver wake path only needs one touch.
+        this->add_raw_touch_position_(0, cinfo.x[selected_touch], cinfo.y[selected_touch]);
     } else if (cinfo.finger_num >= 1) {
-        ESP_LOGW(TAG, "Ignoring out-of-bounds GSL3680 touch %dx%d", cinfo.x[0], cinfo.y[0]);
+        ESP_LOGW(TAG, "Ignoring out-of-bounds GSL3680 touches %dx%d and %dx%d",
+                 cinfo.x[0], cinfo.y[0], cinfo.x[1], cinfo.y[1]);
     }
 }
 
