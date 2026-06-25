@@ -912,9 +912,10 @@ function escHtml(s) {
 }
 
 function mdiIcon(icon, className) {
+  var iconName = String(icon || "cog").trim();
   var span = document.createElement("span");
   span.className = className || "mdi";
-  span.classList.add("mdi-" + iconSlug(icon || "cog"));
+  span.classList.add("mdi-" + (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(iconName) ? iconName : iconSlug(iconName)));
   return span;
 }
 
