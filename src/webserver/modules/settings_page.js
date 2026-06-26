@@ -530,7 +530,7 @@ function buildSettingsPage(parent) {
   syncNtpServerUi();
   clockBody.appendChild(ntpField);
 
-  var timeSettingsCard = makeCollapsibleCard("Time Settings", clockBody, true);
+  var timeSettingsCard = makeCollapsibleCard("Time", clockBody, true);
 
   var clockBarBody = document.createElement("div");
 
@@ -620,7 +620,7 @@ function buildSettingsPage(parent) {
   els.setTemperatureUnit = unitSelect;
 
   syncTemperatureUi();
-  var temperatureCard = makeCollapsibleCard("Temperature Settings", tempBody, true);
+  var temperatureCard = makeCollapsibleCard("Temperature", tempBody, true);
 
   var ssBody = document.createElement("div");
   var ssMode = getActiveScreensaverMode();
@@ -687,11 +687,15 @@ function buildSettingsPage(parent) {
     });
     els.setCoverArtToggle = coverArtToggle.input;
 
+    var coverArtOptions = condField();
+    var coverArtOnlyOptions = condField();
+    var coverArtAdvancedBody = document.createElement("div");
+
     var sleepPreventionToggle = toggleRow(
       "Keep Screen Awake During Playback",
       "sp-set-ss-media-sleep-prevention",
       state.mediaPlayerSleepPreventionOn);
-    coverArtBody.appendChild(sleepPreventionToggle.row);
+    coverArtOptions.appendChild(sleepPreventionToggle.row);
     sleepPreventionToggle.input.addEventListener("change", function () {
       state.mediaPlayerSleepPreventionOn = this.checked;
       syncMediaPlayerSleepPreventionUi();
@@ -699,10 +703,6 @@ function buildSettingsPage(parent) {
       postSwitch(entityName("screen_saver_media_player_sleep_prevention"), state.mediaPlayerSleepPreventionOn);
     });
     els.setMediaPlayerSleepPreventionToggle = sleepPreventionToggle.input;
-
-    var coverArtOptions = condField();
-    var coverArtOnlyOptions = condField();
-    var coverArtAdvancedBody = document.createElement("div");
 
     var coverArtEntityField = document.createElement("div");
     coverArtEntityField.className = "sp-field";
@@ -713,7 +713,7 @@ function buildSettingsPage(parent) {
       "e.g. media_player.living_room",
       ["media_player"]);
     coverArtEntityField.appendChild(coverArtEntityInp);
-    coverArtOptions.appendChild(coverArtEntityField);
+    coverArtOnlyOptions.appendChild(coverArtEntityField);
     bindTextPost(coverArtEntityInp, entityName("screen_saver_cover_art_entity"), {
       onBlur: function (value) { state.coverArtMediaPlayerEntity = value; },
     });
@@ -970,7 +970,7 @@ function buildSettingsPage(parent) {
     var coverArtBadge = statusBadge("Media cover art on");
     els.setCoverArtBadge = coverArtBadge;
     syncCoverArtScreensaverUi();
-    coverArtCard = makeCollapsibleCard("Media Cover Art", coverArtBody, true, coverArtBadge);
+    coverArtCard = makeCollapsibleCard("Cover Art", coverArtBody, true, coverArtBadge);
   }
 
   var backupBody = document.createElement("div");
@@ -1180,19 +1180,21 @@ function buildSettingsPage(parent) {
     appearanceCard,
     backlightCard,
     clockBarCard,
+    coverArtCard,
     voiceServicesCard,
     rotationCard,
   ]);
   appendSettingsSection(config, "Sleep & Schedule", [
     idleCard,
     screensaverCard,
-    coverArtCard,
     scheduleCard,
   ]);
-  appendSettingsSection(config, "System", [
+  appendSettingsSection(config, "Preferences", [
     languageCard,
     timeSettingsCard,
     temperatureCard,
+  ]);
+  appendSettingsSection(config, "System", [
     backupCard,
     firmwareCard,
     homeAssistantSettingsCard,

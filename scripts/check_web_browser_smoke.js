@@ -403,6 +403,11 @@ async function assertSettingsPage(page, label, options = {}) {
   assert(appearanceVisible, `${label}: settings content should render`);
   assert.strictEqual(themeVisible, !!options.isEpaper, `${label}: theme selector visibility should match display type`);
   assert.strictEqual(onColorVisible, !options.isEpaper, `${label}: color controls visibility should match display type`);
+  assert.deepStrictEqual(
+    await page.locator("#sp-settings .sp-settings-status-title").evaluateAll((nodes) => nodes.map((node) => node.textContent)),
+    ["Display", "Sleep & Schedule", "Preferences", "System"],
+    `${label}: settings groups should be ordered by purpose`
+  );
   const clockBarCard = page.locator("#sp-settings .card").filter({ hasText: "Clock Bar" }).first();
   const clockBarText = await clockBarCard.textContent();
   const voiceServicesCard = page.locator("#sp-settings .card").filter({
@@ -428,9 +433,9 @@ async function assertSettingsPage(page, label, options = {}) {
   );
   if (!options.isEpaper) {
     const coverArtCard = page.locator("#sp-settings .card").filter({
-      has: page.locator(".card-header h3", { hasText: /^Media Cover Art$/ }),
+      has: page.locator(".card-header h3", { hasText: /^Cover Art$/ }),
     }).first();
-    assert(await coverArtCard.isVisible(), `${label}: media cover art settings card should render`);
+    assert(await coverArtCard.isVisible(), `${label}: cover art settings card should render`);
     await coverArtCard.locator(".card-header").click();
     assert.strictEqual(
       await page.locator("#sp-cover-art-info").count(),
@@ -440,12 +445,17 @@ async function assertSettingsPage(page, label, options = {}) {
     assert.strictEqual(
       await page.locator("#sp-set-ss-media-sleep-prevention").count(),
       1,
-      `${label}: keep-screen-awake option should render separately`
+      `${label}: keep-screen-awake option should exist in cover art settings`
     );
-    await coverArtCard.locator("#sp-set-ss-media-sleep-prevention + .sp-toggle-track").click();
-    assert(
+    assert.strictEqual(
+      await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
+      false,
+      `${label}: keep-screen-awake option should hide when cover art is disabled`
+    );
+    assert.strictEqual(
       await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),
-      `${label}: media player entity field should render when keep-screen-awake is enabled`
+      false,
+      `${label}: media player entity field should hide when cover art is disabled`
     );
     assert.strictEqual(
       await coverArtCard.locator("#sp-set-ss-cover-art-delay").isVisible(),
@@ -453,6 +463,10 @@ async function assertSettingsPage(page, label, options = {}) {
       `${label}: cover art show-after field should stay hidden until cover art is enabled`
     );
     await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
+    assert(
+      await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
+      `${label}: keep-screen-awake option should render when cover art is enabled`
+    );
     assert(
       await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),
       `${label}: media player entity field should render when cover art is enabled`
@@ -488,6 +502,19 @@ async function assertSettingsPage(page, label, options = {}) {
     assert(
       await coverArtCard.locator("#sp-set-ss-cover-art-conditions").isVisible(),
       `${label}: cover art conditions field should render after advanced filtering is enabled`
+    );
+    if (!(await coverArtCard.locator("#sp-set-ss-media-sleep-prevention").isChecked())) {
+      await coverArtCard.locator("#sp-set-ss-media-sleep-prevention + .sp-toggle-track").click();
+    }
+    await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
+    assert(
+      await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
+      `${label}: enabled keep-screen-awake option should remain visible when cover art is disabled`
+    );
+    assert.strictEqual(
+      await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),
+      false,
+      `${label}: media player entity field should hide when cover art is disabled even if keep-screen-awake is enabled`
     );
     assert(
       await page.locator("#sp-set-ss-cover-art-server").count() === 0,
@@ -1260,7 +1287,9 @@ async function assertClockBarEditorSmoke(page, posts, label) {
 
   await page.getByRole("tab", { name: "Settings" }).click();
   await page.waitForSelector("#sp-settings.sp-page.active");
-  const timeSettingsCard = page.locator("#sp-settings .card").filter({ hasText: "Time Settings" }).first();
+  const timeSettingsCard = page.locator("#sp-settings .card").filter({
+    has: page.locator(".card-header h3", { hasText: /^Time$/ }),
+  }).first();
   const timeSettingsText = await timeSettingsCard.textContent();
   assert(timeSettingsText.includes("Timezone"), `${label}: timezone remains in global time settings`);
   assert(timeSettingsText.includes("Clock Format"), `${label}: clock format remains in global time settings`);
