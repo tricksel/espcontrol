@@ -873,6 +873,11 @@ async function assertCoverSettingsPanels(page, label) {
 
   await modalSettings.locator(".sp-disclosure-button").click();
   assert(await modalSettings.getByText("Controls", { exact: true }).isVisible(), `${label}: cover modal settings panel should contain modal tab controls`);
+  assert.strictEqual(
+    await modalSettings.getByText("Modal Tabs", { exact: true }).count(),
+    0,
+    `${label}: cover modal settings panel should not show a Modal Tabs heading`
+  );
   await page.locator("#sp-inp-cover-interaction").selectOption("toggle");
   await page.waitForFunction(() => {
     var panels = Array.from(document.querySelectorAll(".sp-settings-modal .sp-disclosure"));

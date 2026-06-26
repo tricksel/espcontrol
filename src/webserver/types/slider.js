@@ -52,6 +52,7 @@ function renderCoverControlTabSettings(panel, b, helpers) {
     normalizeOptions: normalizeCoverOptions,
     setTabs: setCoverControlTabs,
     idPrefix: "cover-tab-",
+    hideHeading: true,
   });
 }
 
