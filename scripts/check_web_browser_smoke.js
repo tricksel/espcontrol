@@ -507,9 +507,10 @@ async function assertSettingsPage(page, label, options = {}) {
       await coverArtCard.locator("#sp-set-ss-media-sleep-prevention + .sp-toggle-track").click();
     }
     await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
-    assert(
+    assert.strictEqual(
       await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
-      `${label}: enabled keep-screen-awake option should remain visible when cover art is disabled`
+      false,
+      `${label}: enabled keep-screen-awake option should hide when cover art is disabled`
     );
     assert.strictEqual(
       await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),

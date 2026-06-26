@@ -1268,7 +1268,7 @@ function syncCoverArtScreensaverUi() {
   if (els.setCoverArtOptions) {
     els.setCoverArtOptions.classList.toggle(
       "sp-visible",
-      !!state.coverArtScreensaverOn || !!state.mediaPlayerSleepPreventionOn);
+      !!state.coverArtScreensaverOn);
   }
   if (els.setCoverArtOnlyOptions) {
     els.setCoverArtOnlyOptions.classList.toggle(
