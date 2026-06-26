@@ -445,12 +445,17 @@ async function assertSettingsPage(page, label, options = {}) {
     assert.strictEqual(
       await page.locator("#sp-set-ss-media-sleep-prevention").count(),
       1,
-      `${label}: keep-screen-awake option should render separately`
+      `${label}: keep-screen-awake option should exist in cover art settings`
     );
-    await coverArtCard.locator("#sp-set-ss-media-sleep-prevention + .sp-toggle-track").click();
-    assert(
+    assert.strictEqual(
+      await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
+      false,
+      `${label}: keep-screen-awake option should hide when cover art is disabled`
+    );
+    assert.strictEqual(
       await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),
-      `${label}: media player entity field should render when keep-screen-awake is enabled`
+      false,
+      `${label}: media player entity field should hide when cover art is disabled`
     );
     assert.strictEqual(
       await coverArtCard.locator("#sp-set-ss-cover-art-delay").isVisible(),
@@ -458,6 +463,10 @@ async function assertSettingsPage(page, label, options = {}) {
       `${label}: cover art show-after field should stay hidden until cover art is enabled`
     );
     await coverArtCard.locator("#sp-set-ss-cover-art-enable + .sp-toggle-track").click();
+    assert(
+      await coverArtCard.getByText("Keep Screen Awake During Playback", { exact: true }).isVisible(),
+      `${label}: keep-screen-awake option should render when cover art is enabled`
+    );
     assert(
       await coverArtCard.locator("#sp-set-ss-cover-art-player").isVisible(),
       `${label}: media player entity field should render when cover art is enabled`

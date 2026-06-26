@@ -687,11 +687,15 @@ function buildSettingsPage(parent) {
     });
     els.setCoverArtToggle = coverArtToggle.input;
 
+    var coverArtOptions = condField();
+    var coverArtOnlyOptions = condField();
+    var coverArtAdvancedBody = document.createElement("div");
+
     var sleepPreventionToggle = toggleRow(
       "Keep Screen Awake During Playback",
       "sp-set-ss-media-sleep-prevention",
       state.mediaPlayerSleepPreventionOn);
-    coverArtBody.appendChild(sleepPreventionToggle.row);
+    coverArtOptions.appendChild(sleepPreventionToggle.row);
     sleepPreventionToggle.input.addEventListener("change", function () {
       state.mediaPlayerSleepPreventionOn = this.checked;
       syncMediaPlayerSleepPreventionUi();
@@ -699,10 +703,6 @@ function buildSettingsPage(parent) {
       postSwitch(entityName("screen_saver_media_player_sleep_prevention"), state.mediaPlayerSleepPreventionOn);
     });
     els.setMediaPlayerSleepPreventionToggle = sleepPreventionToggle.input;
-
-    var coverArtOptions = condField();
-    var coverArtOnlyOptions = condField();
-    var coverArtAdvancedBody = document.createElement("div");
 
     var coverArtEntityField = document.createElement("div");
     coverArtEntityField.className = "sp-field";
@@ -1268,7 +1268,7 @@ function syncCoverArtScreensaverUi() {
   if (els.setCoverArtOptions) {
     els.setCoverArtOptions.classList.toggle(
       "sp-visible",
-      !!state.coverArtScreensaverOn || !!state.mediaPlayerSleepPreventionOn);
+      !!state.coverArtScreensaverOn);
   }
   if (els.setCoverArtOnlyOptions) {
     els.setCoverArtOnlyOptions.classList.toggle(
