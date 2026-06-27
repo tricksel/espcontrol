@@ -343,6 +343,8 @@ def firmware_action_card_script_fields_errors(firmware_dir: Path, root: Path) ->
         errors.append(f"{rel}: initialize script field variables separately from service data")
     if "ha_action_add_variable(req, key.c_str(), value.c_str())" not in text:
         errors.append(f"{rel}: send script fields through Home Assistant action variables")
+    if "req.data_template.init(1)" not in text or 'ha_action_add_data_template(req, "variables"' not in text:
+        errors.append(f"{rel}: send script fields in the script.turn_on variables service payload")
     add_fields_match = re.search(
         r"inline\s+void\s+action_card_add_script_field_variables\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
         text,
@@ -2559,7 +2561,7 @@ def run_self_test() -> int:
         ),
     )
     expect_action_card_script_fields_errors(
-        "script fields sent as variables",
+        "script fields sent as template context only",
         "inline void action_card_add_script_field_variables(esphome::api::HomeassistantActionRequest &req) {\n"
         "  std::string fields = cfg_option_value(options, \"script_fields\");\n"
         "  ha_action_add_variable(req, key.c_str(), value.c_str());\n"
@@ -2568,6 +2570,21 @@ def run_self_test() -> int:
         "  size_t script_field_count = action_card_script_field_count(p.options);\n"
         "  ha_action_begin(req, p.sensor.c_str(), false, 1);\n"
         "  req.variables.init(script_field_count);\n"
+        "}\n",
+        ("send script fields in the script.turn_on variables service payload",),
+    )
+    expect_action_card_script_fields_errors(
+        "script fields sent in variables payload",
+        "inline void action_card_add_script_field_variables(esphome::api::HomeassistantActionRequest &req) {\n"
+        "  std::string fields = cfg_option_value(options, \"script_fields\");\n"
+        "  ha_action_add_variable(req, key.c_str(), value.c_str());\n"
+        "}\n"
+        "inline void send_action_card_action(const ParsedCfg &p) {\n"
+        "  size_t script_field_count = action_card_script_field_count(p.options);\n"
+        "  ha_action_begin(req, p.sensor.c_str(), false, 1);\n"
+        "  req.data_template.init(1);\n"
+        "  req.variables.init(script_field_count);\n"
+        "  ha_action_add_data_template(req, \"variables\", script_fields_template.c_str());\n"
         "}\n",
         (),
     )

@@ -86,6 +86,28 @@ inline size_t action_card_script_field_count(const std::string &options) {
   return count;
 }
 
+inline std::string action_card_script_fields_template(const std::string &options) {
+  std::string fields = cfg_option_value(options, "script_fields");
+  if (fields.empty()) return "";
+  std::string out = "{{ dict(";
+  bool first = true;
+  size_t start = 0;
+  while (start <= fields.size()) {
+    size_t end = fields.find('\n', start);
+    if (end == std::string::npos) end = fields.size();
+    std::string key;
+    std::string value;
+    if (action_card_parse_script_field(fields.substr(start, end - start), key, value)) {
+      if (!first) out += ", ";
+      out += key + "=" + key;
+      first = false;
+    }
+    start = end + 1;
+  }
+  out += ") }}";
+  return first ? std::string() : out;
+}
+
 inline void action_card_add_script_field_variables(esphome::api::HomeassistantActionRequest &req,
                                                    const std::string &options) {
   std::string fields = cfg_option_value(options, "script_fields");
@@ -133,12 +155,22 @@ inline void send_action_card_action(const ParsedCfg &p) {
 
   esphome::api::HomeassistantActionRequest req;
   if (!ha_action_begin(req, p.sensor.c_str(), false, 1 + (value_key ? 1 : 0))) return;
-  if (script_field_count > 0) req.variables.init(script_field_count);
+  std::string script_fields_template;
+  if (script_field_count > 0) {
+    script_fields_template = action_card_script_fields_template(p.options);
+    if (!script_fields_template.empty()) {
+      req.data_template.init(1);
+      req.variables.init(script_field_count);
+    }
+  }
   ha_action_add_entity(req, p.entity);
   if (value_key) {
     ha_action_add_data(req, value_key, p.unit.c_str());
   }
-  if (script_field_count > 0) action_card_add_script_field_variables(req, p.options);
+  if (!script_fields_template.empty()) {
+    ha_action_add_data_template(req, "variables", script_fields_template.c_str());
+    action_card_add_script_field_variables(req, p.options);
+  }
   ha_action_send(req);
 }
 
