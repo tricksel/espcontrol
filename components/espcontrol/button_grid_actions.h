@@ -86,8 +86,8 @@ inline size_t action_card_script_field_count(const std::string &options) {
   return count;
 }
 
-inline void action_card_add_script_fields(esphome::api::HomeassistantActionRequest &req,
-                                          const std::string &options) {
+inline void action_card_add_script_field_variables(esphome::api::HomeassistantActionRequest &req,
+                                                   const std::string &options) {
   std::string fields = cfg_option_value(options, "script_fields");
   if (fields.empty()) return;
   size_t start = 0;
@@ -97,7 +97,7 @@ inline void action_card_add_script_fields(esphome::api::HomeassistantActionReque
     std::string key;
     std::string value;
     if (action_card_parse_script_field(fields.substr(start, end - start), key, value)) {
-      ha_action_add_data(req, key.c_str(), value.c_str());
+      ha_action_add_variable(req, key.c_str(), value.c_str());
     }
     start = end + 1;
   }
@@ -132,13 +132,13 @@ inline void send_action_card_action(const ParsedCfg &p) {
     : 0;
 
   esphome::api::HomeassistantActionRequest req;
-  if (!ha_action_begin(req, p.sensor.c_str(), false,
-                       1 + (value_key ? 1 : 0) + script_field_count)) return;
+  if (!ha_action_begin(req, p.sensor.c_str(), false, 1 + (value_key ? 1 : 0))) return;
+  if (script_field_count > 0) req.variables.init(script_field_count);
   ha_action_add_entity(req, p.entity);
   if (value_key) {
     ha_action_add_data(req, value_key, p.unit.c_str());
   }
-  if (script_field_count > 0) action_card_add_script_fields(req, p.options);
+  if (script_field_count > 0) action_card_add_script_field_variables(req, p.options);
   ha_action_send(req);
 }
 
