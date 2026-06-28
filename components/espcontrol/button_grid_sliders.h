@@ -363,7 +363,7 @@ inline void light_control_apply_modal_power(LightControlCtx *ctx) {
   if (ui.power_off_btn) {
     lv_obj_set_style_bg_color(
       ui.power_off_btn,
-      lv_color_hex(ctx->on ? DARK_BACKGROUND_SECONDARY : 0xFFFFFF),
+      lv_color_hex(ctx->on ? DARK_BACKGROUND_SECONDARY : DARK_TEXT_PRIMARY),
       LV_PART_MAIN);
     lv_obj_set_style_bg_opa(ui.power_off_btn, ctx->on ? LV_OPA_TRANSP : LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_border_width(ui.power_off_btn, 0, LV_PART_MAIN);
@@ -372,13 +372,13 @@ inline void light_control_apply_modal_power(LightControlCtx *ctx) {
   if (on_label) {
     lv_obj_set_style_text_color(
       on_label,
-      lv_color_hex(ctx->on ? 0xFFFFFF : DARK_TEXT_MUTED),
+      lv_color_hex(ctx->on ? DARK_TEXT_PRIMARY : DARK_TEXT_MUTED),
       LV_PART_MAIN);
   }
   if (off_label) {
     lv_obj_set_style_text_color(
       off_label,
-      lv_color_hex(ctx->on ? DARK_TEXT_MUTED : 0x000000),
+      lv_color_hex(ctx->on ? DARK_TEXT_MUTED : DARK_TEXT_INVERTED),
       LV_PART_MAIN);
   }
 }
