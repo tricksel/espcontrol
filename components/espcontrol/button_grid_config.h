@@ -101,6 +101,7 @@ constexpr const char *FAN_CONTROL_DEFAULT_TABS_VALUE = "power|speed|preset|oscil
 constexpr const char *LABEL_DISPLAY_OPTION = card_runtime_option_name_label_display();
 constexpr const char *NUMBER_DISPLAY_OPTION = card_runtime_option_name_number_display();
 constexpr const char *TEMPERATURE_STEP_OPTION = card_runtime_option_name_temperature_step();
+constexpr const char *VOLUME_MAX_OPTION = card_runtime_option_name_volume_max();
 
 inline int bounded_grid_slots(int num_slots) {
   if (num_slots < 0) return 0;
@@ -394,12 +395,12 @@ inline void append_large_numbers_option(std::string &out, const std::string &opt
 }
 
 inline int normalize_media_volume_max_percent(const std::string &value) {
-  if (value.empty()) return 100;
+  if (value.empty()) return card_runtime_media_volume_max_default();
   char *end = nullptr;
   long parsed = std::strtol(value.c_str(), &end, 10);
-  if (end == value.c_str()) return 100;
-  if (parsed < 1) return 1;
-  if (parsed > 100) return 100;
+  if (end == value.c_str()) return card_runtime_media_volume_max_default();
+  if (parsed < card_runtime_media_volume_max_min()) return card_runtime_media_volume_max_min();
+  if (parsed > card_runtime_media_volume_max_max()) return card_runtime_media_volume_max_max();
   return static_cast<int>(parsed);
 }
 
@@ -408,9 +409,9 @@ inline std::string media_card_options_normalized(const std::string &options,
   if (mode != "volume" && mode != "position") return "";
   std::string out;
   int max_pct = normalize_media_volume_max_percent(
-    cfg_option_value(options, "volume_max"));
-  if (mode == "volume" && max_pct < 100) {
-    out = "volume_max=" + std::to_string(max_pct);
+    cfg_option_value(options, VOLUME_MAX_OPTION));
+  if (mode == "volume" && max_pct < card_runtime_media_volume_max_default()) {
+    out = std::string(VOLUME_MAX_OPTION) + "=" + std::to_string(max_pct);
   }
   append_large_numbers_option(out, options);
   return out;
@@ -1273,8 +1274,8 @@ inline bool cfg_option_enabled(const std::string &options, const char *name) {
 
 inline int media_volume_max_percent(const ParsedCfg &p) {
   return p.type == "media" && p.sensor == "volume"
-    ? normalize_media_volume_max_percent(cfg_option_value(p.options, "volume_max"))
-    : 100;
+    ? normalize_media_volume_max_percent(cfg_option_value(p.options, VOLUME_MAX_OPTION))
+    : card_runtime_media_volume_max_default();
 }
 
 inline std::string action_card_state_entity(const ParsedCfg &p) {

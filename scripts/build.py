@@ -585,6 +585,10 @@ def contract_card_option_default(cards, card_type, option_name):
     return contract_card_option(cards, card_type, option_name).get("defaultValue", "")
 
 
+def contract_card_option_int(cards, card_type, option_name, key):
+    return int(contract_card_option(cards, card_type, option_name).get(key, 0))
+
+
 def gen_card_contract_h(data):
     groups = data["cardGroups"]
     fan = groups["fan"]
@@ -638,6 +642,9 @@ def gen_card_contract_h(data):
         f'constexpr const char *CARD_CONTRACT_GARAGE_LABEL_DISPLAY_DEFAULT = {json.dumps(contract_card_option_default(cards, "garage", "label_display"))};\n',
         f'constexpr const char *CARD_CONTRACT_COVER_CONTROL_TABS_DEFAULT = {json.dumps(contract_card_option_default(cards, "cover", "cover_tabs"))};\n',
         f'constexpr const char *CARD_CONTRACT_MEDIA_DEFAULT_MODE = {json.dumps(media_behavior["defaultMode"])};\n',
+        f'constexpr int CARD_CONTRACT_MEDIA_VOLUME_MAX_MIN = {contract_card_option_int(cards, "media", "volume_max", "min")};\n',
+        f'constexpr int CARD_CONTRACT_MEDIA_VOLUME_MAX_MAX = {contract_card_option_int(cards, "media", "volume_max", "max")};\n',
+        f'constexpr int CARD_CONTRACT_MEDIA_VOLUME_MAX_DEFAULT = {int(contract_card_option_default(cards, "media", "volume_max"))};\n',
         f'constexpr size_t CARD_CONTRACT_ALARM_MAX_VISIBLE_ACTIONS = {int(alarm_behavior.get("maxVisibleActions", 3))};\n',
         f'constexpr const char *CARD_CONTRACT_ALARM_ICON_DISPLAY_DEFAULT = {json.dumps(contract_card_option_default(cards, "alarm", "icon_display"))};\n',
         f'constexpr const char *CARD_CONTRACT_ALARM_LABEL_DISPLAY_DEFAULT = {json.dumps(contract_card_option_default(cards, "alarm", "label_display"))};\n',
