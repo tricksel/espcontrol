@@ -21,6 +21,7 @@ CLOCK_BAR_HEADER = ROOT / "components" / "espcontrol" / "clock_bar.h"
 LAYOUT_HEADER = ROOT / "components" / "espcontrol" / "button_grid_layout.h"
 CARD_NORMALIZATION_FIXTURES = ROOT / "common" / "config" / "card_normalization_fixtures.json"
 DEVICES_DIR = ROOT / "devices"
+IMAGE_CARD_NORMALIZATION_FIXTURES = ROOT / "common" / "config" / "image_card_normalization_fixtures.json"
 
 
 CPP_SOURCE = r'''
@@ -636,18 +637,26 @@ def cpp_string(value: str) -> str:
     return json.dumps(value)
 
 
-def generated_card_normalization_assertions() -> str:
-    fixtures = json.loads(CARD_NORMALIZATION_FIXTURES.read_text(encoding="utf-8"))
-    lines = ["  // Shared saved-card normalization fixtures."]
-    for fixture in fixtures["alarm"]:
+def generated_fixture_assertions(fixtures: list[dict], comment: str, prefix: str) -> str:
+    lines = [f"  // {comment}"]
+    for fixture in fixtures:
         name = fixture["name"]
         input_value = fixture["input"]
         expected = fixture["expected"]
-        var_name = "fixture_" + "".join(ch if ch.isalnum() else "_" for ch in name.lower())
+        var_name = prefix + "".join(ch if ch.isalnum() else "_" for ch in name.lower())
         lines.append(f"  auto {var_name} = parse_cfg({cpp_string(input_value)});")
         for field in ("entity", "label", "icon", "icon_on", "sensor", "unit", "type", "precision", "options"):
             lines.append(f"  assert({var_name}.{field} == {cpp_string(expected[field])});")
     return "\n".join(lines) + "\n"
+
+
+def generated_card_normalization_assertions() -> str:
+    shared_fixtures = json.loads(CARD_NORMALIZATION_FIXTURES.read_text(encoding="utf-8"))
+    image_fixtures = json.loads(IMAGE_CARD_NORMALIZATION_FIXTURES.read_text(encoding="utf-8"))
+    return (
+        generated_fixture_assertions(shared_fixtures["alarm"], "Shared alarm saved-card normalization fixtures.", "fixture_")
+        + generated_fixture_assertions(image_fixtures, "Shared image saved-card normalization fixtures.", "image_fixture_")
+    )
 
 
 def main() -> int:
