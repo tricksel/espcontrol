@@ -2131,7 +2131,11 @@ inline void grid_phase2(
               lv_obj_t *target = static_cast<lv_obj_t *>(lv_event_get_target(e));
               if (target && lv_obj_has_state(target, LV_STATE_DISABLED)) return;
               ParsedCfg *c = (ParsedCfg *)lv_event_get_user_data(e);
-              if (c) send_media_playlist_action(*c);
+              if (c) {
+                ESP_LOGI("button", "Subpage playlist clicked: entity=%s label=%s mode=%s options=%s",
+                         c->entity.c_str(), c->label.c_str(), c->sensor.c_str(), c->options.c_str());
+                send_media_playlist_action(*c);
+              }
             }, LV_EVENT_CLICKED, ctx);
           } else if (media_playback_button_mode(mode)) {
             ParsedCfg *ctx = grid_delete_with_owner(sb_btn, new ParsedCfg(sb_cfg));

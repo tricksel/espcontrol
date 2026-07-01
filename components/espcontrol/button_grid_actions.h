@@ -685,27 +685,70 @@ inline void send_media_playback_action(const std::string &entity_id,
   send_media_player_action(entity_id, media_service_for_mode(mode));
 }
 
+inline uint32_t next_media_playlist_call_id() {
+  static uint32_t call_id = 400000;
+  return call_id++;
+}
+
 inline void send_media_playlist_action(const ParsedCfg &p) {
   if (p.entity.empty()) return;
   std::string content_id = cfg_option_value(p.options, MEDIA_PLAYLIST_CONTENT_ID_OPTION);
-  if (content_id.empty()) return;
+  if (content_id.empty()) {
+    ESP_LOGW("media", "Playlist button for %s has no media content ID", p.entity.c_str());
+    return;
+  }
   std::string content_type = cfg_option_value(p.options, MEDIA_PLAYLIST_CONTENT_TYPE_OPTION);
   if (content_type.empty()) content_type = "playlist";
   std::string player_source = cfg_option_value(p.options, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION);
+  ESP_LOGI("media", "Playlist button: entity=%s content_type=%s content_id=%s playback_device=%s",
+           p.entity.c_str(), content_type.c_str(), content_id.c_str(),
+           player_source.empty() ? "(none)" : player_source.c_str());
   if (!player_source.empty()) {
     esphome::api::HomeassistantActionRequest source_req;
-    if (ha_action_begin(source_req, "media_player.select_source", false, 2)) {
+    uint32_t source_call_id = next_media_playlist_call_id();
+    if (ha_action_begin(source_req, "media_player.select_source", false, 2, source_call_id)) {
       ha_action_add_entity(source_req, p.entity);
       ha_action_add_data(source_req, "source", player_source.c_str());
-      ha_action_send(source_req);
+      std::string entity_id = p.entity;
+      std::string source = player_source;
+      ha_register_action_response_callback(
+        source_req.call_id,
+        [entity_id, source](const esphome::api::ActionResponse &response) {
+          if (response.is_success()) {
+            ESP_LOGI("media", "media_player.select_source accepted for %s source=%s",
+                     entity_id.c_str(), source.c_str());
+            return;
+          }
+          ESP_LOGW("media", "media_player.select_source failed for %s source=%s: %s",
+                   entity_id.c_str(), source.c_str(), response.get_error_message().c_str());
+        });
+      if (!ha_action_send(source_req)) {
+        ha_cancel_action_response_callback(source_req.call_id, "send failed");
+      }
     }
   }
   esphome::api::HomeassistantActionRequest req;
-  if (!ha_action_begin(req, "media_player.play_media", false, 3)) return;
+  uint32_t play_call_id = next_media_playlist_call_id();
+  if (!ha_action_begin(req, "media_player.play_media", false, 3, play_call_id)) return;
   ha_action_add_entity(req, p.entity);
   ha_action_add_data(req, "media_content_id", content_id.c_str());
   ha_action_add_data(req, "media_content_type", content_type.c_str());
-  ha_action_send(req);
+  std::string entity_id = p.entity;
+  ha_register_action_response_callback(
+    req.call_id,
+    [entity_id, content_type, content_id](const esphome::api::ActionResponse &response) {
+      if (response.is_success()) {
+        ESP_LOGI("media", "media_player.play_media accepted for %s type=%s id=%s",
+                 entity_id.c_str(), content_type.c_str(), content_id.c_str());
+        return;
+      }
+      ESP_LOGW("media", "media_player.play_media failed for %s type=%s id=%s: %s",
+               entity_id.c_str(), content_type.c_str(), content_id.c_str(),
+               response.get_error_message().c_str());
+    });
+  if (!ha_action_send(req)) {
+    ha_cancel_action_response_callback(req.call_id, "send failed");
+  }
 }
 
 inline bool media_fast_press_mode(const std::string &mode) {
@@ -773,6 +816,8 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
   if (media_fast_press_consume(slot_num)) return;
   if (btn_obj && lv_obj_has_state(btn_obj, LV_STATE_DISABLED)) return;
   ParsedCfg p = parse_cfg(cfg);
+  ESP_LOGI("button", "Main button %d clicked: type=%s entity=%s mode=%s label=%s",
+           slot_num, p.type.c_str(), p.entity.c_str(), p.sensor.c_str(), p.label.c_str());
   if (p.type == "sensor" || p.type == "text_sensor" || p.type == "local_sensor" ||
       p.type == "door_window" ||
       p.type == "presence" ||
