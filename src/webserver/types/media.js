@@ -139,8 +139,76 @@ var MEDIA_CARD_METADATA = {
   },
 };
 
-function mediaPlaylistContentIdPlaceholder() {
-  return "e.g. spotify:playlist:1LG2Lnt9EDQS1DqoE8E2uO";
+var MEDIA_PLAYLIST_SOURCE_DEFINITIONS = [
+  { value: "spotify", label: "Spotify", prefix: "spotify" },
+  { value: "apple_music", label: "Apple Music", prefix: "apple_music" },
+  { value: "youtube_music", label: "YouTube Music", prefix: "youtube_music" },
+  { value: "plex", label: "Plex", prefix: "plex" },
+  { value: "jellyfin", label: "Jellyfin", prefix: "jellyfin" },
+  { value: "media_source", label: "Home Assistant Media Source", prefix: "media-source" },
+  { value: "url", label: "Web URL", prefix: "" },
+  { value: "__custom", label: "Custom / full URI", prefix: "" },
+];
+
+function mediaPlaylistSourceOptions() {
+  return MEDIA_PLAYLIST_SOURCE_DEFINITIONS.map(function (source) {
+    return [source.value, source.label];
+  });
+}
+
+function mediaPlaylistSourceDefinition(value) {
+  value = String(value || "");
+  for (var i = 0; i < MEDIA_PLAYLIST_SOURCE_DEFINITIONS.length; i++) {
+    if (MEDIA_PLAYLIST_SOURCE_DEFINITIONS[i].value === value) return MEDIA_PLAYLIST_SOURCE_DEFINITIONS[i];
+  }
+  return MEDIA_PLAYLIST_SOURCE_DEFINITIONS[0];
+}
+
+function mediaPlaylistContentIdPlaceholder(source, contentType) {
+  source = String(source || "spotify");
+  contentType = String(contentType || "playlist");
+  if (source === "spotify") return "e.g. 1LG2Lnt9EDQS1DqoE8E2uO";
+  if (source === "media_source") return "e.g. music/morning-mix";
+  if (source === "url") return "e.g. https://example.com/music/stream.mp3";
+  if (source === "__custom") return "e.g. spotify:" + contentType + ":1LG2Lnt9EDQS1DqoE8E2uO";
+  return "Enter the " + contentType + " ID";
+}
+
+function parseMediaPlaylistContentId(value, contentType) {
+  value = String(value || "").trim();
+  contentType = String(contentType || "playlist").trim() || "playlist";
+  if (!value) return { source: "spotify", id: "" };
+  if (/^https?:\/\//i.test(value)) return { source: "url", id: value };
+
+  var spotifyMatch = value.match(/^spotify:([^:]+):(.+)$/i);
+  if (spotifyMatch) return { source: "spotify", contentType: spotifyMatch[1], id: spotifyMatch[2] };
+
+  var mediaSourceMatch = value.match(/^media-source:\/\/(.+)$/i);
+  if (mediaSourceMatch) return { source: "media_source", id: mediaSourceMatch[1] };
+
+  var colonMatch = value.match(/^([a-z][a-z0-9_-]*):([^:]+):(.+)$/i);
+  if (colonMatch) {
+    var prefix = colonMatch[1].toLowerCase();
+    for (var i = 0; i < MEDIA_PLAYLIST_SOURCE_DEFINITIONS.length; i++) {
+      var source = MEDIA_PLAYLIST_SOURCE_DEFINITIONS[i];
+      if (source.prefix && source.prefix.toLowerCase() === prefix) {
+        return { source: source.value, contentType: colonMatch[2], id: colonMatch[3] };
+      }
+    }
+  }
+
+  return { source: "__custom", id: value };
+}
+
+function buildMediaPlaylistContentId(source, contentType, id) {
+  source = String(source || "spotify");
+  contentType = String(contentType || "playlist").trim() || "playlist";
+  id = String(id || "").trim();
+  if (!id) return "";
+  if (source === "__custom" || source === "url") return id;
+  if (source === "media_source") return "media-source://" + id.replace(/^\/+/, "");
+  var definition = mediaPlaylistSourceDefinition(source);
+  return definition.prefix + ":" + contentType + ":" + id;
 }
 
 function mediaPlaylistContentTypeKnown(value) {
@@ -508,18 +576,118 @@ registerButtonType("media", {
       playlistInfo.appendChild(playlistInfoText);
       panel.appendChild(playlistInfo);
 
+      var playlistContentType = mediaPlaylistContentType(b);
+      var explicitPlaylistContentType = configOptionValue(b && b.options, MEDIA_PLAYLIST_CONTENT_TYPE_OPTION);
+      var parsedPlaylistContentId = parseMediaPlaylistContentId(mediaPlaylistContentId(b), playlistContentType);
+      if (!explicitPlaylistContentType &&
+          parsedPlaylistContentId.contentType &&
+          parsedPlaylistContentId.contentType !== playlistContentType) {
+        playlistContentType = parsedPlaylistContentId.contentType;
+        setMediaPlaylistContentType(b, playlistContentType);
+        helpers.saveField("options", b.options);
+      }
+      var sourceField = helpers.selectField(
+        "Source",
+        helpers.idPrefix + "playlist-source",
+        mediaPlaylistSourceOptions(),
+        parsedPlaylistContentId.source);
+      panel.appendChild(sourceField.field);
+
+      var contentTypeField = helpers.selectField(
+        "Media Type",
+        helpers.idPrefix + "playlist-content-type",
+        mediaPlaylistContentTypeOptions(),
+        mediaPlaylistContentTypeKnown(playlistContentType) ? playlistContentType : "__custom");
+      panel.appendChild(contentTypeField.field);
+
+      var customContentTypeField = helpers.textField(
+        "Custom Media Content Type",
+        helpers.idPrefix + "playlist-content-type-custom",
+        mediaPlaylistContentTypeKnown(playlistContentType) ? "" : playlistContentType,
+        "e.g. favorite",
+        "",
+        false);
+      panel.appendChild(customContentTypeField.field);
+
+      function updateCustomContentTypeVisibility() {
+        customContentTypeField.field.hidden = contentTypeField.select.value !== "__custom";
+      }
+
+      function selectedPlaylistContentType() {
+        return contentTypeField.select.value === "__custom"
+          ? customContentTypeField.input.value
+          : contentTypeField.select.value;
+      }
+
+      function savePlaylistContentIdFromFields() {
+        var selectedSource = sourceField.select.value;
+        var selectedType = selectedPlaylistContentType();
+        setMediaPlaylistContentType(b, selectedType);
+        setMediaPlaylistContentId(
+          b,
+          buildMediaPlaylistContentId(selectedSource, selectedType, contentIdField.input.value)
+        );
+        contentIdField.input.value = selectedSource === "__custom" || selectedSource === "url"
+          ? mediaPlaylistContentId(b)
+          : parseMediaPlaylistContentId(mediaPlaylistContentId(b), selectedType).id;
+        helpers.saveField("options", b.options);
+      }
+
       var contentIdField = helpers.textField(
-        "Media Content ID / URI",
+        "ID",
         helpers.idPrefix + "playlist-content-id",
-        mediaPlaylistContentId(b),
-        mediaPlaylistContentIdPlaceholder(),
+        parsedPlaylistContentId.id,
+        mediaPlaylistContentIdPlaceholder(parsedPlaylistContentId.source, playlistContentType),
         "",
         false);
       panel.appendChild(contentIdField.field);
-      helpers.requireField(contentIdField.input, "Add a media content ID before saving.");
+      helpers.requireField(contentIdField.input, "Add a media ID before saving.");
+
+      function syncContentIdPlaceholder() {
+        contentIdField.input.placeholder = mediaPlaylistContentIdPlaceholder(
+          sourceField.select.value,
+          selectedPlaylistContentType()
+        );
+      }
+
+      sourceField.select.addEventListener("change", function () {
+        if (sourceField.select.value === "__custom" || sourceField.select.value === "url") {
+          contentIdField.input.value = mediaPlaylistContentId(b);
+        } else {
+          contentIdField.input.value = parseMediaPlaylistContentId(
+            mediaPlaylistContentId(b),
+            selectedPlaylistContentType()
+          ).id;
+        }
+        syncContentIdPlaceholder();
+        savePlaylistContentIdFromFields();
+      });
       contentIdField.input.addEventListener("change", function () {
-        setMediaPlaylistContentId(b, contentIdField.input.value);
-        contentIdField.input.value = mediaPlaylistContentId(b);
+        savePlaylistContentIdFromFields();
+      });
+      contentTypeField.select.addEventListener("change", function () {
+        updateCustomContentTypeVisibility();
+        syncContentIdPlaceholder();
+        savePlaylistContentIdFromFields();
+      });
+      customContentTypeField.input.addEventListener("change", function () {
+        savePlaylistContentIdFromFields();
+        customContentTypeField.input.value = mediaPlaylistContentTypeKnown(mediaPlaylistContentType(b))
+          ? "" : mediaPlaylistContentType(b);
+        syncContentIdPlaceholder();
+      });
+      updateCustomContentTypeVisibility();
+      syncContentIdPlaceholder();
+
+      var playerSourceField = helpers.renderCardTextField(panel, b, helpers, {
+        label: "Playback Device",
+        idSuffix: "playlist-player-source",
+        bindName: "",
+        placeholder: "e.g. Kitchen Speaker",
+        value: function () { return mediaPlaylistPlayerSource(b); },
+      });
+      playerSourceField.input.addEventListener("change", function () {
+        setMediaPlaylistPlayerSource(b, playerSourceField.input.value);
         helpers.saveField("options", b.options);
       });
 

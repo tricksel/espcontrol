@@ -81,6 +81,10 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
       if (b.label.empty() || b.label == "Media") b.label = "Volume";
       b.icon = "Auto";
     }
+    if (b.sensor == "playlist") {
+      if (b.label.empty() || b.label == "Media") b.label = "Playlist";
+      if (b.icon.empty() || b.icon == "Auto") b.icon = "Music";
+    }
     if (b.sensor == "position" && (b.label.empty() || b.label == "Track")) b.label = "Position";
     if (b.sensor == "now_playing") {
       b.precision = (b.precision == "progress" || b.precision == "play_pause") ? b.precision : "";
@@ -89,6 +93,7 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
     } else {
       b.precision.clear();
     }
+    b.options = media_card_options_normalized(b.options, b.sensor);
   }
   if (climate_card_type(b.type)) {
     b.sensor.clear();

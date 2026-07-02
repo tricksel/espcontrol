@@ -357,6 +357,7 @@ var MEDIA_LABEL_DISPLAY_OPTION = cardContractOptionName("label_display");
 var MEDIA_NUMBER_DISPLAY_OPTION = cardContractOptionName("number_display");
 var MEDIA_PLAYLIST_CONTENT_ID_OPTION = cardContractOptionName("playlist_content_id");
 var MEDIA_PLAYLIST_CONTENT_TYPE_OPTION = cardContractOptionName("playlist_content_type");
+var MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION = cardContractOptionName("playlist_player_source");
 var SUBPAGE_KIND_OPTION = cardContractOptionName("subpage_kind");
 var IMAGE_LABEL_OPTION = cardContractOptionName("image_label");
 var IMAGE_ICON_OPTION = cardContractOptionName("image_icon");
@@ -504,6 +505,8 @@ function normalizeMediaOptions(options, mode) {
     if (contentType !== defaultType) {
       playlistOut = setConfigOptionValue(playlistOut, MEDIA_PLAYLIST_CONTENT_TYPE_OPTION, contentType);
     }
+    var playerSource = configOptionValue(options, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION);
+    if (playerSource) playlistOut = setConfigOptionValue(playlistOut, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION, playerSource);
     return playlistOut;
   }
   if (mode !== "volume" && mode !== "position") return "";
@@ -1284,6 +1287,17 @@ function setMediaPlaylistContentType(b, value) {
     b.options,
     MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
     value === defaultType ? "" : value);
+  b.options = normalizeMediaOptions(b.options, b.sensor);
+  return b.options;
+}
+
+function mediaPlaylistPlayerSource(b) {
+  return configOptionValue(b && b.options, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION);
+}
+
+function setMediaPlaylistPlayerSource(b, value) {
+  if (!b) return "";
+  b.options = setConfigOptionValue(b.options, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION, value || "");
   b.options = normalizeMediaOptions(b.options, b.sensor);
   return b.options;
 }

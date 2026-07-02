@@ -2213,7 +2213,11 @@ inline void grid_phase2(
             subscribe_media_playlist_state(playlist_ctx);
             lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
               ParsedCfg *c = (ParsedCfg *)lv_event_get_user_data(e);
-              if (c) send_media_playlist_action(*c);
+              if (c) {
+                ESP_LOGI("button", "Subpage playlist clicked: entity=%s label=%s mode=%s options=%s",
+                         c->entity.c_str(), c->label.c_str(), c->sensor.c_str(), c->options.c_str());
+                send_media_playlist_action(*c);
+              }
             }, LV_EVENT_CLICKED, ctx);
           } else if (media_playback_button_mode(mode)) {
             ParsedCfg *ctx = grid_delete_with_owner(sb_btn, new ParsedCfg(sb_cfg));
