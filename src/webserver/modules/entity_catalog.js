@@ -482,6 +482,49 @@ var ENTITY_CATALOG = {
       "domain": "select",
       "name": "Firmware: Update Frequency"
     },
+    "esp32_c6_update_available": {
+      "domain": "text_sensor",
+      "name": "ESP32-C6: Update Available",
+      "objectIds": [
+        "esp32_c6__update_available",
+        "esp32_c6_update_available",
+        "c6_update_available"
+      ]
+    },
+    "esp32_c6_current_firmware": {
+      "domain": "text_sensor",
+      "name": "ESP32-C6: Current Firmware",
+      "objectIds": [
+        "esp32_c6__current_firmware",
+        "esp32_c6_current_firmware",
+        "c6_update_current_firmware"
+      ]
+    },
+    "esp32_c6_latest_firmware": {
+      "domain": "text_sensor",
+      "name": "ESP32-C6: Latest Firmware",
+      "objectIds": [
+        "esp32_c6__latest_firmware",
+        "esp32_c6_latest_firmware",
+        "c6_update_latest_firmware"
+      ]
+    },
+    "esp32_c6_check_for_update": {
+      "domain": "button",
+      "name": "Firmware ESP32-C6: Check for Update",
+      "objectIds": [
+        "firmware_esp32_c6__check_for_update",
+        "firmware_esp32_c6_check_for_update"
+      ]
+    },
+    "esp32_c6_install_update": {
+      "domain": "button",
+      "name": "Firmware ESP32-C6: Install Update",
+      "objectIds": [
+        "firmware_esp32_c6__install_update",
+        "firmware_esp32_c6_install_update"
+      ]
+    },
     "screen_rotation": {
       "domain": "select",
       "name": "Screen: Rotation"
@@ -569,7 +612,12 @@ var ENTITY_CATALOG = {
       "firmware_check_for_update",
       "firmware_install_update",
       "firmware_auto_update",
-      "firmware_update_frequency"
+      "firmware_update_frequency",
+      "esp32_c6_update_available",
+      "esp32_c6_current_firmware",
+      "esp32_c6_latest_firmware",
+      "esp32_c6_check_for_update",
+      "esp32_c6_install_update"
     ],
     "settings_voice": [
       "voice_services"

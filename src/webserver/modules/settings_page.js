@@ -1080,6 +1080,69 @@ function buildSettingsPage(parent) {
 
   var firmwareCard = makeCollapsibleCard("Firmware", fwBody, true);
 
+  var wifiFirmwareBody = document.createElement("div");
+  var c6CurrentRow = document.createElement("div");
+  c6CurrentRow.className = "sp-fw-row sp-fw-info-row";
+  var c6CurrentLabel = document.createElement("span");
+  c6CurrentLabel.className = "sp-fw-label";
+  c6CurrentLabel.textContent = "Current C6 Firmware";
+  var c6CurrentValue = document.createElement("span");
+  c6CurrentValue.className = "sp-fw-version";
+  c6CurrentRow.appendChild(c6CurrentLabel);
+  c6CurrentRow.appendChild(c6CurrentValue);
+  wifiFirmwareBody.appendChild(c6CurrentRow);
+  els.c6FirmwareCurrent = c6CurrentValue;
+
+  var c6LatestRow = document.createElement("div");
+  c6LatestRow.className = "sp-fw-row sp-fw-info-row";
+  var c6LatestLabel = document.createElement("span");
+  c6LatestLabel.className = "sp-fw-label";
+  c6LatestLabel.textContent = "Available C6 Firmware";
+  var c6LatestValue = document.createElement("span");
+  c6LatestValue.className = "sp-fw-version";
+  c6LatestRow.appendChild(c6LatestLabel);
+  c6LatestRow.appendChild(c6LatestValue);
+  wifiFirmwareBody.appendChild(c6LatestRow);
+  els.c6FirmwareLatest = c6LatestValue;
+
+  var c6Actions = document.createElement("div");
+  c6Actions.className = "sp-fw-actions sp-fw-actions-full";
+  var c6UpdateBtn = document.createElement("button");
+  c6UpdateBtn.className = "sp-fw-btn";
+  c6UpdateBtn.textContent = "Check for Update";
+  c6UpdateBtn.addEventListener("click", function () {
+    if (!state.c6FirmwareUpdateControlsSupported) return;
+    if (c6FirmwareUpdateKnownAvailable() && state.c6FirmwareInstallControlsSupported) {
+      state.c6FirmwareInstalling = true;
+      state.c6FirmwareChecking = false;
+      syncC6FirmwareUi();
+      postC6FirmwareUpdateInstall();
+      setTimeout(function () {
+        refreshFirmwareVersion();
+      }, 5000);
+      return;
+    }
+    state.c6FirmwareChecking = true;
+    syncC6FirmwareUi();
+    postC6FirmwareUpdateCheck();
+    setTimeout(function () {
+      state.c6FirmwareChecking = false;
+      refreshFirmwareVersion();
+      syncC6FirmwareUi();
+    }, 10000);
+  });
+  c6Actions.appendChild(c6UpdateBtn);
+  wifiFirmwareBody.appendChild(c6Actions);
+  els.c6FirmwareUpdateBtn = c6UpdateBtn;
+
+  var c6Status = document.createElement("div");
+  c6Status.className = "sp-fw-status";
+  wifiFirmwareBody.appendChild(c6Status);
+  els.c6FirmwareStatus = c6Status;
+  var wifiFirmwareCard = makeCollapsibleCard("WiFi", wifiFirmwareBody, true);
+  els.c6FirmwareCard = wifiFirmwareCard;
+  syncC6FirmwareUi();
+
   var homeAssistantSettingsBody = document.createElement("div");
   var haProtocolField = document.createElement("div");
   haProtocolField.className = "sp-field";
@@ -1152,6 +1215,7 @@ function buildSettingsPage(parent) {
   appendSettingsSection(config, "System", [
     backupCard,
     firmwareCard,
+    wifiFirmwareCard,
     homeAssistantSettingsCard,
   ]);
 
