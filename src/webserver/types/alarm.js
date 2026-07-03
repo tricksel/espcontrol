@@ -304,18 +304,26 @@ registerButtonType("alarm", {
       helpers.saveField("options", b.options);
     }
 
-    var armPinToggle = helpers.renderCardOptionToggle(modalSettings, b, helpers, {
+    var pinSettingsDisclosure = helpers.disclosureSection(
+      "PIN Settings",
+      helpers.idPrefix + "alarm-pin-settings",
+      false
+    );
+    var pinSettings = pinSettingsDisclosure.section;
+
+    var armPinToggle = helpers.renderCardOptionToggle(pinSettings, b, helpers, {
       label: "PIN required for arming",
       idSuffix: "alarm-pin-arm",
       checked: function () { return alarmPinRequired(b, "arm"); },
       onChange: savePinOptions,
     });
-    var disarmPinToggle = helpers.renderCardOptionToggle(modalSettings, b, helpers, {
+    var disarmPinToggle = helpers.renderCardOptionToggle(pinSettings, b, helpers, {
       label: "PIN required for disarming",
       idSuffix: "alarm-pin-disarm",
       checked: function () { return alarmPinRequired(b, "disarm"); },
       onChange: savePinOptions,
     });
+    modalSettings.appendChild(pinSettingsDisclosure.panel);
     panel.appendChild(modalSettingsDisclosure.panel);
   },
   renderPreview: function (b, helpers) {

@@ -1551,14 +1551,18 @@ async function assertAlarmSettingsPanels(page, label) {
     `${label}: alarm entity field should sit outside collapsible panels`
   );
 
-  await cardSettings.locator(".sp-disclosure-button").click();
+  await cardSettings.locator("> .sp-disclosure-button").click();
   assert(await cardSettings.getByText("Label Display", { exact: true }).isVisible(), `${label}: alarm card settings panel should contain label display controls`);
   assert(await cardSettings.getByText("Icon Display", { exact: true }).isVisible(), `${label}: alarm card settings panel should contain icon display controls`);
 
-  await modalSettings.locator(".sp-disclosure-button").click();
+  await modalSettings.locator("> .sp-disclosure-button").click();
   assert(await modalSettings.getByText("Visible Actions", { exact: true }).isVisible(), `${label}: alarm modal settings panel should contain visible actions controls`);
-  assert(await modalSettings.getByText("PIN required for arming", { exact: true }).isVisible(), `${label}: alarm modal settings panel should contain arming PIN controls`);
-  assert(await modalSettings.getByText("PIN required for disarming", { exact: true }).isVisible(), `${label}: alarm modal settings panel should contain disarming PIN controls`);
+  const pinSettings = modalSettings.locator(".sp-disclosure").filter({ hasText: "PIN Settings" }).first();
+  assert(await pinSettings.isVisible(), `${label}: alarm modal settings panel should contain PIN settings`);
+  assert(!(await pinSettings.getAttribute("class")).includes("sp-open"), `${label}: alarm PIN settings panel should start collapsed`);
+  await pinSettings.locator("> .sp-disclosure-button").click();
+  assert(await pinSettings.getByText("PIN required for arming", { exact: true }).isVisible(), `${label}: alarm PIN settings panel should contain arming PIN controls`);
+  assert(await pinSettings.getByText("PIN required for disarming", { exact: true }).isVisible(), `${label}: alarm PIN settings panel should contain disarming PIN controls`);
 
   await page.locator(".sp-settings-close").click();
   await page.waitForFunction(() => {
