@@ -66,7 +66,7 @@ const CASES = casesFromManifest();
 const BUTTON_FIXTURES = [
   "light.kitchen;Kitchen;Lightbulb;Lightbulb",
   "sensor.energy;Energy;Gauge;Auto;sensor.energy;W;sensor;0",
-  "climate.hall;Hall;Thermostat;Auto;;;climate;;",
+  "alarm_control_panel.house;Alarm;Security;Auto;;;alarm;;",
   "media_player.living;Media;Auto;Auto;play_pause;;media;;",
   "cover.office_blind;Blind;Blinds Open;Blinds;modal;;cover;;cover_tabs=controls%7Cposition%7Ctilt",
 ];
@@ -1523,6 +1523,62 @@ async function assertCoverSettingsPanels(page, label) {
   });
 }
 
+async function assertAlarmLabelDisplaySettings(page, label) {
+  await page.getByRole("tab", { name: "Screen" }).click();
+  await page.waitForSelector("#sp-screen.sp-page.active");
+  await page.locator('.sp-main [data-slot="3"]').click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+
+  const labelInput = page.locator("#sp-inp-alarm-label");
+  await labelInput.waitFor({ state: "attached" });
+  assert.strictEqual(
+    await labelInput.isVisible(),
+    false,
+    `${label}: alarm label input starts hidden when status label display is selected`,
+  );
+
+  await page
+    .locator(".sp-settings-modal .sp-field")
+    .filter({ hasText: "Label Display" })
+    .getByRole("button", { name: "Name", exact: true })
+    .click();
+  assert(
+    await labelInput.isVisible(),
+    `${label}: alarm label input appears when name label display is selected`,
+  );
+  assert(
+    await labelInput.evaluate((el) => {
+      var field = el.closest(".sp-cond-field");
+      var displayField = field && field.previousElementSibling;
+      return !!(
+        field &&
+        field.classList.contains("sp-visible") &&
+        displayField &&
+        displayField.textContent.indexOf("Label Display") !== -1
+      );
+    }),
+    `${label}: alarm label input is shown directly below label display controls`,
+  );
+
+  await page
+    .locator(".sp-settings-modal .sp-field")
+    .filter({ hasText: "Label Display" })
+    .getByRole("button", { name: "Status", exact: true })
+    .click();
+  assert.strictEqual(
+    await labelInput.isVisible(),
+    false,
+    `${label}: alarm label input hides again when status label display is selected`,
+  );
+
+  await page.locator(".sp-settings-close").click();
+  await page.waitForFunction(() => {
+    var overlay = document.querySelector(".sp-settings-overlay");
+    return overlay && !overlay.classList.contains("sp-visible");
+  });
+}
+
 function postRecord(requestUrl) {
   const url = new URL(requestUrl);
   const parts = url.pathname
@@ -2495,6 +2551,7 @@ async function runCase(browser, testCase) {
       testCase,
     );
     await assertCoverSettingsPanels(page, testCase.name);
+    await assertAlarmLabelDisplaySettings(page, testCase.name);
     if (testCase.exerciseInteractions) {
       await assertMobileTabLayout(page, testCase.name, testCase.viewport);
     }
