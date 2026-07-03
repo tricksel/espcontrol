@@ -105,7 +105,7 @@ registerButtonType("climate", {
     helpers.renderCardEntityField(panel, b, helpers, CLIMATE_CARD_METADATA);
     if (b.type === "climate_control") {
       var modalTabsDisclosure = helpers.disclosureSection(
-        "Modal Tabs",
+        "Modal Settings",
         helpers.idPrefix + "climate-modal-tabs",
         b._modalSettingsOpen === true
       );
