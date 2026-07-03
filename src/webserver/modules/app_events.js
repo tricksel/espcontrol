@@ -500,6 +500,33 @@ function connectEvents() {
       }
       syncFirmwareUpdateUi();
     },
+    "text_sensor-esp32_c6__current_firmware": function (val) {
+      setC6FirmwareCurrentVersion(val);
+    },
+    "text_sensor-c6_update_current_firmware": function (val) {
+      setC6FirmwareCurrentVersion(val);
+    },
+    "text_sensor-esp32_c6__latest_firmware": function (val) {
+      setC6FirmwareLatestVersion(val);
+    },
+    "text_sensor-c6_update_latest_firmware": function (val) {
+      setC6FirmwareLatestVersion(val);
+    },
+    "text_sensor-esp32_c6__update_available": function (val) {
+      setC6FirmwareUpdateAvailable(val);
+    },
+    "text_sensor-c6_update_available": function (val) {
+      setC6FirmwareUpdateAvailable(val);
+    },
+    "button-firmware_esp32_c6__install_update": function () {
+      state.c6FirmwareUpdateControlsSupported = true;
+      state.c6FirmwareInstallControlsSupported = true;
+      syncC6FirmwareUi();
+    },
+    "button-firmware_esp32_c6__check_for_update": function () {
+      state.c6FirmwareUpdateControlsSupported = true;
+      syncC6FirmwareUi();
+    },
   };
 
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.clockBar, sseHandlers["switch-screen__clock_bar"]);
@@ -661,6 +688,29 @@ function connectEvents() {
     if (isFirmwareCheckButtonEvent(id, d)) {
       state.firmwareUpdateControlsSupported = true;
       renderFirmwareUpdateStatus();
+      return;
+    }
+    if (isC6FirmwareCurrentEvent(id, d)) {
+      setC6FirmwareCurrentVersion(val);
+      return;
+    }
+    if (isC6FirmwareLatestEvent(id, d)) {
+      setC6FirmwareLatestVersion(val);
+      return;
+    }
+    if (isC6FirmwareUpdateAvailableEvent(id, d)) {
+      setC6FirmwareUpdateAvailable(val);
+      return;
+    }
+    if (isC6FirmwareInstallButtonEvent(id, d)) {
+      state.c6FirmwareUpdateControlsSupported = true;
+      state.c6FirmwareInstallControlsSupported = true;
+      syncC6FirmwareUi();
+      return;
+    }
+    if (isC6FirmwareCheckButtonEvent(id, d)) {
+      state.c6FirmwareUpdateControlsSupported = true;
+      syncC6FirmwareUi();
       return;
     }
     if (isRemovedLegacyStateEvent(id, d)) return;
