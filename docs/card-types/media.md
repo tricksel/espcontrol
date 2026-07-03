@@ -77,6 +77,7 @@ Enter:
 - **Source** - choose the source preset, such as **Spotify**, **Apple Music**, **YouTube Music**, **Plex**, **Jellyfin**, **Home Assistant Media Source**, or **Custom / full URI**.
 - **Media Type** - choose the type Home Assistant expects, such as `playlist`, `music`, `album`, `track`, or `channel`. Use **Custom** if your integration needs a different value.
 - **ID** - enter only the playlist, station, album, track, or favorite ID when using a source preset. Use **Custom / full URI** if your integration needs the full media content ID exactly as Home Assistant shows it.
+- **Player Source / Input** - optional. Use it only when the selected speaker needs Home Assistant to select a source or input before playback, such as `Spotify` or `Line-in`.
 - **Label** - the name shown on the button, for example `Morning Playlist`.
 - **Icon** - the icon shown on the button.
 
