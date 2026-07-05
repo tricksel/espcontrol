@@ -139,22 +139,30 @@ inline bool media_external_source_input(const std::string &source) {
 
 inline void media_apply_now_playing_artist_text(MediaNowPlayingCtx *ctx) {
   if (!ctx || !ctx->artist_lbl) return;
-  std::string text = ctx->external_source
-    ? espcontrol_i18n(std::string("Source"))
+  const char *text = ctx->external_source
+    ? espcontrol_i18n("Source")
     : ctx->artist;
-  lv_label_set_text(ctx->artist_lbl, text.c_str());
+  lv_label_set_text(ctx->artist_lbl, text);
+}
+
+inline void media_set_now_playing_artist(MediaNowPlayingCtx *ctx,
+                                         esphome::StringRef artist) {
+  if (!ctx) return;
+  std::string text = media_metadata_text(artist, "");
+  std::strncpy(ctx->artist, text.c_str(), sizeof(ctx->artist) - 1);
+  ctx->artist[sizeof(ctx->artist) - 1] = '\0';
 }
 
 inline void media_refresh_artist_text(MediaNowPlayingCtx *ctx,
                                       const std::string &entity_id) {
   if (!ctx || entity_id.empty()) return;
-  ctx->artist.clear();
+  ctx->artist[0] = '\0';
   media_apply_now_playing_artist_text(ctx);
   ha_get_attribute(
     entity_id, std::string("media_artist"),
     std::function<void(esphome::StringRef)>(
       [ctx](esphome::StringRef artist) {
-        ctx->artist = media_metadata_text(artist, "");
+        media_set_now_playing_artist(ctx, artist);
         media_apply_now_playing_artist_text(ctx);
       })
   );
@@ -1963,7 +1971,7 @@ inline void subscribe_media_now_playing_state(MediaNowPlayingCtx *ctx,
     entity_id, std::string("media_artist"),
     std::function<void(esphome::StringRef)>(
       [ctx](esphome::StringRef artist) {
-        ctx->artist = media_metadata_text(artist, "");
+        media_set_now_playing_artist(ctx, artist);
         media_apply_now_playing_artist_text(ctx);
       })
   );
