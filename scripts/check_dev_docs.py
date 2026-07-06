@@ -456,6 +456,40 @@ def check_generated_files(errors: list[str]) -> None:
             errors.append(f"{path} generated section is stale; run python3 scripts/check_dev_docs.py --update")
 
 
+def source_truth_path_targets(value: str) -> list[str]:
+    prefixes = ("common/", "components/", "compatibility/", "devices/", "docs/", "scripts/", "src/")
+    targets: list[str] = []
+    quoted = re.findall(r"`([^`]+)`", value)
+    if value.startswith(("generated ", "no generated ", "compile ")):
+        return [target for target in quoted if target.startswith(prefixes)]
+    targets.extend(target for target in quoted if target.startswith(prefixes))
+    for prefix in prefixes:
+        if value.startswith(prefix):
+            targets.append(value.split(",", 1)[0].split(" ", 1)[0])
+            break
+    return list(dict.fromkeys(targets))
+
+
+def check_source_truth_path(value: str, label: str, errors: list[str]) -> None:
+    for target in source_truth_path_targets(value):
+        if any(marker in target for marker in ("<", ">", "...")):
+            continue
+        matches = sorted(ROOT.glob(target)) if "*" in target else []
+        if "*" in target:
+            if not matches:
+                errors.append(f"source-of-truth {label} pattern has no matches: {target}")
+            continue
+        if not (ROOT / target).exists():
+            errors.append(f"source-of-truth {label} path is missing: {target}")
+
+
+def check_source_truth_paths(errors: list[str]) -> None:
+    for row in SOURCE_TRUTH_ROWS:
+        check_source_truth_path(row.source, "source", errors)
+        for output in row.outputs:
+            check_source_truth_path(output, "output", errors)
+
+
 def check_public_docs(errors: list[str]) -> None:
     card_types = set(contract_cards())
     mapped = set(PUBLIC_DOCS_BY_TYPE)
@@ -554,6 +588,7 @@ def run_checks() -> list[str]:
     check_package_script(errors)
     check_public_docs(errors)
     check_generated_files(errors)
+    check_source_truth_paths(errors)
     check_markdown_links(errors)
     check_referenced_commands(errors)
     check_referenced_paths(errors)
