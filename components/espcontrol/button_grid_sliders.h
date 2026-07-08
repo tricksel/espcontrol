@@ -2145,6 +2145,7 @@ inline void cover_control_layout_modal(CoverControlCtx *ctx) {
     }
     lv_obj_scroll_to_y(ui.presets_box, 0, LV_ANIM_OFF);
   }
+  if (ui.tab_row) lv_obj_move_foreground(ui.tab_row);
   lv_obj_move_foreground(ui.back_btn);
 }
 
